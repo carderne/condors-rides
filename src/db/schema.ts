@@ -121,9 +121,42 @@ export const ride = pgTable(
   },
   (table) => [index("ride__user_id_idx").on(table.userId)],
 );
-export const rideRelations = relations(ride, ({ one }) => ({
+export const rideRelations = relations(ride, ({ one, many }) => ({
   user: one(user, {
     fields: [ride.userId],
+    references: [user.id],
+  }),
+  members: many(rideMember),
+}));
+
+// *****************************************
+// Ride member table
+// *****************************************
+export const rideMember = pgTable(
+  "ride_member",
+  {
+    id: id(),
+    rideId: text("ride_id")
+      .references(() => ride.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: text("user_id").references(() => user.id),
+    name: text("name"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("ride_member__ride_id_idx").on(table.rideId),
+    index("ride_member__user_id_idx").on(table.userId),
+  ],
+);
+
+export const rideMemberRelations = relations(rideMember, ({ one }) => ({
+  ride: one(ride, {
+    fields: [rideMember.rideId],
+    references: [ride.id],
+  }),
+  user: one(user, {
+    fields: [rideMember.userId],
     references: [user.id],
   }),
 }));
