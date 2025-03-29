@@ -4,15 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function getMembership(): Promise<User> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
+  const user = await maybeGetMembership();
+  if (!user) {
     redirect("/sign-in");
   }
-
-  const { user } = session;
-  return user as User;
+  return user;
 }
 
 export async function maybeGetMembership(): Promise<User | null> {

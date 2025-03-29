@@ -1,4 +1,4 @@
-import { H2 } from "@/components/ui/typography";
+import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/config";
 import { headers } from "next/headers";
@@ -23,11 +23,11 @@ export default async function SignIn({
     redirect("/");
   }
 
-  const redirectSuffix = "/";
+  const redirectSuffix = "/rides";
   const redirectUrl = new URL(redirectSuffix, config.baseUrl).toString();
 
   return (
-    <main className="flex w-full flex-col justify-center gap-8 text-center md:mx-0 md:w-72">
+    <main className="mt-40 flex w-full flex-col justify-center gap-8 text-center">
       {error && (
         <div>
           <p className="text-2xl font-bold">Sign up failed</p>
@@ -35,8 +35,9 @@ export default async function SignIn({
           <p>Please try again below</p>
         </div>
       )}
-      <H2 className="text-primary z-10 font-sans text-[40px]">Sign In</H2>
-      <div className="z-10 mt-0 flex flex-col gap-4">
+      <H2 className="text-primary z-10 font-sans text-5xl">Sign In</H2>
+      <H3 className="">Sign in to create and join rides, comment etc!</H3>
+      <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
         <SignInGoogle redirectUrl={redirectUrl} />
       </div>
     </main>

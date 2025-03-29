@@ -29,16 +29,7 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-        <div
-          className="w-screen max-w-full overflow-y-scroll font-sans antialiased"
-          style={{
-            backgroundImage: `var(--background-image)`,
-            backgroundAttachment: "fixed",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <div className="w-screen max-w-full overflow-y-scroll font-sans antialiased">
           <div className="relative mx-auto h-screen w-full px-12 md:w-[100ch] md:px-0">
             {children}
           </div>

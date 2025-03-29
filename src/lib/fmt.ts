@@ -1,5 +1,9 @@
 import { format, formatISO } from "date-fns";
 
+export function formatShortDate(date: Date) {
+  return format(date, "EEE, d MMM");
+}
+
 export function formatFullDate(date: Date) {
   return format(date, "EEE, d MMM yyyy");
 }

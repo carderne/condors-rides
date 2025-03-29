@@ -49,8 +49,8 @@ export function UpsertForm({ ride }: { ride: Ride | undefined }) {
         defaultValue={(state.formData?.get("time") as string) ?? ride?.time ?? "09:00"}
       />
       <FormInput
-        required={false}
-        type="number"
+        required={true}
+        type="text"
         name="speed"
         label="Speed"
         placeholder="28"
@@ -59,11 +59,54 @@ export function UpsertForm({ ride }: { ride: Ride | undefined }) {
       />
       <FormInput
         required={true}
+        type="number"
+        name="distance"
+        label="Distance"
+        placeholder="90"
+        errors={state.errors?.distance}
+        defaultValue={(state.formData?.get("distance") as string) ?? ride?.distance ?? ""}
+      />
+      <FormInput
+        required={false}
+        type="number"
+        name="elevation"
+        label="Elevation"
+        placeholder="450"
+        errors={state.errors?.elevation}
+        defaultValue={(state.formData?.get("elevation") as string) ?? ride?.elevation ?? ""}
+      />
+      <FormInput
+        required={false}
         name="route"
         placeholder="https://www.strava.com/routes/..."
         label="Route"
         errors={state.errors?.route}
         defaultValue={(state.formData?.get("route") as string) ?? ride?.route ?? ""}
+      />
+      <FormInput
+        required={false}
+        type="number"
+        name="maxGroupSize"
+        label="Max group size"
+        placeholder="8"
+        errors={state.errors?.maxGroupSize}
+        defaultValue={(state.formData?.get("maxGroupSize") as string) ?? ride?.maxGroupSize ?? "8"}
+      />
+      <FormInput
+        required={false}
+        name="cafeStop"
+        placeholder="Waterperry Gardens Tea Stop"
+        label="Cafe stop"
+        errors={state.errors?.cafeStop}
+        defaultValue={(state.formData?.get("cafeStop") as string) ?? ride?.cafeStop ?? ""}
+      />
+      <FormInput
+        required={false}
+        name="notes"
+        placeholder="Not too hily but we will regroup at the top."
+        label="Notes"
+        errors={state.errors?.notes}
+        defaultValue={(state.formData?.get("notes") as string) ?? ride?.notes ?? ""}
       />
       <FormSubmit>{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>

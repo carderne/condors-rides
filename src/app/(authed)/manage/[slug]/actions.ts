@@ -2,6 +2,7 @@
 
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
 import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -21,13 +22,15 @@ export async function action(
   const slug = existingRideId ? undefined : await createSlug(data.date, data.name);
   const insertable = { ...data, userId: user.id };
 
-  await db
+  const [ride] = await db
     .insert(schema.ride)
     .values({ id: existingRideId, slug, ...insertable })
     .onConflictDoUpdate({
       target: schema.ride.id,
       set: insertable,
-    });
+    })
+    .returning();
+  invariant(ride, "no ride upserted");
 
   redirect(`/rides/${slug}`);
 }

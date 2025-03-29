@@ -1,5 +1,15 @@
 import { relations } from "drizzle-orm";
-import { boolean, date, index, pgTable, text, time, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  pgTable,
+  text,
+  time,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
 // Note: we're using `timestamp` throughout, rather than `timestamptz`
@@ -8,6 +18,7 @@ import { nanoid } from "nanoid";
 
 const id = () => text("id").$default(nanoid).primaryKey();
 const slug = () => text("slug").unique().notNull().$default(nanoid);
+const deletedAt = () => timestamp("deleted_at");
 const createdAt = () => timestamp("created_at").notNull().defaultNow();
 const updatedAt = () =>
   timestamp("updated_at")
@@ -111,11 +122,16 @@ export const ride = pgTable(
     userId: text("user_id")
       .references(() => user.id)
       .notNull(),
-    name: text("name").notNull().default("Unnamed Ride"),
+    name: text("name").notNull(),
     date: date("date", { mode: "date" }).notNull(),
     time: time("time").notNull(),
     speed: text("speed").notNull(),
-    route: text("route").notNull(),
+    distance: integer("distance").notNull(),
+    elevation: integer("elevation"),
+    route: text("route"),
+    maxGroupSize: integer("max_group_size"),
+    cafeStop: text("cafe_stop"),
+    notes: text("notes"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -127,6 +143,7 @@ export const rideRelations = relations(ride, ({ one, many }) => ({
     references: [user.id],
   }),
   members: many(rideMember),
+  comments: many(comment),
 }));
 
 // *****************************************
@@ -139,17 +156,18 @@ export const rideMember = pgTable(
     rideId: text("ride_id")
       .references(() => ride.id, { onDelete: "cascade" })
       .notNull(),
-    userId: text("user_id").references(() => user.id),
-    name: text("name"),
+    userId: text("user_id")
+      .references(() => user.id)
+      .notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (table) => [
     index("ride_member__ride_id_idx").on(table.rideId),
     index("ride_member__user_id_idx").on(table.userId),
+    uniqueIndex("ride_member__ride_id_user_id_unique_idx").on(table.rideId, table.userId),
   ],
 );
-
 export const rideMemberRelations = relations(rideMember, ({ one }) => ({
   ride: one(ride, {
     fields: [rideMember.rideId],
@@ -157,6 +175,75 @@ export const rideMemberRelations = relations(rideMember, ({ one }) => ({
   }),
   user: one(user, {
     fields: [rideMember.userId],
+    references: [user.id],
+  }),
+}));
+
+// *****************************************
+// Comments
+// *****************************************
+export const comment = pgTable(
+  "comment",
+  {
+    id: id(),
+    rideId: text("ride_id")
+      .notNull()
+      .references(() => ride.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    text: text("text").notNull(),
+
+    deletedAt: deletedAt(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("comment__ride_id_idx").on(table.rideId),
+    index("comment__user_id_idx").on(table.userId),
+  ],
+);
+export const commentRelations = relations(comment, ({ one, many }) => ({
+  ride: one(ride, {
+    fields: [comment.rideId],
+    references: [ride.id],
+  }),
+  user: one(user, {
+    fields: [comment.userId],
+    references: [user.id],
+  }),
+  reactions: many(commentReaction),
+}));
+
+export const commentReaction = pgTable(
+  "comment_reaction",
+  {
+    id: id(),
+    commentId: text("comment_id")
+      .notNull()
+      .references(() => comment.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    index("comment_reaction__comment_id_idx").on(table.commentId),
+    index("comment_reaction__user_id_idx").on(table.userId),
+    uniqueIndex("comment_reaction__comment_id_user_id_unique_idx").on(
+      table.commentId,
+      table.userId,
+    ),
+  ],
+);
+export const commentReactionRelations = relations(commentReaction, ({ one }) => ({
+  comment: one(comment, {
+    fields: [commentReaction.commentId],
+    references: [comment.id],
+  }),
+  user: one(user, {
+    fields: [commentReaction.userId],
     references: [user.id],
   }),
 }));
