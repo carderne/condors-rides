@@ -30,7 +30,7 @@ export default async function RootLayout({
       </head>
       <body>
         <div className="w-screen max-w-full overflow-y-scroll font-sans antialiased">
-          <div className="relative mx-auto h-screen w-full px-12 md:w-[100ch] md:px-0">
+          <div className="relative mx-auto h-screen w-full px-2 md:w-[100ch] md:px-0 md:px-12">
             {children}
           </div>
         </div>

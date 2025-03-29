@@ -11,7 +11,7 @@ export default async function HomePage() {
   });
 
   return (
-    <main className="flex flex-col py-8">
+    <main className="flex flex-col">
       <H2>Upcoming rides</H2>
       <RideList rides={rides} />
     </main>

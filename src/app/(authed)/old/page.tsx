@@ -11,7 +11,7 @@ export default async function OldRides() {
   });
 
   return (
-    <main className="flex flex-col py-8">
+    <main className="flex flex-col">
       <H2>Old rides</H2>
       <RideList rides={rides} />
     </main>
