@@ -33,20 +33,21 @@ export default async function SignIn({
       {error && (
         <div>
           <p className="text-2xl font-bold">Sign up failed</p>
+          <p>Did you use your work account?</p>
           <p>Please try again below</p>
         </div>
       )}
-      <H2 className="text-primary z-10 font-sans text-5xl">Sign In</H2>
-      <H3 className="">Sign in to create and join rides, comment etc!</H3>
+      <H2 className="text-primary z-10 font-sans text-5xl">Sign up</H2>
+      <H3 className="">Sign up to create and join rides, comment etc!</H3>
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
-        <SignUpEmail redirectUrl={redirectUrl} type="in" />
+        <SignUpEmail redirectUrl={redirectUrl} type="up" />
         <div className="text-xl">OR</div>
         <SignInGoogle redirectUrl={redirectUrl} />
       </div>
       <div className="flex items-center justify-center gap-2 text-center">
-        Need an account?
-        <Link href="/sign-up" className="text-primary">
-          sign up!
+        Already have an account?
+        <Link href="/sign-in" className="text-primary">
+          sign in!
         </Link>
       </div>
     </main>

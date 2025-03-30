@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col py-8">
-      <div className="flex flex-col gap-0 mb-2">
+      <div className="mb-2 flex flex-col gap-0">
         <H1>Condors Rides</H1>
         <div className="text-xs">(Unofficial!)</div>
       </div>

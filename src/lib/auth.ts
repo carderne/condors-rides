@@ -12,7 +12,7 @@ export const auth = betterAuth({
     provider: "pg",
   }),
   emailAndPassword: {
-    enabled: false,
+    enabled: true,
   },
   socialProviders: {
     google: config.google,
@@ -33,18 +33,6 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         input: false,
-      },
-    },
-  },
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          if (user.email.endsWith("@rdrn.me")) {
-            return true;
-          }
-          return false;
-        },
       },
     },
   },
