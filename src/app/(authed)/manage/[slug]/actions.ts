@@ -32,7 +32,7 @@ export async function action(
     .returning();
   invariant(ride, "no ride upserted");
 
-  redirect(`/rides/${slug}`);
+  redirect(`/rides/${ride.slug}`);
 }
 
 export async function deleteAction(rideId: string) {

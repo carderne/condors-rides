@@ -48,6 +48,9 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
   const hasJoined = ride.members.some((member) => member.userId === user.id);
 
+  const numRiders = ride.members.length + 1; // the leader
+  const riders = [...ride.members.map((m) => m.user), ride.user];
+
   return (
     <main className="py-8">
       <div className="mb-8">
@@ -198,35 +201,26 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <div className="flex items-center justify-between">
               <CardTitle>Riders</CardTitle>
               <div className="rounded-full bg-white/20 px-3 py-1 text-sm text-white">
-                {ride.members.length} {ride.members.length === 1 ? "rider" : "riders"}
+                {numRiders} {numRiders === 1 ? "rider" : "riders"}
               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            {ride.members.length > 0 ? (
-              <div className="flex flex-row flex-wrap gap-4">
-                {ride.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex basis-1/3 items-center gap-3 rounded-lg bg-slate-50 p-3"
-                  >
-                    <UserPlusIcon className="h-5 w-5 text-pink-500" />
-                    <div>
-                      <div className="font-medium">
-                        <span>{member.user.name}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(member.createdAt).toLocaleString()}
-                      </div>
+            <div className="flex flex-row flex-wrap gap-4">
+              {riders.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex basis-1/3 items-center gap-3 rounded-lg bg-slate-50 p-3"
+                >
+                  <UserPlusIcon className="h-5 w-5 text-pink-500" />
+                  <div>
+                    <div className="font-medium">
+                      <span>{user.name}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-6 text-center text-gray-500">
-                <p>No one has joined this ride yet. Be the first!</p>
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
         <Card className="h-fit">

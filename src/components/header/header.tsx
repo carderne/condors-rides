@@ -12,10 +12,12 @@ export function Header() {
   return (
     <div className="my-4 flex flex-col items-center justify-between">
       <div className="flex w-full justify-between">
-        <div className="flex flex-col gap-0">
-          <H1>Condors Rides</H1>
-          <div className="text-xs">(Unofficial!)</div>
-        </div>
+        <Link href="/rides">
+          <div className="flex flex-col gap-0">
+            <H1>Condors Rides</H1>
+            <div className="text-xs">(Unofficial!)</div>
+          </div>
+        </Link>
         <div className="flex items-center">
           <Link
             href="/sign-out"

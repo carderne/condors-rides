@@ -1,5 +1,5 @@
 import { RideList } from "@/components/rides/ride-list";
-import { H2 } from "@/components/ui/typography";
+import { H1, H2 } from "@/components/ui/typography";
 import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { gte } from "drizzle-orm";
@@ -20,13 +20,17 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col py-8">
+      <div className="flex flex-col gap-0 mb-2">
+        <H1>Condors Rides</H1>
+        <div className="text-xs">(Unofficial!)</div>
+      </div>
       <div className="flex justify-between">
         <H2>Upcoming rides</H2>
         <Link
           href="/sign-in"
           className="bg-primary hover:bg-primary-hover ml-auto flex items-center gap-2 rounded-md px-4 py-2 text-white transition-colors"
         >
-          Sign in to add rides
+          Sign in to participate
         </Link>
       </div>
       <RideList rides={rides} />
