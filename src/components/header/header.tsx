@@ -21,7 +21,8 @@ export function CondorsHeader({ user }: { user: User | null }) {
   const navItems = [
     { name: "Main site", href: "https://cowleyroadcondors.cc" },
     { name: "Rides", href: "/rides" },
-    { name: "Archive", href: "/old" },
+    { name: "Archive", href: "/archive" },
+    { name: "Routes", href: "/routes" },
     { name: "About", href: "/about" },
   ];
 
