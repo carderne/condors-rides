@@ -1,4 +1,3 @@
-import { SignUpEmail } from "@/components/auth/email";
 import { SignInGoogle } from "@/components/auth/google";
 import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
@@ -39,8 +38,6 @@ export default async function SignIn({
       <H2 className="text-primary z-10 font-sans text-5xl">Sign In</H2>
       <H3 className="">Sign in to create and join rides, comment etc!</H3>
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
-        <SignUpEmail redirectUrl={redirectUrl} type="in" />
-        <div className="text-xl">OR</div>
         <SignInGoogle redirectUrl={redirectUrl} />
       </div>
       <div className="flex items-center justify-center gap-2 text-center">
