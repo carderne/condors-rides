@@ -1,5 +1,5 @@
 import { RideList } from "@/components/rides/ride-list";
-import { H1, H2 } from "@/components/ui/typography";
+import { H2 } from "@/components/ui/typography";
 import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { gte } from "drizzle-orm";
@@ -20,10 +20,6 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col py-8">
-      <div className="mb-2 flex flex-col gap-0">
-        <H1>Condors Rides</H1>
-        <div className="text-xs">(Unofficial!)</div>
-      </div>
       <div className="flex justify-between">
         <H2>Upcoming rides</H2>
         <Link

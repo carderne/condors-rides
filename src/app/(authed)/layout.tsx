@@ -1,4 +1,3 @@
-import { Header } from "@/components/header/header";
 import { getMembership } from "@/dal/membership";
 
 export default async function MainLayout({
@@ -9,7 +8,6 @@ export default async function MainLayout({
   await getMembership();
   return (
     <div className="">
-      <Header />
       <div className="h-full w-full">{children}</div>
     </div>
   );

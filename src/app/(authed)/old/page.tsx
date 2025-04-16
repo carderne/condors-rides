@@ -12,7 +12,7 @@ export default async function OldRides() {
 
   return (
     <main className="flex flex-col">
-      <H2>Old rides</H2>
+      <H2>Archive</H2>
       <RideList rides={rides} />
     </main>
   );

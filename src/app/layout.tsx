@@ -1,3 +1,5 @@
+import { CondorsHeader } from "@/components/header/header";
+import { maybeGetMembership } from "@/dal/membership";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -22,6 +24,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await maybeGetMembership();
   return (
     <html lang="en" className={`${fontInter.variable}`}>
       <head>
@@ -30,7 +33,8 @@ export default async function RootLayout({
       </head>
       <body>
         <div className="w-screen max-w-full overflow-y-scroll font-sans antialiased">
-          <div className="relative mx-auto h-screen w-full px-2 md:max-w-[100ch] md:px-0 md:px-12">
+          <CondorsHeader user={user} />
+          <div className="relative mx-auto h-screen w-full px-2 pt-4 md:max-w-[100ch] md:px-0 md:px-12">
             {children}
           </div>
         </div>
