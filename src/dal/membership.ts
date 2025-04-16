@@ -8,7 +8,7 @@ import { notFound, redirect } from "next/navigation";
 
 export async function getAdmin(): Promise<User> {
   const user = await getMembership();
-  if (!user.admin) {
+  if (user.type !== "admin") {
     return notFound();
   }
   return user;

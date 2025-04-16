@@ -4,7 +4,15 @@ import { formatDistanceToNow } from "date-fns";
 import { Clock, PlusIcon, TrashIcon } from "lucide-react";
 import { deleteCommentAction, upvoteCommentAction } from "./actions";
 
-export function CommentCard({ userId, comment }: { userId: string; comment: CommentHydrated }) {
+export function CommentCard({
+  userId,
+  comment,
+  admin,
+}: {
+  userId: string;
+  comment: CommentHydrated;
+  admin: boolean;
+}) {
   return (
     <div className="flex flex-col gap-2">
       <div className="text-muted-foreground flex items-center gap-4 text-sm">
@@ -23,7 +31,7 @@ export function CommentCard({ userId, comment }: { userId: string; comment: Comm
           <PlusIcon className="!size-3" strokeWidth={1} />
           <span>{comment.reactions.length}</span>
         </Button>
-        {userId === comment.userId && (
+        {(userId === comment.userId || admin) && (
           <Button
             variant="ghost"
             size="icon"

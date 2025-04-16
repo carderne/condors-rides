@@ -100,7 +100,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               <Link href={`/manage/from-ride/${ride.slug}`}>
                 <Button variant="secondary">Do it again!</Button>
               </Link>
-              {isLeader && (
+              {(isLeader || user.type === "admin") && (
                 <Link href={`/manage/${ride.slug}`} className="flex gap-2">
                   <Button variant="default">
                     <PencilIcon />
@@ -252,7 +252,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           <CardContent className="pt-6">
             <OptimisticProvider items={ride.comments}>
               <NewCommentForm rideId={ride.id} user={user} />
-              <CommentsList userId={user.id} />
+              <CommentsList userId={user.id} admin={user.type === "admin"} />
             </OptimisticProvider>
           </CardContent>
         </Card>

@@ -1,8 +1,10 @@
-import { db } from "@/db";
+import { db, schema } from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { eq } from "drizzle-orm";
 import { getConfig } from "./config";
+import { invariant } from "./invariant";
 
 const config = getConfig();
 
@@ -33,6 +35,23 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const user = await db.query.user.findFirst({
+            where: eq(schema.user.id, session.userId),
+          });
+          invariant(user, "session with no user");
+          if (user.deactivatedAt) {
+            return false;
+          }
+
+          return { data: session };
+        },
       },
     },
   },

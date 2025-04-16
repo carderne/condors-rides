@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  pgEnum,
   pgTable,
   text,
   time,
@@ -28,15 +29,19 @@ const updatedAt = () =>
 // *****************************************
 // Core user session tables from better-auth
 // *****************************************
+export const userTypeArray = ["user", "admin"] as const;
+export const userType = pgEnum("user_type", userTypeArray);
 export const user = pgTable(
   "user",
   {
     id: id(),
     name: text("name").notNull(),
-    admin: boolean("admin").notNull().default(false),
+    type: userType("type").notNull().default("user"),
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
+
+    deactivatedAt: timestamp("deactivated_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -45,6 +50,7 @@ export const user = pgTable(
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
   sessions: many(session),
+  rides: many(ride),
 }));
 
 export const session = pgTable(

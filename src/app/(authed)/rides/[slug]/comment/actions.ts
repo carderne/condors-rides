@@ -24,7 +24,10 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
 export async function deleteCommentAction(commentId: string) {
   const user = await getMembership();
   const { id: userId } = user;
-  const where = and(eq(schema.comment.id, commentId), eq(schema.comment.userId, userId));
+  const where =
+    user.type === "admin"
+      ? eq(schema.comment.id, commentId)
+      : and(eq(schema.comment.id, commentId), eq(schema.comment.userId, userId));
   await db.update(schema.comment).set({ deletedAt: new Date() }).where(where);
   revalidatePath("/rides");
 }
