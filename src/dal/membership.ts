@@ -1,7 +1,18 @@
+import { db, schema } from "@/db";
 import type { User } from "@/db/zod";
 import { auth } from "@/lib/auth";
+import { invariant } from "@/lib/invariant";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+
+export async function getAdmin(): Promise<User> {
+  const user = await getMembership();
+  if (!user.admin) {
+    return notFound();
+  }
+  return user;
+}
 
 export async function getMembership(): Promise<User> {
   const user = await maybeGetMembership();
@@ -19,6 +30,10 @@ export async function maybeGetMembership(): Promise<User | null> {
     return null;
   }
 
-  const { user } = session;
-  return user as User;
+  const user = await db.query.user.findFirst({
+    where: eq(schema.user.id, session.user.id),
+  });
+  invariant(user);
+
+  return user;
 }

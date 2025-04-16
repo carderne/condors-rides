@@ -23,7 +23,6 @@ export function HeaderBar({ user }: { user: User | null }) {
     { name: "Rides", href: "/rides" },
     { name: "Archive", href: "/archive" },
     { name: "Routes", href: "/routes" },
-    { name: "About", href: "/about" },
   ];
 
   return (
