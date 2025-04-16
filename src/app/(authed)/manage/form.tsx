@@ -9,7 +9,7 @@ import { useActionState } from "react";
 import { action } from "./actions";
 import { type State, validator } from "./validate";
 
-export function UpsertForm({ ride }: { ride: Ride | undefined }) {
+export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
   const [state, formAction] = useActionState<State, FormData>(
     async (prev, formData) => {
       const validated = validator(formData);

@@ -1,4 +1,4 @@
-import { CondorsHeader } from "@/components/header/header";
+import { HeaderBar } from "@/components/header/header";
 import { maybeGetMembership } from "@/dal/membership";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -32,11 +32,9 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-        <div className="w-screen max-w-full overflow-y-scroll font-sans antialiased">
-          <CondorsHeader user={user} />
-          <div className="relative mx-auto h-screen w-full px-2 pt-4 md:max-w-[100ch] md:px-0 md:px-12">
-            {children}
-          </div>
+        <div className="w-screen overflow-y-auto font-sans antialiased">
+          <HeaderBar user={user} />
+          <div className="mx-auto w-full p-4 md:max-w-[100ch]">{children}</div>
         </div>
       </body>
     </html>

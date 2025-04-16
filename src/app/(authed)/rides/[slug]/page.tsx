@@ -74,28 +74,23 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </div>
         <div className="mt-2 flex items-center gap-2 text-gray-600">
           <UserIcon className="h-5 w-5" />
-          <span className="text-md">Created by {ride.user.name}</span>
+          <span className="text-xl font-bold">Leader: {ride.user.name}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-8">
         <Card className="h-fit">
-          <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
-            <CardTitle>Join This Ride</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {hasJoined && (
-              <div className="mb-4 rounded-lg bg-green-50 p-4 text-green-700">
-                <p className="font-medium">You're going!</p>
-              </div>
-            )}
+          <CardContent className="flex justify-between pt-6">
             {hasJoined ? (
-              <Button variant="secondary" onClick={leaveRideAction.bind(null, ride.id)}>
+              <Button variant="destructive" onClick={leaveRideAction.bind(null, ride.id)}>
                 Leave ride
               </Button>
             ) : (
               <Button onClick={joinRideAction.bind(null, ride.id)}>Join ride</Button>
             )}
+            <Link href={`/manage/from-ride/${ride.slug}`}>
+              <Button variant="secondary">Do it again!</Button>
+            </Link>
           </CardContent>
         </Card>
 

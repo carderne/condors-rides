@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
-export function CondorsHeader({ user }: { user: User | null }) {
+export function HeaderBar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -27,14 +27,9 @@ export function CondorsHeader({ user }: { user: User | null }) {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-screen">
       {/* Mobile Menu Overlay */}
-      <div
-        className={cn(
-          "flex flex-col bg-gray-800 transition-all",
-          mobileMenuOpen ? "block" : "hidden",
-        )}
-      >
+      <div className={cn("flex flex-col bg-gray-800", mobileMenuOpen ? "block" : "hidden")}>
         <div className="flex justify-end pt-4 pr-4">
           <Button
             size="icon"
