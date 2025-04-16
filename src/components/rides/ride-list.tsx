@@ -3,7 +3,7 @@ import { formatShortDate } from "@/lib/fmt";
 import { invariant } from "@/lib/invariant";
 import { RideCard } from "./ride-card";
 
-type RideHydrated = Ride & { user: User };
+type RideHydrated = Ride & { leader: User };
 interface GroupedRides {
   date: Date;
   rides: RideHydrated[];

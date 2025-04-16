@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-type RideHydrated = Ride & { user: User };
+type RideHydrated = Ride & { leader: User };
 
 export function RideCard({ ride }: { ride: RideHydrated }) {
   return (
@@ -21,7 +21,9 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
           <CardTitle className="truncate text-xl">{ride.name}</CardTitle>
           <div className="mt-2 flex items-center gap-2">
             <UserIcon className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate text-sm font-medium">{ride.user.name}</span>
+            <span className="truncate text-sm font-medium">
+              {ride.unclaimed ? "No leader! Can you lead it?" : ride.leader.name}
+            </span>
           </div>
         </CardHeader>
 

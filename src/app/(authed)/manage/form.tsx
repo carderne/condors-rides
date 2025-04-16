@@ -2,6 +2,7 @@
 
 import { FormInput } from "@/components/form/input";
 import { FormSubmit } from "@/components/form/submit";
+import { FormSwitch } from "@/components/form/switch";
 import type { Ride } from "@/db/zod";
 import { addDays, format } from "date-fns";
 import Form from "next/form";
@@ -107,6 +108,15 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         label="Notes"
         errors={state.errors?.notes}
         defaultValue={(state.formData?.get("notes") as string) ?? ride?.notes ?? ""}
+      />
+      <FormSwitch
+        required={false}
+        name="unclaimed"
+        label="Unclaimed (the ride will have no leader and can be claimed by anyone)"
+        errors={state.errors?.unclaimed}
+        defaultChecked={
+          ((state.formData?.get("unclaimed") as string) === "on" || ride?.unclaimed) ?? false
+        }
       />
       <FormSubmit>{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>

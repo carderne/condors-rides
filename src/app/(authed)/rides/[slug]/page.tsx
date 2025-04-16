@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { joinRideAction, leaveRideAction } from "./actions";
+import { claimRideAction, joinRideAction, leaveRideAction, unclaimRideAction } from "./actions";
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
@@ -33,7 +33,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const ride = await db.query.ride.findFirst({
     where: eq(schema.ride.slug, slug),
     with: {
-      user: true,
+      leader: true,
       comments: {
         where: isNull(schema.comment.deletedAt),
         with: { user: true, reactions: true },
@@ -46,10 +46,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
     notFound();
   }
 
+  const isLeader = !ride.unclaimed && ride.userId === user.id;
   const hasJoined = ride.members.some((member) => member.userId === user.id);
 
-  const numRiders = ride.members.length + 1; // the leader
-  const riders = [...ride.members.map((m) => m.user), ride.user];
+  const numRiders = ride.members.length + (ride.unclaimed ? 0 : 1); // the leader
+  const riders = [...ride.members.map((m) => m.user), ...(ride.unclaimed ? [] : [ride.leader])];
 
   return (
     <main className="py-8">
@@ -63,34 +64,60 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </Link>
         <div className="flex justify-between">
           <H1>{ride.name}</H1>
-          {ride.userId === user.id && (
-            <Link href={`/manage/${ride.slug}`} className="flex gap-2">
-              <Button variant="secondary">
-                <PencilIcon />
-                Edit
-              </Button>
-            </Link>
-          )}
         </div>
         <div className="mt-2 flex items-center gap-2 text-gray-600">
           <UserIcon className="h-5 w-5" />
-          <span className="text-xl font-bold">Leader: {ride.user.name}</span>
+          <span className="text-xl font-bold">
+            {ride.unclaimed ? "No leader!" : `Leader: ${ride.leader.name}`}
+          </span>
         </div>
       </div>
 
       <div className="flex flex-col gap-8">
+        {ride.unclaimed && (
+          <Card className="bg-primary/50 h-fit">
+            <CardContent className="flex justify-between pt-6">
+              <div className="text-lg">
+                <p>This ride has no leader and may not go ahead.</p>
+                <p>Please hit "Lead this ride" if you'd like to lead it!</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="h-fit">
           <CardContent className="flex justify-between pt-6">
             {hasJoined ? (
               <Button variant="destructive" onClick={leaveRideAction.bind(null, ride.id)}>
                 Leave ride
               </Button>
-            ) : (
+            ) : !isLeader ? (
               <Button onClick={joinRideAction.bind(null, ride.id)}>Join ride</Button>
+            ) : (
+              <div></div>
             )}
-            <Link href={`/manage/from-ride/${ride.slug}`}>
-              <Button variant="secondary">Do it again!</Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href={`/manage/from-ride/${ride.slug}`}>
+                <Button variant="secondary">Do it again!</Button>
+              </Link>
+              {isLeader && (
+                <Link href={`/manage/${ride.slug}`} className="flex gap-2">
+                  <Button variant="default">
+                    <PencilIcon />
+                    Edit
+                  </Button>
+                </Link>
+              )}
+              {isLeader ? (
+                <Button variant="destructive" onClick={unclaimRideAction.bind(null, ride.id)}>
+                  Unlead this ride
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={claimRideAction.bind(null, ride.id)}>
+                  Lead this ride
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 

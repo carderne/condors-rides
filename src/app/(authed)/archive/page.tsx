@@ -6,7 +6,7 @@ import { lt } from "drizzle-orm";
 export default async function OldRides() {
   const rides = await db.query.ride.findMany({
     where: lt(schema.ride.date, new Date()),
-    with: { user: true },
+    with: { leader: true },
     orderBy: [schema.ride.date, schema.ride.time],
   });
 

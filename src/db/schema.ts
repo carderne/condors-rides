@@ -123,6 +123,7 @@ export const ride = pgTable(
     userId: text("user_id")
       .references(() => user.id)
       .notNull(),
+    unclaimed: boolean("unclaimed").notNull().default(false),
     name: text("name").notNull(),
     date: date("date", { mode: "date" }).notNull(),
     time: time("time").notNull(),
@@ -139,7 +140,7 @@ export const ride = pgTable(
   (table) => [index("ride__user_id_idx").on(table.userId)],
 );
 export const rideRelations = relations(ride, ({ one, many }) => ({
-  user: one(user, {
+  leader: one(user, {
     fields: [ride.userId],
     references: [user.id],
   }),
