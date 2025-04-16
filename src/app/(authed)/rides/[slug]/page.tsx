@@ -112,11 +112,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                 <Button variant="destructive" onClick={unclaimRideAction.bind(null, ride.id)}>
                   Unlead this ride
                 </Button>
-              ) : (
+              ) : ride.unclaimed ? (
                 <Button variant="outline" onClick={claimRideAction.bind(null, ride.id)}>
                   Lead this ride
                 </Button>
-              )}
+              ) : null}
             </div>
           </CardContent>
         </Card>
