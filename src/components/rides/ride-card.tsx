@@ -1,15 +1,9 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ride, User } from "@/db/zod";
 import { formatFullDate, formatTime } from "@/lib/fmt";
-import {
-  ArrowRightIcon,
-  CalendarDaysIcon,
-  ClockIcon,
-  GaugeIcon,
-  RulerIcon,
-  UserIcon,
-} from "lucide-react";
+import { ArrowRightIcon, CalendarDaysIcon, ClockIcon, GaugeIcon, RulerIcon } from "lucide-react";
 import Link from "next/link";
+import { UserAvatar } from "../user";
 
 type RideHydrated = Ride & { leader: User };
 
@@ -20,7 +14,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
         <CardHeader className="from-primary to-primary-hover bg-gradient-to-r text-white">
           <CardTitle className="truncate text-xl">{ride.name}</CardTitle>
           <div className="mt-2 flex items-center gap-2">
-            <UserIcon className="h-4 w-4 flex-shrink-0" />
+            <UserAvatar user={ride.unclaimed ? null : ride.leader} />
             <span className="truncate text-sm font-medium">
               {ride.unclaimed ? "No leader! Can you lead it?" : ride.leader.name}
             </span>

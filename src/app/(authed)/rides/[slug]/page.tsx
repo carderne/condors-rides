@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
+import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { formatFullDate, formatTime } from "@/lib/fmt";
@@ -16,8 +17,6 @@ import {
   MountainIcon,
   PencilIcon,
   RulerIcon,
-  UserIcon,
-  UserPlusIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -66,7 +65,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           <H1>{ride.name}</H1>
         </div>
         <div className="mt-2 flex items-center gap-2 text-gray-600">
-          <UserIcon className="h-5 w-5" />
+          <UserAvatar user={ride.unclaimed ? null : ride.leader} />
           <span className="text-xl font-bold">
             {ride.unclaimed ? "No leader!" : `Leader: ${ride.leader.name}`}
           </span>
@@ -234,7 +233,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   key={user.id}
                   className="flex basis-1/3 items-center gap-3 rounded-lg bg-slate-50 p-3"
                 >
-                  <UserPlusIcon className="h-5 w-5 text-pink-500" />
+                  <UserAvatar user={user} />
                   <div>
                     <div className="font-medium">
                       <span>{user.name}</span>

@@ -60,7 +60,7 @@ export function HeaderBar({ user }: { user: User | null }) {
         </nav>
       </div>
       {/* Header */}
-      <header className="bg-gradient-to-r from-red-400 to-pink-500 text-white">
+      <header className="to-primary bg-gradient-to-r from-red-400 text-white">
         {/* Desktop Navigation */}
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center">

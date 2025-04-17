@@ -18,6 +18,7 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: config.google,
+    facebook: config.facebook,
   },
   account: {
     accountLinking: {

@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { invariant } from "@/lib/invariant";
 import { redirect } from "next/navigation";
 
-export type Provider = "google";
+export type Provider = "google" | "facebook";
 
 export async function signUpSocialAction(
   redirectUrl: string,

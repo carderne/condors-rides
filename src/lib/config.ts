@@ -19,6 +19,10 @@ type Config = {
     clientId: string;
     clientSecret: string;
   };
+  facebook: {
+    clientId: string;
+    clientSecret: string;
+  };
 };
 
 function getDefaultConfig() {
@@ -29,6 +33,10 @@ function getDefaultConfig() {
     google: {
       clientId: get("GOOGLE_CLIENT_ID"),
       clientSecret: get("GOOGLE_CLIENT_SECRET"),
+    },
+    facebook: {
+      clientId: get("FACEBOOK_CLIENT_ID"),
+      clientSecret: get("FACEBOOK_CLIENT_SECRET"),
     },
   };
 }

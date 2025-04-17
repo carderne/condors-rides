@@ -1,3 +1,4 @@
+import { SignInFacebook } from "@/components/auth/facebook";
 import { SignInGoogle } from "@/components/auth/google";
 import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
@@ -40,6 +41,7 @@ export default async function SignIn({
       <H3 className="">Sign up to create and join rides, comment etc!</H3>
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
         <SignInGoogle redirectUrl={redirectUrl} />
+        <SignInFacebook redirectUrl={redirectUrl} />
       </div>
       <div className="flex items-center justify-center gap-2 text-center">
         Already have an account?
