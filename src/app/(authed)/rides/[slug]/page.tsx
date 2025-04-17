@@ -120,38 +120,36 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <CardHeader className="bg-gray-700 text-white">
               <CardTitle>Admin controls</CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-end pt-6">
-              <div className="flex gap-2">
-                <Link href={`/manage/${ride.slug}`} className="flex gap-2">
-                  <Button variant="secondary">
-                    <PencilIcon />
-                    Edit (as admin)
-                  </Button>
-                </Link>
-                <Confirmation
-                  title="Cancel?"
-                  description="Are you sure you want to cancel this ride?"
-                  action={cancelRideAction.bind(null, ride.id)}
-                >
-                  <Button disabled={!!ride.canceledAt} variant="secondary">
-                    Cancel (as admin)
-                  </Button>
-                </Confirmation>
-                <Confirmation
-                  title="Delete?"
-                  description="Are you sure you want to DELETE this ride?"
-                  action={deleteRideAction.bind(null, ride.id)}
-                >
-                  <Button variant="secondary">Delete (as admin)</Button>
-                </Confirmation>
-              </div>
+            <CardContent className="flex flex-wrap justify-end gap-2 pt-6">
+              <Link href={`/manage/${ride.slug}`} className="flex gap-2">
+                <Button variant="secondary">
+                  <PencilIcon />
+                  Edit (as admin)
+                </Button>
+              </Link>
+              <Confirmation
+                title="Cancel?"
+                description="Are you sure you want to cancel this ride?"
+                action={cancelRideAction.bind(null, ride.id)}
+              >
+                <Button disabled={!!ride.canceledAt} variant="secondary">
+                  Cancel (as admin)
+                </Button>
+              </Confirmation>
+              <Confirmation
+                title="Delete?"
+                description="Are you sure you want to DELETE this ride?"
+                action={deleteRideAction.bind(null, ride.id)}
+              >
+                <Button variant="secondary">Delete (as admin)</Button>
+              </Confirmation>
             </CardContent>
           </Card>
         )}
 
         {/* JOINING, EDITING */}
         <Card className="h-fit">
-          <CardContent className="flex justify-between pt-6">
+          <CardContent className="flex flex-wrap justify-between pt-6">
             {hasJoined ? (
               <Button variant="destructive" onClick={leaveRideAction.bind(null, ride.id)}>
                 Leave ride
@@ -161,7 +159,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             ) : (
               <div></div>
             )}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link href={`/manage/from-ride/${ride.slug}`}>
                 <Button variant="secondary">Do it again!</Button>
               </Link>
