@@ -1,5 +1,3 @@
-import { HeaderBar } from "@/components/header/header";
-import { maybeGetMembership } from "@/dal/membership";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -24,7 +22,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await maybeGetMembership();
   return (
     <html lang="en" className={`${fontInter.variable}`}>
       <head>
@@ -32,10 +29,7 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-        <div className="w-screen overflow-y-auto font-sans antialiased">
-          <HeaderBar user={user} />
-          <div className="mx-auto w-full p-4 md:max-w-[100ch]">{children}</div>
-        </div>
+        <div className="w-screen overflow-y-auto font-sans antialiased">{children}</div>
       </body>
     </html>
   );

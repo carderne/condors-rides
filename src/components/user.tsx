@@ -8,7 +8,6 @@ function getInitials(user: User | null) {
   const words = user.name.split(" ");
   const initials = words.map((w) => w.slice(0, 1));
   const res = initials.join("");
-  console.log({ words, initials, res });
   return res;
 }
 

@@ -1,12 +1,12 @@
 import { HeaderBar } from "@/components/header/header";
-import { getMembership } from "@/dal/membership";
+import { maybeGetMembership } from "@/dal/membership";
 
-export default async function AuthedLayout({
+export default async function PublicLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getMembership();
+  const user = await maybeGetMembership();
   return (
     <>
       <HeaderBar user={user} />

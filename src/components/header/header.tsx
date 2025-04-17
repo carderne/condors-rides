@@ -1,6 +1,7 @@
 "use client";
 
 import CondorsLogo from "@/components/images/condors.png";
+import { Button } from "@/components/ui/button";
 import type { User } from "@/db/zod";
 import { cn } from "@/lib/utils";
 import { MenuIcon, PlusCircleIcon, XIcon } from "lucide-react";
@@ -8,7 +9,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Button } from "../ui/button";
 
 export function HeaderBar({ user }: { user: User | null }) {
   const pathname = usePathname();
