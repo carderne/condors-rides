@@ -4,5 +4,5 @@ import { redirect, RedirectType } from "next/navigation";
 
 export default async function SignOutPage() {
   await auth.api.signOut({ headers: await headers() });
-  redirect("/", RedirectType.push);
+  redirect("/signed-out", RedirectType.push);
 }
