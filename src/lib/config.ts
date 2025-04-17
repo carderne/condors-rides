@@ -15,6 +15,9 @@ type Config = {
   baseUrl: string;
   dbUrl: string;
 
+  stravaToken: string;
+  osKey: string;
+
   google: {
     clientId: string;
     clientSecret: string;
@@ -29,6 +32,9 @@ function getDefaultConfig() {
   return {
     baseUrl: get("BASE_URL"),
     dbUrl: get("DATABASE_URL"),
+
+    stravaToken: get("STRAVA_TOKEN"),
+    osKey: get("OS_KEY"),
 
     google: {
       clientId: get("GOOGLE_CLIENT_ID"),

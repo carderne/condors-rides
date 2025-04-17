@@ -1,3 +1,4 @@
+import { getStravaRoute } from "@/clients/strava";
 import { Confirmation } from "@/components/confirmation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,8 +6,12 @@ import { H1 } from "@/components/ui/typography";
 import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import type { Ride } from "@/db/zod";
+import { getConfig } from "@/lib/config";
 import { formatFullDate, formatTime } from "@/lib/fmt";
+import { invariant } from "@/lib/invariant";
 import { checkIsAdmin } from "@/lib/permissions";
+import polyline from "@mapbox/polyline";
 import { and, eq, isNull } from "drizzle-orm";
 import {
   ArrowLeftIcon,
@@ -33,6 +38,9 @@ import {
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
+import { Map } from "./map";
+
+const { osKey } = getConfig();
 
 export default async function RidePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -61,6 +69,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
   const numRiders = ride.members.length + (unclaimed ? 0 : 1); // the leader
   const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
+
+  const geojson = await getGeojson(ride);
 
   return (
     <main className="py-8">
@@ -285,6 +295,17 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           </CardContent>
         </Card>
 
+        {/* MAP */}
+        {geojson && (
+          <Card className="h-fit">
+            <CardContent className="pt-6">
+              <div className="h-[600px] w-full">
+                <Map geojson={geojson} osKey={osKey} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* RIDERS */}
         <Card className="h-fit md:col-span-2">
           <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
@@ -329,4 +350,15 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       </div>
     </main>
   );
+}
+
+async function getGeojson(ride: Ride): Promise<GeoJSON.LineString | null> {
+  if (ride.route && ride.route.includes("strava.com")) {
+    const routeId = ride.route.split("/").at(-1);
+    invariant(routeId);
+    const rrr = await getStravaRoute(routeId);
+    const geojson = polyline.toGeoJSON(rrr.map.polyline);
+    return geojson;
+  }
+  return null;
 }
