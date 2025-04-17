@@ -8,13 +8,24 @@ import { cn } from "@/lib/utils";
 import { MenuIcon, PlusCircleIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function HeaderBar({ user }: { user: User | null }) {
   const isAdmin = user ? checkIsAdmin(user) : false;
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const refresh = searchParams.get("refresh");
+
+  useEffect(() => {
+    if (refresh) {
+      router.replace(pathname);
+      router.refresh();
+    }
+  });
 
   const toggleMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
