@@ -25,20 +25,6 @@ export const auth = betterAuth({
       enabled: false,
     },
   },
-  session: {
-    cookieCache: {
-      // gives issues with ensuring that an active org id is set
-      enabled: false,
-      maxAge: 5 * 60, // Cache duration in seconds
-    },
-    additionalFields: {
-      activeOrganizationId: {
-        type: "string",
-        required: false,
-        input: false,
-      },
-    },
-  },
   databaseHooks: {
     session: {
       create: {
