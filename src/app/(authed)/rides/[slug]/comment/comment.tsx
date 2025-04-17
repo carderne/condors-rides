@@ -7,11 +7,11 @@ import { deleteCommentAction, upvoteCommentAction } from "./actions";
 export function CommentCard({
   userId,
   comment,
-  admin,
+  isAdmin,
 }: {
   userId: string;
   comment: CommentHydrated;
-  admin: boolean;
+  isAdmin: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -31,7 +31,7 @@ export function CommentCard({
           <PlusIcon className="!size-3" strokeWidth={1} />
           <span>{comment.reactions.length}</span>
         </Button>
-        {(userId === comment.userId || admin) && (
+        {(userId === comment.userId || isAdmin) && (
           <Button
             variant="ghost"
             size="icon"

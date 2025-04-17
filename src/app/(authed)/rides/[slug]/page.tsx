@@ -1,3 +1,4 @@
+import { Confirmation } from "@/components/confirmation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
@@ -5,7 +6,8 @@ import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { formatFullDate, formatTime } from "@/lib/fmt";
-import { eq, isNull } from "drizzle-orm";
+import { checkIsAdmin } from "@/lib/permissions";
+import { and, eq, isNull } from "drizzle-orm";
 import {
   ArrowLeftIcon,
   CalendarDaysIcon,
@@ -20,7 +22,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { claimRideAction, joinRideAction, leaveRideAction, unclaimRideAction } from "./actions";
+import {
+  cancelRideAction,
+  claimRideAction,
+  deleteRideAction,
+  joinRideAction,
+  leaveRideAction,
+  unclaimRideAction,
+} from "./actions";
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
@@ -30,7 +39,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const user = await getMembership();
 
   const ride = await db.query.ride.findFirst({
-    where: eq(schema.ride.slug, slug),
+    where: and(eq(schema.ride.slug, slug), isNull(schema.ride.deletedAt)),
     with: {
       leader: true,
       comments: {
@@ -45,35 +54,46 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
     notFound();
   }
 
-  const isLeader = !ride.unclaimed && ride.userId === user.id;
+  const { unclaimed } = ride;
+  const isLeader = !unclaimed && ride.userId === user.id;
   const hasJoined = ride.members.some((member) => member.userId === user.id);
+  const isAdmin = checkIsAdmin(user);
 
-  const numRiders = ride.members.length + (ride.unclaimed ? 0 : 1); // the leader
-  const riders = [...ride.members.map((m) => m.user), ...(ride.unclaimed ? [] : [ride.leader])];
+  const numRiders = ride.members.length + (unclaimed ? 0 : 1); // the leader
+  const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
 
   return (
     <main className="py-8">
+      {/* OVERVIEW */}
       <div className="mb-8">
         <Link
-          href="/"
+          href="/rides"
           className="mb-4 flex items-center text-pink-600 transition-colors hover:text-pink-800"
         >
           <ArrowLeftIcon className="mr-2 h-4 w-4" />
           Back to all rides
         </Link>
         <div className="flex justify-between">
-          <H1>{ride.name}</H1>
+          {ride.canceledAt ? (
+            <H1>
+              <span className="line-through">{ride.name}</span>{" "}
+              <span className="text-primary">CANCELLED</span>
+            </H1>
+          ) : (
+            <H1>{ride.name}</H1>
+          )}
         </div>
         <div className="mt-2 flex items-center gap-2 text-gray-600">
-          <UserAvatar user={ride.unclaimed ? null : ride.leader} />
+          <UserAvatar user={unclaimed ? null : ride.leader} />
           <span className="text-xl font-bold">
-            {ride.unclaimed ? "No leader!" : `Leader: ${ride.leader.name}`}
+            {unclaimed ? "No leader!" : `Leader: ${ride.leader.name}`}
           </span>
         </div>
       </div>
 
+      {/* UNCLAIMED */}
       <div className="flex flex-col gap-8">
-        {ride.unclaimed && (
+        {unclaimed && (
           <Card className="bg-primary/50 h-fit">
             <CardContent className="flex justify-between pt-6">
               <div className="text-lg">
@@ -84,6 +104,42 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           </Card>
         )}
 
+        {/* ADMIN CARD */}
+        {isAdmin && (
+          <Card className="h-fit">
+            <CardHeader className="bg-gray-700 text-white">
+              <CardTitle>Admin controls</CardTitle>
+            </CardHeader>
+            <CardContent className="flex justify-end pt-6">
+              <div className="flex gap-2">
+                <Link href={`/manage/${ride.slug}`} className="flex gap-2">
+                  <Button variant="secondary">
+                    <PencilIcon />
+                    Edit (as admin)
+                  </Button>
+                </Link>
+                <Confirmation
+                  title="Cancel?"
+                  description="Are you sure you want to cancel this ride?"
+                  action={cancelRideAction.bind(null, ride.id)}
+                >
+                  <Button disabled={!!ride.canceledAt} variant="secondary">
+                    Cancel (as admin)
+                  </Button>
+                </Confirmation>
+                <Confirmation
+                  title="Delete?"
+                  description="Are you sure you want to DELETE this ride?"
+                  action={deleteRideAction.bind(null, ride.id)}
+                >
+                  <Button variant="secondary">Delete (as admin)</Button>
+                </Confirmation>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* JOINING, EDITING */}
         <Card className="h-fit">
           <CardContent className="flex justify-between pt-6">
             {hasJoined ? (
@@ -99,7 +155,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               <Link href={`/manage/from-ride/${ride.slug}`}>
                 <Button variant="secondary">Do it again!</Button>
               </Link>
-              {(isLeader || user.type === "admin") && (
+              {isLeader && (
                 <Link href={`/manage/${ride.slug}`} className="flex gap-2">
                   <Button variant="default">
                     <PencilIcon />
@@ -109,17 +165,29 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               )}
               {isLeader ? (
                 <Button variant="destructive" onClick={unclaimRideAction.bind(null, ride.id)}>
-                  Unlead this ride
+                  Unlead
                 </Button>
-              ) : ride.unclaimed ? (
+              ) : unclaimed ? (
                 <Button variant="outline" onClick={claimRideAction.bind(null, ride.id)}>
-                  Lead this ride
+                  Lead
                 </Button>
               ) : null}
+              {isLeader && (
+                <Confirmation
+                  title="Cancel?"
+                  description="Are you sure you want to cancel this ride?"
+                  action={cancelRideAction.bind(null, ride.id)}
+                >
+                  <Button disabled={!!ride.canceledAt} variant="destructive">
+                    Cancel
+                  </Button>
+                </Confirmation>
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* DETAILS */}
         <Card className="h-fit">
           <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
             <CardTitle>Ride Details</CardTitle>
@@ -217,6 +285,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           </CardContent>
         </Card>
 
+        {/* RIDERS */}
         <Card className="h-fit md:col-span-2">
           <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
             <div className="flex items-center justify-between">
@@ -244,6 +313,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             </div>
           </CardContent>
         </Card>
+
+        {/* COMMENT */}
         <Card className="h-fit">
           <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
             <CardTitle>Comments</CardTitle>
@@ -251,7 +322,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           <CardContent className="pt-6">
             <OptimisticProvider items={ride.comments}>
               <NewCommentForm rideId={ride.id} user={user} />
-              <CommentsList userId={user.id} admin={user.type === "admin"} />
+              <CommentsList userId={user.id} isAdmin={isAdmin} />
             </OptimisticProvider>
           </CardContent>
         </Card>

@@ -3,6 +3,7 @@
 import CondorsLogo from "@/components/images/condors.png";
 import { Button } from "@/components/ui/button";
 import type { User } from "@/db/zod";
+import { checkIsAdmin } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { MenuIcon, PlusCircleIcon, XIcon } from "lucide-react";
 import Image from "next/image";
@@ -11,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export function HeaderBar({ user }: { user: User | null }) {
+  const isAdmin = user ? checkIsAdmin(user) : false;
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -86,6 +88,14 @@ export function HeaderBar({ user }: { user: User | null }) {
             </nav>
           </div>
           <div className="flex items-center space-x-6">
+            {isAdmin && (
+              <Link href="/admin" className="font-medium hover:underline">
+                <span>Admin</span>
+              </Link>
+            )}
+            <Link href="/settings" className="font-medium hover:underline">
+              <span>Settings</span>
+            </Link>
             <Link
               href="/manage/new"
               className="text-primary flex items-center gap-2 rounded-md bg-white px-4 py-2 transition-colors hover:bg-white/90"

@@ -12,7 +12,15 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
     <Link href={`/rides/${ride.slug}`} className="block h-full">
       <Card className="hover:border-primary flex h-full w-full cursor-pointer flex-col border transition-all hover:-translate-y-1 hover:shadow-md">
         <CardHeader className="from-primary to-primary-hover bg-gradient-to-r text-white">
-          <CardTitle className="truncate text-xl">{ride.name}</CardTitle>
+          <CardTitle className="truncate text-xl">
+            {ride.canceledAt ? (
+              <>
+                <span className="line-through">{ride.name}</span> <span>CANCELLED</span>
+              </>
+            ) : (
+              <>{ride.name}</>
+            )}
+          </CardTitle>
           <div className="mt-2 flex items-center gap-2">
             <UserAvatar user={ride.unclaimed ? null : ride.leader} />
             <span className="truncate text-sm font-medium">
