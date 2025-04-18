@@ -10,7 +10,13 @@ export function FormSubmit({ disabled, children, className, ...props }: Componen
   const { pending } = useFormStatus();
   return (
     <div className={cn("flex flex-row items-center justify-end", className)}>
-      <Button type="submit" disabled={pending || disabled} {...props}>
+      <Button
+        size="lg"
+        type="submit"
+        disabled={pending || disabled}
+        className="!h-20 text-xl"
+        {...props}
+      >
         {pending ? <LoaderIcon className="animate-spin" /> : children}
       </Button>
     </div>

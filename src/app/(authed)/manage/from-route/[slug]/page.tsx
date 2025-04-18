@@ -22,7 +22,7 @@ export default async function NewRideFromRoutePage({
   const routeOnly = { name, route, distance, elevation, cafeStop };
 
   return (
-    <main className="flex max-w-2xl flex-col gap-4">
+    <main className="mx-auto flex max-w-2xl flex-col gap-4">
       <H2>New ride</H2>
       <UpsertForm ride={routeOnly} />
     </main>

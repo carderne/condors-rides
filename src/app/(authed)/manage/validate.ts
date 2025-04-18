@@ -4,7 +4,6 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 const schema = zfd.formData({
-  unclaimed: zfd.checkbox(),
   name: zfd.text(),
   date: zfd.text(z.coerce.date()),
   time: zfd.text(),

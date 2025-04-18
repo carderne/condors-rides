@@ -22,7 +22,7 @@ export default async function UpsertRidePage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <main className="flex max-w-2xl flex-col gap-4">
+    <main className="mx-auto flex max-w-2xl flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <H2>Edit ride</H2>
         {ride.userId !== user.id && <H3 className="text-primary">Editing as admin</H3>}

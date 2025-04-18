@@ -3,7 +3,6 @@
 import { FormInput } from "@/components/form/input";
 import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
-import { FormSwitch } from "@/components/form/switch";
 import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import type { Ride } from "@/db/zod";
 import { addDays, format } from "date-fns";
@@ -90,7 +89,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         required={false}
         type="number"
         name="maxGroupSize"
-        label="Max group size"
+        label="Max riders"
         placeholder="8"
         errors={state.errors?.maxGroupSize}
         defaultValue={(state.formData?.get("maxGroupSize") as string) ?? ride?.maxGroupSize ?? "8"}
@@ -124,16 +123,6 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
           <SelectItem value="gravel">Gravel</SelectItem>
         </SelectContent>
       </Select>
-
-      <FormSwitch
-        required={false}
-        name="unclaimed"
-        label="Unclaimed (the ride will have no leader and can be claimed by anyone)"
-        errors={state.errors?.unclaimed}
-        defaultChecked={
-          ((state.formData?.get("unclaimed") as string) === "on" || ride?.unclaimed) ?? false
-        }
-      />
       <FormSubmit>{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>
   );

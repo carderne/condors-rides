@@ -11,9 +11,16 @@ interface FormInputProps extends ComponentProps<"input"> {
 
 export function FormInput({ label, errors, ...props }: FormInputProps) {
   return (
-    <Label htmlFor={props.id} text={label}>
-      <Input {...props} className={cn(props.className, !!errors?.length && errorInputStyle)} />
+    <div className="row flex flex-col items-center gap-1 md:flex md:flex-row md:gap-4">
+      <Label htmlFor={props.name} className="mb-0 flex items-center text-xl md:w-32">
+        {label}
+      </Label>
+      <Input
+        {...props}
+        id={props.name}
+        className={cn("h-20 p-4 !text-xl", props.className, !!errors?.length && errorInputStyle)}
+      />
       <FormError errors={errors} />
-    </Label>
+    </div>
   );
 }

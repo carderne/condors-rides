@@ -36,6 +36,8 @@ export function HeaderBar({ user }: { user: User | null }) {
     { name: "Rides", href: "/rides" },
     { name: "Archive", href: "/archive" },
     { name: "Routes", href: "/routes" },
+    { name: "Settings", href: "/settings" },
+    ...(isAdmin ? [{ name: "Admin", href: "/admin" }] : []),
   ];
 
   return (
@@ -99,19 +101,11 @@ export function HeaderBar({ user }: { user: User | null }) {
             </nav>
           </div>
           <div className="flex items-center space-x-6">
-            {isAdmin && (
-              <Link href="/admin" className="font-medium hover:underline">
-                <span>Admin</span>
-              </Link>
-            )}
-            <Link href="/settings" className="font-medium hover:underline">
-              <span>Settings</span>
-            </Link>
             <Link
               href="/manage/new"
               className="text-primary flex items-center gap-2 rounded-md bg-white px-4 py-2 transition-colors hover:bg-white/90"
             >
-              <PlusCircleIcon className="size-4" />
+              <PlusCircleIcon className="hidden size-4 md:block" />
               <span>New ride</span>
             </Link>
             <SignInOrOut user={user} />

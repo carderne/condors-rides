@@ -11,12 +11,20 @@ interface FormSelectTriggerProps extends ComponentProps<typeof SelectTrigger> {
 
 export function FormSelectTrigger({ label, errors, ...props }: FormSelectTriggerProps) {
   return (
-    <Label htmlFor={props.id} text={label}>
+    <div className="row flex flex-col items-center gap-1 md:flex md:flex-row md:gap-4">
+      <Label htmlFor={props.name} className="mb-0 flex items-center text-xl md:w-32">
+        {label}
+      </Label>
       <SelectTrigger
         {...props}
-        className={cn(props.className, !!errors?.length && errorInputStyle)}
+        id={props.name}
+        className={cn(
+          "!h-20 w-full p-4 !text-xl",
+          props.className,
+          !!errors?.length && errorInputStyle,
+        )}
       />
       <FormError errors={errors} />
-    </Label>
+    </div>
   );
 }
