@@ -40,15 +40,17 @@ export function NewCommentForm({ rideId, user }: { rideId: string; user: User })
   };
   return (
     <Form ref={ref} className="flex flex-col gap-2" action={optimisticAction}>
-      <FormError errors={state.errors?.text} />
       <Textarea
         name="text"
         placeholder="Add a comment..."
         defaultValue={(state.formData?.get("text") as string) || ""}
         required={true}
-        className="min-h-[80px]"
+        className="mb-3 min-h-[100px] border-gray-200 focus-visible:ring-pink-500"
       />
-      <FormSubmit>Add Comment</FormSubmit>
+      <FormError errors={state.errors?.text} />
+      <div className="flex justify-end">
+        <FormSubmit>Post Comment</FormSubmit>
+      </div>
     </Form>
   );
 }

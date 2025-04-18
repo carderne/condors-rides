@@ -41,7 +41,9 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
               </h2>
               <div className="flex items-center gap-3">
                 <UserAvatar user={ride.unclaimed ? null : ride.leader} />
-                <span className="text-gray-600">{ride.leader.name}</span>
+                <span className="text-gray-600">
+                  {ride.unclaimed ? "No leader!" : ride.leader.name}
+                </span>
               </div>
             </div>
           </Link>
@@ -54,7 +56,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
               </div>
               <div>
                 <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
-                <div className="font-semibold">{ride.speed}</div>
+                <div className="font-semibold">{ride.speed} kph</div>
               </div>
             </div>
 
@@ -102,7 +104,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
             </Link>
 
             {ride.route && (
-              <a
+              <Link
                 href={ride.route}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -110,7 +112,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
               >
                 View route
                 <ExternalLinkIcon className="h-4 w-4" />
-              </a>
+              </Link>
             )}
           </div>
         </div>

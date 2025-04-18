@@ -25,10 +25,11 @@ export async function getStravaRoute(routeId: string): Promise<GetStravaResponse
     },
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
     return { success: false, error: "Strava request failed" };
   }
 
-  const data = (await response.json()) as StravaRoute;
-  return { success: true, data };
+  return { success: true, data: data as StravaRoute };
 }

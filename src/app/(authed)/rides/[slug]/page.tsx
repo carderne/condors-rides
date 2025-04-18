@@ -1,29 +1,29 @@
-import { getStravaRoute } from "@/clients/strava";
 import { Confirmation } from "@/components/confirmation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { H1 } from "@/components/ui/typography";
+import { Card } from "@/components/ui/card";
 import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
-import type { Ride } from "@/db/zod";
 import { getConfig } from "@/lib/config";
-import { formatFullDate, formatTime } from "@/lib/fmt";
-import { invariant } from "@/lib/invariant";
+import { getGeojson } from "@/lib/geojson";
 import { checkIsAdmin } from "@/lib/permissions";
-import polyline from "@mapbox/polyline";
+import { format } from "date-fns";
 import { and, eq, isNull } from "drizzle-orm";
 import {
-  ArrowLeftIcon,
-  CalendarDaysIcon,
+  BikeIcon,
+  CalendarIcon,
   ClockIcon,
+  CopyIcon,
+  EditIcon,
   ExternalLinkIcon,
-  GaugeIcon,
-  GroupIcon,
+  HandHelpingIcon,
   MapPinIcon,
   MountainIcon,
-  PencilIcon,
-  RulerIcon,
+  RouteIcon,
+  Trash2Icon,
+  UsersIcon,
+  WindIcon,
+  XIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -67,299 +67,290 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const hasJoined = ride.members.some((member) => member.userId === user.id);
   const isAdmin = checkIsAdmin(user);
 
-  const numRiders = ride.members.length + (unclaimed ? 0 : 1); // the leader
   const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
 
   const geojson = await getGeojson(ride);
 
   return (
-    <main className="py-8">
-      {/* OVERVIEW */}
-      <div className="mb-8">
-        <Link
-          href="/rides"
-          className="mb-4 flex items-center text-pink-600 transition-colors hover:text-pink-800"
-        >
-          <ArrowLeftIcon className="mr-2 h-4 w-4" />
-          Back to all rides
-        </Link>
-        <div className="flex justify-between">
-          {ride.canceledAt ? (
-            <H1>
-              <span className="line-through">{ride.name}</span>{" "}
-              <span className="text-primary">CANCELLED</span>
-            </H1>
-          ) : (
-            <H1>{ride.name}</H1>
-          )}
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-gray-600">
-          <UserAvatar user={unclaimed ? null : ride.leader} />
-          <span className="text-xl font-bold">
-            {unclaimed ? "No leader!" : `Leader: ${ride.leader.name}`}
-          </span>
+    <div className="flex flex-col gap-8">
+      {/* Ride Header */}
+      <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+        <div className="relative bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
+          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-bold">{ride.name}</h1>
+              <div className="flex items-center gap-3">
+                <UserAvatar user={unclaimed ? null : ride.leader} />
+                <div className="flex flex-col">
+                  {unclaimed ? (
+                    <>
+                      <span className="font-medium">No leader!</span>
+                      <span className="text-sm opacity-90">
+                        Hit the Lead button below if you're up to it!
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm opacity-90">Led by</span>
+                      <span className="font-medium">{ride.leader.name}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between gap-2">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
+                  <CalendarIcon className="h-5 w-5" />
+                  <span>{format(ride.date, "EEE, dd MMM yyyy")}</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
+                  <ClockIcon className="h-5 w-5" />
+                  <span>{ride.time}</span>
+                </div>
+              </div>
+              {hasJoined ? (
+                <Button
+                  className="w-full bg-red-100 bg-white py-6 text-lg text-black hover:bg-red-200"
+                  disabled={isLeader}
+                  onClick={leaveRideAction.bind(null, ride.id)}
+                >
+                  Leave this ride
+                </Button>
+              ) : (
+                <Button
+                  className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
+                  disabled={isLeader}
+                  onClick={joinRideAction.bind(null, ride.id)}
+                >
+                  Join this ride
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* UNCLAIMED */}
-      <div className="flex flex-col gap-8">
-        {unclaimed && (
-          <Card className="bg-primary/50 h-fit">
-            <CardContent className="flex justify-between pt-6">
-              <div className="text-lg">
-                <p>This ride has no leader and may not go ahead.</p>
-                <p>Please hit "Lead this ride" if you'd like to lead it!</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div className="w-full text-center text-xl font-medium text-gray-700">
+        <p>{ride.notes}</p>
+      </div>
 
-        {/* ADMIN CARD */}
-        {isAdmin && (
-          <Card className="h-fit">
-            <CardHeader className="bg-gray-700 text-white">
-              <CardTitle>Admin controls</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap justify-end gap-2 pt-6">
-              <Link href={`/manage/${ride.slug}`} className="flex gap-2">
-                <Button variant="secondary">
-                  <PencilIcon />
-                  Edit (as admin)
-                </Button>
-              </Link>
-              <Confirmation
-                title="Cancel?"
-                description="Are you sure you want to cancel this ride?"
-                action={cancelRideAction.bind(null, ride.id)}
-              >
-                <Button disabled={!!ride.canceledAt} variant="secondary">
-                  Cancel (as admin)
-                </Button>
-              </Confirmation>
-              <Confirmation
-                title="Delete?"
-                description="Are you sure you want to DELETE this ride?"
-                action={deleteRideAction.bind(null, ride.id)}
-              >
-                <Button variant="secondary">Delete (as admin)</Button>
-              </Confirmation>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* JOINING, EDITING */}
-        <Card className="h-fit">
-          <CardContent className="flex flex-wrap justify-between pt-6">
-            {hasJoined ? (
-              <Button variant="destructive" onClick={leaveRideAction.bind(null, ride.id)}>
-                Leave ride
-              </Button>
-            ) : !isLeader ? (
-              <Button onClick={joinRideAction.bind(null, ride.id)}>Join ride</Button>
-            ) : (
-              <div></div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Link href={`/manage/from-ride/${ride.slug}`}>
-                <Button variant="secondary">Do it again!</Button>
-              </Link>
-              {isLeader && (
-                <Link href={`/manage/${ride.slug}`} className="flex gap-2">
-                  <Button variant="default">
-                    <PencilIcon />
-                    Edit
+      <div className="flex w-full flex-row gap-8">
+        {/* Left column - Ride details and actions */}
+        <div className="flex basis-1/2 flex-col gap-8">
+          <Card className="overflow-hidden">
+            <div className="p-6">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {(isLeader || isAdmin) && (
+                  <Link href={`/manage/${ride.slug}`}>
+                    <Button
+                      variant="outline"
+                      className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-blue-600"
+                    >
+                      <EditIcon className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </Link>
+                )}
+                <Link href={`/manage/from-ride/${ride.slug}`}>
+                  <Button
+                    variant="outline"
+                    className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                  >
+                    <CopyIcon className="h-4 w-4" />
+                    Duplicate
                   </Button>
                 </Link>
-              )}
-              {isLeader ? (
-                <Button variant="destructive" onClick={unclaimRideAction.bind(null, ride.id)}>
-                  Unlead
-                </Button>
-              ) : unclaimed ? (
-                <Button variant="outline" onClick={claimRideAction.bind(null, ride.id)}>
-                  Lead
-                </Button>
-              ) : null}
-              {isLeader && (
-                <Confirmation
-                  title="Cancel?"
-                  description="Are you sure you want to cancel this ride?"
-                  action={cancelRideAction.bind(null, ride.id)}
-                >
-                  <Button disabled={!!ride.canceledAt} variant="destructive">
-                    Cancel
+                {isLeader ? (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                    onClick={unclaimRideAction.bind(null, ride.id)}
+                  >
+                    <HandHelpingIcon className="h-4 w-4" />
+                    Unlead
                   </Button>
-                </Confirmation>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* DETAILS */}
-        <Card className="h-fit">
-          <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
-            <CardTitle>Ride Details</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <CalendarDaysIcon className="h-5 w-5 text-pink-500" />
-                <div>
-                  <div className="text-sm text-gray-500">Date</div>
-                  <div className="font-medium">{formatFullDate(ride.date)}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-5 w-5 text-pink-500" />
-                <div>
-                  <div className="text-sm text-gray-500">Start Time</div>
-                  <div className="font-medium">{formatTime(ride.time)}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <GaugeIcon className="h-5 w-5 text-pink-500" />
-                <div>
-                  <div className="text-sm text-gray-500">Speed</div>
-                  <div className="font-medium">{ride.speed} kph</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <RulerIcon className="text-primary h-5 w-5 flex-shrink-0" />
-                <div>
-                  <div className="text-xs text-gray-500">Distance</div>
-                  <div className="text-sm font-medium">{ride.distance} km</div>
-                </div>
-              </div>
-
-              {ride.elevation && (
-                <div className="flex items-center gap-3">
-                  <MountainIcon className="text-primary h-5 w-5 flex-shrink-0" />
-                  <div>
-                    <div className="text-xs text-gray-500">Elevation</div>
-                    <div className="text-sm font-medium">{ride.elevation} m</div>
-                  </div>
-                </div>
-              )}
-
-              {ride.route && (
-                <div className="flex items-center gap-3">
-                  <MapPinIcon className="h-5 w-5 text-pink-500" />
-                  <div>
-                    <div className="text-sm text-gray-500">Route</div>
-                    <Link
-                      href={ride.route.startsWith("http") ? ride.route : `https://${ride.route}`}
-                      className="flex items-center gap-1 font-medium text-pink-600 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                ) : unclaimed ? (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                    onClick={claimRideAction.bind(null, ride.id)}
+                  >
+                    <BikeIcon className="h-4 w-4" />
+                    Lead
+                  </Button>
+                ) : null}
+                {(isLeader || isAdmin) && (
+                  <Confirmation
+                    title="Cancel?"
+                    description="Are you sure you want to cancel this ride?"
+                    action={cancelRideAction.bind(null, ride.id)}
+                  >
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
                     >
-                      View route
-                      <ExternalLinkIcon className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {ride.maxGroupSize && (
-                <div className="flex items-center gap-3">
-                  <GroupIcon className="text-primary h-5 w-5 flex-shrink-0" />
-                  <div>
-                    <div className="text-xs text-gray-500">Max group size</div>
-                    <div className="text-sm font-medium">{ride.maxGroupSize}</div>
-                  </div>
-                </div>
-              )}
-
-              {ride.cafeStop && (
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="text-xs text-gray-500">Cafe stop</div>
-                    <div className="text-sm font-medium">{ride.cafeStop}</div>
-                  </div>
-                </div>
-              )}
-
-              {ride.notes && (
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="text-xs text-gray-500">Notes</div>
-                    <div className="text-sm font-medium">{ride.notes}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* MAP */}
-        {geojson && (
-          <Card className="h-fit">
-            <CardContent className="pt-6">
-              <div className="h-[600px] w-full">
-                <Map geojson={geojson} osKey={osKey} />
+                      <XIcon className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </Confirmation>
+                )}
+                {isAdmin && (
+                  <Confirmation
+                    title="Delete?"
+                    description="Are you sure you want to DELETE this ride?"
+                    action={deleteRideAction.bind(null, ride.id)}
+                  >
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-red-600"
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  </Confirmation>
+                )}
               </div>
-            </CardContent>
+            </div>
           </Card>
-        )}
 
-        {/* RIDERS */}
-        <Card className="h-fit md:col-span-2">
-          <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
-            <div className="flex items-center justify-between">
-              <CardTitle>Riders</CardTitle>
-              <div className="rounded-full bg-white/20 px-3 py-1 text-sm text-white">
-                {numRiders} {numRiders === 1 ? "rider" : "riders"}
+          {/* Ride Details */}
+          <Card className="overflow-hidden">
+            <div className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <WindIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
+                    <div className="font-semibold">{ride.speed} kph</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <MapPinIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                    <div className="font-semibold">{ride.distance} km</div>
+                  </div>
+                </div>
+
+                {ride.elevation && (
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <MountainIcon className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                      <div className="font-semibold">{ride.elevation} m</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <RouteIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                    <div className="font-semibold">
+                      {ride.surface === "gravel" ? "Gravel" : "Road"}
+                    </div>
+                  </div>
+                </div>
+
+                {ride.maxGroupSize && (
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <UsersIcon className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">
+                        Max riders
+                      </div>
+                      <div className="font-semibold">{ride.maxGroupSize}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="flex flex-row flex-wrap gap-4">
-              {riders.map((user) => (
+          </Card>
+        </div>
+
+        {/* Right column - Map */}
+        <div className="basis-1/2">
+          <Card className="relative flex h-full items-center justify-center bg-gray-50">
+            {ride.route && (
+              <Link
+                href={ride.route}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute top-4 left-4 z-10 flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
+              >
+                View route
+                <ExternalLinkIcon className="h-4 w-4" />
+              </Link>
+            )}
+            <div className="h-full w-full">
+              {geojson ? (
+                <Map geojson={geojson} osKey={osKey} />
+              ) : (
+                <div>
+                  <p>Use Strava or MapMyRide if you want your route to show up here :)</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <div className="flex w-full flex-row gap-8">
+        {/* Riders List */}
+        <Card className="w-min basis-1/2 rounded-2xl p-6 shadow-md">
+          {riders.length === 0 ? (
+            <div>
+              <p>No one on this ride yet :(</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {riders.map((rider) => (
                 <div
-                  key={user.id}
-                  className="flex basis-1/3 items-center gap-3 rounded-lg bg-slate-50 p-3"
+                  key={rider.id}
+                  className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 transition-colors hover:border-pink-200"
                 >
-                  <UserAvatar user={user} />
-                  <div>
-                    <div className="font-medium">
-                      <span>{user.name}</span>
-                    </div>
+                  <UserAvatar user={unclaimed ? null : ride.leader} />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800">{rider.name}</span>
+                    {isLeader && (
+                      <span className="flex items-center text-xs text-pink-500">
+                        <BikeIcon className="mr-1 h-3 w-3" />
+                        Leader
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
+          )}
         </Card>
 
-        {/* COMMENT */}
-        <Card className="h-fit">
-          <CardHeader className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">
-            <CardTitle>Comments</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <OptimisticProvider items={ride.comments}>
+        {/* Comments Section */}
+        <Card className="basis-1/2 rounded-2xl p-6 shadow-md">
+          <OptimisticProvider items={ride.comments}>
+            {/* Comment Input */}
+            <div className="mb-4">
               <NewCommentForm rideId={ride.id} user={user} />
-              <CommentsList userId={user.id} isAdmin={isAdmin} />
-            </OptimisticProvider>
-          </CardContent>
+            </div>
+
+            {/* Comments List */}
+            <CommentsList userId={user.id} isAdmin={isAdmin} />
+          </OptimisticProvider>
         </Card>
       </div>
-    </main>
+    </div>
   );
-}
-
-async function getGeojson(ride: Ride): Promise<GeoJSON.LineString | null> {
-  if (ride.route && ride.route.includes("strava.com")) {
-    const routeId = ride.route.split("/").at(-1);
-    invariant(routeId);
-    const stravaResponse = await getStravaRoute(routeId);
-    if (!stravaResponse.success) {
-      return null;
-    }
-    const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
-    return geojson;
-  }
-  return null;
 }

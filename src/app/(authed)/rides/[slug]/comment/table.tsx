@@ -1,14 +1,53 @@
 "use client";
 
-import { CommentCard } from "./comment";
+import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/user";
+import { formatRelative } from "date-fns";
+import { ThumbsUpIcon, Trash2Icon } from "lucide-react";
+import { deleteCommentAction, upvoteCommentAction } from "./actions";
 import { useOptimisticContext } from "./optimistic";
 
 export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
   const { optimistic: comments } = useOptimisticContext();
   return (
-    <div className="flex flex-col gap-8">
+    <div className="space-y-6">
       {comments.map((comment) => (
-        <CommentCard key={comment.id} userId={userId} comment={comment} isAdmin={isAdmin} />
+        <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-0">
+          <div className="mb-3 flex justify-between">
+            <div className="flex items-center gap-3">
+              <UserAvatar user={comment.user} />
+              <div>
+                <div className="font-medium text-gray-800">{comment.user.name}</div>
+                <div className="text-xs text-gray-500">
+                  {formatRelative(comment.createdAt, new Date())}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-gray-500 hover:text-pink-600"
+                onClick={upvoteCommentAction.bind(null, comment.id)}
+              >
+                <ThumbsUpIcon className="mr-1 h-4 w-4" />
+                <span>{comment.reactions.length}</span>
+              </Button>
+              {(comment.userId == userId || isAdmin) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-gray-500 hover:text-red-600"
+                  onClick={deleteCommentAction.bind(null, comment.id)}
+                >
+                  <Trash2Icon className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
+              )}
+            </div>
+          </div>
+          <p className="text-gray-700">{comment.text}</p>
+        </div>
       ))}
     </div>
   );
