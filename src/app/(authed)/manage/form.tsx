@@ -1,8 +1,10 @@
 "use client";
 
 import { FormInput } from "@/components/form/input";
+import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
 import { FormSwitch } from "@/components/form/switch";
+import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import type { Ride } from "@/db/zod";
 import { addDays, format } from "date-fns";
 import Form from "next/form";
@@ -109,6 +111,20 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         errors={state.errors?.notes}
         defaultValue={(state.formData?.get("notes") as string) ?? ride?.notes ?? ""}
       />
+
+      <Select
+        name="surface"
+        defaultValue={(state.formData?.get("surface") as string) ?? ride?.surface ?? "road"}
+      >
+        <FormSelectTrigger label="Surface" errors={state.errors?.surface}>
+          <SelectValue />
+        </FormSelectTrigger>
+        <SelectContent>
+          <SelectItem value="road">Road</SelectItem>
+          <SelectItem value="gravel">Gravel</SelectItem>
+        </SelectContent>
+      </Select>
+
       <FormSwitch
         required={false}
         name="unclaimed"

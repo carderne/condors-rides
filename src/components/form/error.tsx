@@ -9,7 +9,7 @@ export function FormError({ errors }: FormErrorProps) {
     return null;
   }
   return (
-    <div className="text-status-warning mt-1 text-sm">
+    <div className="mt-1 text-sm text-red-600">
       {errors.map((error, index) => (
         <div key={index} className="flex items-center gap-1">
           <span>{error}</span>

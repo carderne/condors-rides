@@ -1,3 +1,4 @@
+import { rideSurfaceArray } from "@/db/schema";
 import { createValidator, type ActionState } from "@/lib/forms";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
@@ -14,6 +15,7 @@ const schema = zfd.formData({
   maxGroupSize: zfd.numeric(z.number().optional()),
   cafeStop: zfd.text(z.string().optional()),
   notes: zfd.text(z.string().optional()),
+  surface: z.enum(rideSurfaceArray),
 });
 
 type Schema = typeof schema;

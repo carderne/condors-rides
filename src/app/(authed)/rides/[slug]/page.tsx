@@ -354,8 +354,11 @@ async function getGeojson(ride: Ride): Promise<GeoJSON.LineString | null> {
   if (ride.route && ride.route.includes("strava.com")) {
     const routeId = ride.route.split("/").at(-1);
     invariant(routeId);
-    const rrr = await getStravaRoute(routeId);
-    const geojson = polyline.toGeoJSON(rrr.map.polyline);
+    const stravaResponse = await getStravaRoute(routeId);
+    if (!stravaResponse.success) {
+      return null;
+    }
+    const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
     return geojson;
   }
   return null;

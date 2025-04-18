@@ -12,12 +12,12 @@ export interface LineString {
 export type GeoJson = LineString;
 
 interface StravaRoute {
-  map: {
-    polyline: string;
-  };
+  map: { polyline: string };
 }
 
-export async function getStravaRoute(routeId: string): Promise<StravaRoute> {
+type GetStravaResponse = { success: true; data: StravaRoute } | { success: false; error: string };
+
+export async function getStravaRoute(routeId: string): Promise<GetStravaResponse> {
   const response = await fetch(`https://www.strava.com/api/v3/routes/${routeId}`, {
     method: "GET",
     headers: {
@@ -26,9 +26,9 @@ export async function getStravaRoute(routeId: string): Promise<StravaRoute> {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
+    return { success: false, error: "Strava request failed" };
   }
 
-  const res = await response.json();
-  return res;
+  const data = (await response.json()) as StravaRoute;
+  return { success: true, data };
 }

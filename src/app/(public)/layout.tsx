@@ -10,7 +10,7 @@ export default async function PublicLayout({
   return (
     <>
       <HeaderBar user={user} />
-      <div className="mx-auto w-full p-4 md:max-w-[100ch]">{children}</div>
+      <div className="mx-auto w-full p-4 md:max-w-[120ch]">{children}</div>
     </>
   );
 }
