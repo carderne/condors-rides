@@ -32,6 +32,10 @@ type Config = {
     clientId: string;
     clientSecret: string;
   };
+  ridewithgps: {
+    apiKey: string;
+    authToken: string;
+  };
   google: {
     clientId: string;
     clientSecret: string;
@@ -53,6 +57,10 @@ function getDefaultConfig() {
     strava: {
       clientId: get("STRAVA_CLIENT_ID"),
       clientSecret: get("STRAVA_CLIENT_SECRET"),
+    },
+    ridewithgps: {
+      apiKey: get("RIDEWITHGPS_API_KEY"),
+      authToken: get("RIDEWITHGPS_AUTH_TOKEN"),
     },
     google: {
       clientId: get("GOOGLE_CLIENT_ID"),

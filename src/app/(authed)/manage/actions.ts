@@ -1,5 +1,6 @@
 "use server";
 
+import { convertRouteToLineString, getRideWithGpsRoute } from "@/clients/ridewithgps";
 import { getStravaRoute } from "@/clients/strava";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
@@ -73,6 +74,16 @@ async function getGeojson(route: string | undefined): Promise<GeoJSON.LineString
       return null;
     }
     const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
+    return geojson;
+  }
+  if (route.includes("ridewithgps.com")) {
+    const routeId = route.split("/").at(-1);
+    invariant(routeId);
+    const response = await getRideWithGpsRoute(routeId);
+    if (!response.success) {
+      return null;
+    }
+    const geojson = convertRouteToLineString(response.data);
     return geojson;
   }
   return null;

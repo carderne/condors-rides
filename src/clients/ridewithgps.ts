@@ -1,0 +1,43 @@
+import { getConfig } from "@/lib/config";
+
+const {
+  ridewithgps: { apiKey, authToken },
+} = getConfig();
+
+interface RideWithGpsRoute {
+  route: {
+    // https://github.com/ridewithgps/developers/blob/master/reference/track_points.md
+    course_points: { x: number; y: number }[];
+  };
+}
+
+type RideWithGpsResponse<T> = { success: true; data: T } | { success: false; error: string };
+
+export async function getRideWithGpsRoute(
+  routeId: string,
+): Promise<RideWithGpsResponse<RideWithGpsRoute>> {
+  const response = await fetch(`https://ridewithgps.com/api/v1/routes/${routeId}.json`, {
+    method: "GET",
+    headers: {
+      "x-rwgps-api-key": apiKey,
+      "x-rwgps-auth-token": authToken,
+    },
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("RideWithGps get route failed", data);
+    return { success: false, error: "RideWithGps get route failed" };
+  }
+
+  return { success: true, data };
+}
+
+export function convertRouteToLineString(route: RideWithGpsRoute): GeoJSON.LineString {
+  const coordinates = route.route.course_points.map(({ x, y }) => [x, y]);
+  const linestring = {
+    type: "LineString" as const,
+    coordinates,
+  };
+  return linestring;
+}
