@@ -12,3 +12,5 @@ export type RideMember = typeof schema.rideMember.$inferSelect;
 
 export type Comment = typeof schema.comment.$inferSelect;
 export type CommentReaction = typeof schema.commentReaction.$inferSelect;
+
+export type ExternalAuth = typeof schema.token.$inferSelect;

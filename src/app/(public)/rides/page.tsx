@@ -1,4 +1,5 @@
 import { groupRidesByDate, RideList } from "@/components/rides/list";
+import { H3 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { and, gte, isNull } from "drizzle-orm";
 
@@ -12,7 +13,13 @@ export default async function UpcomingRidesPage() {
 
   return (
     <main className="flex flex-col gap-16">
-      <RideList datedRideArray={datedRideArray} />
+      {datedRideArray.length === 0 ? (
+        <div className="mx-auto mt-20">
+          <H3>No upcoming rides! :(</H3>
+        </div>
+      ) : (
+        <RideList datedRideArray={datedRideArray} />
+      )}
     </main>
   );
 }

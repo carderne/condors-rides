@@ -1,6 +1,13 @@
+import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
+import { decrypt, encrypt } from "@/lib/encryption";
+import { invariant } from "@/lib/invariant";
+import { addHours, isAfter } from "date-fns";
+import { eq } from "drizzle-orm";
 
-const { stravaToken } = getConfig();
+const {
+  strava: { clientId, clientSecret },
+} = getConfig();
 
 type Position = [number, number][];
 
@@ -15,21 +22,80 @@ interface StravaRoute {
   map: { polyline: string };
 }
 
-type GetStravaResponse = { success: true; data: StravaRoute } | { success: false; error: string };
+type StravaResponse<T> = { success: true; data: T } | { success: false; error: string };
 
-export async function getStravaRoute(routeId: string): Promise<GetStravaResponse> {
+export async function getStravaRoute(routeId: string): Promise<StravaResponse<StravaRoute>> {
+  const accessToken = await getAccessToken();
+  if (!accessToken.success) {
+    return accessToken;
+  }
+
   const response = await fetch(`https://www.strava.com/api/v3/routes/${routeId}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${stravaToken}`,
+      Authorization: `Bearer ${accessToken.data}`,
     },
   });
 
   const data = await response.json();
 
   if (!response.ok) {
+    console.error("Strava get route failed", data);
     return { success: false, error: "Strava request failed" };
   }
 
   return { success: true, data: data as StravaRoute };
+}
+
+interface StravaAccessToken {
+  token_type: "Bearer";
+  access_token: string;
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+}
+
+async function getAccessToken(): Promise<StravaResponse<string>> {
+  const auth = await db.query.token.findFirst({
+    where: eq(schema.token.site, "strava"),
+  });
+  invariant(auth, "no strava auth details in db");
+
+  const accessToken = decrypt(auth.accessToken);
+
+  if (isAfter(auth.expiresAt, addHours(new Date(), 1))) {
+    return { success: true, data: accessToken };
+  }
+
+  const refreshToken = decrypt(auth.refreshToken);
+  const response = await fetch("https://www.strava.com/api/v3/oauth/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    console.error("Strava get access token failed", data);
+    return { success: false, error: "Get new access token failed" };
+  }
+  const res = data as StravaAccessToken;
+  const newAccessToken = encrypt(res.access_token);
+  const newRefreshToken = encrypt(res.refresh_token);
+
+  await db
+    .update(schema.token)
+    .set({
+      accessToken: newAccessToken,
+      expiresAt: new Date(res.expires_at * 1000),
+      refreshToken: newRefreshToken,
+    })
+    .where(eq(schema.token.site, "strava"));
+  return { success: true, data: newAccessToken };
 }

@@ -11,13 +11,27 @@ function get(name: string): string {
   }
 }
 
+function getEncryptionKeys(name: string): [string, ...string[]] {
+  const raw = get(name);
+  const arr = raw.split(",").map((k) => k.trim());
+  const [first, ...rest] = arr;
+  if (!first) {
+    throw new Error(`Startup aborted: encryption keys missing: ${name}`);
+  }
+  return [first, ...rest];
+}
+
 type Config = {
   baseUrl: string;
   dbUrl: string;
+  encryptionKeys: [string, ...string[]];
 
-  stravaToken: string;
   osKey: string;
 
+  strava: {
+    clientId: string;
+    clientSecret: string;
+  };
   google: {
     clientId: string;
     clientSecret: string;
@@ -32,10 +46,14 @@ function getDefaultConfig() {
   return {
     baseUrl: get("BASE_URL"),
     dbUrl: get("DATABASE_URL"),
+    encryptionKeys: getEncryptionKeys("ENCRYPTION_KEYS"),
 
-    stravaToken: get("STRAVA_TOKEN"),
     osKey: get("OS_KEY"),
 
+    strava: {
+      clientId: get("STRAVA_CLIENT_ID"),
+      clientSecret: get("STRAVA_CLIENT_SECRET"),
+    },
     google: {
       clientId: get("GOOGLE_CLIENT_ID"),
       clientSecret: get("GOOGLE_CLIENT_SECRET"),

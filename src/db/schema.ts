@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -146,6 +147,8 @@ export const ride = pgTable(
     maxGroupSize: integer("max_group_size"),
     cafeStop: text("cafe_stop"),
 
+    geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
+
     unclaimed: boolean("unclaimed").notNull().default(false),
     canceledAt: timestamp("canceled_at"),
     deletedAt: timestamp("deleted_at"),
@@ -265,3 +268,21 @@ export const commentReactionRelations = relations(commentReaction, ({ one }) => 
     references: [user.id],
   }),
 }));
+
+// *****************************************
+// External auth
+// *****************************************
+export const routeSiteArray = ["strava", "ridewithgps"] as const;
+export const externalApi = pgEnum("external_api", routeSiteArray);
+export const token = pgTable(
+  "token",
+  {
+    site: externalApi("site").primaryKey(),
+    accessToken: text("access_token").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    refreshToken: text("refresh_token").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (_table) => [],
+);

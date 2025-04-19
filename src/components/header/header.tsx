@@ -80,7 +80,7 @@ export function HeaderBar({ user }: { user: User | null }) {
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center">
             <div className="mr-8">
-              <Image src={CondorsLogo} alt="condors logo" height="20" />
+              <Image src={CondorsLogo} alt="condors logo" height="20" priority={true} />
             </div>
             <nav className="hidden md:block">
               <ul className="flex gap-8">

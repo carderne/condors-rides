@@ -13,13 +13,11 @@ function getInitials(user: User | null) {
 
 export function UserAvatar({ user }: { user: User | null }) {
   return (
-    <div className="overflow-hidden rounded-full border-2 border-pink-200">
-      <Avatar className="size-12 rounded-full border-2 border-pink-200">
-        <AvatarImage src={user?.image ?? undefined} alt="user avatar" />
-        <AvatarFallback className="text-md text-primary bg-white font-bold">
-          {getInitials(user)}
-        </AvatarFallback>
-      </Avatar>
-    </div>
+    <Avatar className="size-12 rounded-full border-2 border-pink-200">
+      <AvatarImage src={user?.image ?? undefined} alt="user avatar" />
+      <AvatarFallback className="text-md text-primary bg-white font-bold">
+        {getInitials(user)}
+      </AvatarFallback>
+    </Avatar>
   );
 }

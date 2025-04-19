@@ -5,7 +5,6 @@ import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
-import { getGeojson } from "@/lib/geojson";
 import { checkIsAdmin } from "@/lib/permissions";
 import { format } from "date-fns";
 import { and, eq, isNull } from "drizzle-orm";
@@ -69,8 +68,6 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
   const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
 
-  const geojson = await getGeojson(ride);
-
   return (
     <div className="flex flex-col gap-8">
       {/* Ride Header */}
@@ -107,7 +104,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                 </div>
                 <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
                   <ClockIcon className="h-5 w-5" />
-                  <span>{ride.time}</span>
+                  <span>{ride.time.slice(0, 5)}</span>
                 </div>
               </div>
               {hasJoined ? (
@@ -132,9 +129,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </div>
       </div>
 
-      <div className="w-full text-center text-xl font-medium text-gray-700">
-        <p>{ride.notes}</p>
-      </div>
+      {ride.notes && (
+        <div className="w-full text-center text-xl font-medium text-gray-700">
+          <p>{ride.notes}</p>
+        </div>
+      )}
 
       <div className="flex w-full flex-row gap-8">
         {/* Left column - Ride details and actions */}
@@ -296,10 +295,10 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </Link>
             )}
             <div className="h-full w-full">
-              {geojson ? (
-                <Map geojson={geojson} osKey={osKey} />
+              {ride.geojson ? (
+                <Map geojson={ride.geojson} osKey={osKey} />
               ) : (
-                <div>
+                <div className="m-auto flex h-full w-1/2 flex-col justify-center">
                   <p>Use Strava or MapMyRide if you want your route to show up here :)</p>
                 </div>
               )}
@@ -312,16 +311,13 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         {/* Riders List */}
         <Card className="w-min basis-1/2 rounded-2xl p-6 shadow-md">
           {riders.length === 0 ? (
-            <div>
+            <div className="m-auto flex h-full w-1/2 flex-col justify-center">
               <p>No one on this ride yet :(</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2">
               {riders.map((rider) => (
-                <div
-                  key={rider.id}
-                  className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 transition-colors hover:border-pink-200"
-                >
+                <div key={rider.id} className="flex items-center gap-3 p-3">
                   <UserAvatar user={unclaimed ? null : ride.leader} />
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-800">{rider.name}</span>
