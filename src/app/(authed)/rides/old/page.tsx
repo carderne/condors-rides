@@ -1,4 +1,6 @@
 import { groupRidesByDate, RideList } from "@/components/rides/list";
+import { RidesTabSwitcher } from "@/components/rides/tabs";
+import { H3 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { and, isNull, lt } from "drizzle-orm";
 
@@ -12,7 +14,14 @@ export default async function OldRides() {
 
   return (
     <main className="flex flex-col gap-16">
-      <RideList datedRideArray={datedRideArray} />
+      <RidesTabSwitcher />
+      {datedRideArray.length === 0 ? (
+        <div className="mx-auto mt-20">
+          <H3>No old rides! :(</H3>
+        </div>
+      ) : (
+        <RideList datedRideArray={datedRideArray} />
+      )}
     </main>
   );
 }
