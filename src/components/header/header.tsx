@@ -77,10 +77,12 @@ export function HeaderBar({ user }: { user: User | null }) {
       <header className="to-primary bg-gradient-to-r from-red-400 text-white">
         {/* Desktop Navigation */}
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center">
-            <div className="mr-8">
-              <Image src={CondorsLogo} alt="condors logo" height="20" priority={true} />
-            </div>
+          <div className="flex items-center gap-8">
+            <Link href="/">
+              <div className="">
+                <Image src={CondorsLogo} alt="condors logo" height="20" priority={true} />
+              </div>
+            </Link>
             <nav className="hidden md:block">
               <ul className="flex gap-8">
                 {navItems.map((item) => (
