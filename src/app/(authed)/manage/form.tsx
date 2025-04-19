@@ -33,6 +33,8 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
       />
       <FormInput
         required={true}
+        // doesn't show full-width on safari otherwise
+        className="w-[calc(100vw-2rem)] md:w-full"
         type="date"
         name="date"
         label="Date"
@@ -44,6 +46,8 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
       />
       <FormInput
         required={true}
+        // doesn't show full-width on safari otherwise
+        className="w-[calc(100vw-2rem)] md:w-full"
         type="time"
         name="time"
         label="Time"
@@ -123,7 +127,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
           <SelectItem value="gravel">Gravel</SelectItem>
         </SelectContent>
       </Select>
-      <FormSubmit>{ride ? "Save" : "Add ride"}</FormSubmit>
+      <FormSubmit className="w-full">{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>
   );
 }
