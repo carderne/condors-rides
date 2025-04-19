@@ -29,7 +29,9 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body>
-        <div className="w-screen overflow-y-auto font-sans antialiased">{children}</div>
+        <div className="min-h-screen w-screen overflow-y-auto font-sans antialiased">
+          {children}
+        </div>
       </body>
     </html>
   );

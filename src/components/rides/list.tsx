@@ -27,7 +27,7 @@ export function groupRidesByDate(rides: RideHydrated[]): DatedRide[] {
 
 export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
   return (
-    <main className="flex flex-col gap-16">
+    <main className="flex min-h-full flex-col gap-16">
       {datedRideArray.map((dateGroup) => (
         <div key={formatISODate(dateGroup.date)} className="relative">
           {/* Creative Date Header */}

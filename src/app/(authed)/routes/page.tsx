@@ -42,10 +42,10 @@ export default async function RoutesPage() {
               <TableHead className="h-12 px-4 text-left align-middle font-medium">Name</TableHead>
               <TableHead className="h-12 px-4 text-right align-middle font-medium">Rides</TableHead>
               <TableHead className="h-12 px-4 text-right align-middle font-medium">
-                Avg Distance (km)
+                Distance (km)
               </TableHead>
               <TableHead className="h-12 px-4 text-right align-middle font-medium">
-                Avg Elevation (m)
+                Elevation (m)
               </TableHead>
               <TableHead className="h-12 px-4 text-left align-middle font-medium">
                 Cafe Stops

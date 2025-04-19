@@ -97,7 +97,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             </div>
 
             <div className="flex flex-col justify-between gap-2">
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
                 <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
                   <CalendarIcon className="h-5 w-5" />
                   <span>{format(ride.date, "EEE, dd MMM yyyy")}</span>
@@ -135,12 +135,78 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </div>
       )}
 
-      <div className="flex w-full flex-row gap-8">
+      <div className="flex w-full flex-col gap-8 md:flex-row">
         {/* Left column - Ride details and actions */}
         <div className="flex basis-1/2 flex-col gap-8">
+          {/* Ride Details */}
           <Card className="overflow-hidden">
             <div className="p-6">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <WindIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
+                    <div className="font-semibold">{ride.speed} kph</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <MapPinIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                    <div className="font-semibold">{ride.distance} km</div>
+                  </div>
+                </div>
+
+                {ride.elevation && (
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <MountainIcon className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                      <div className="font-semibold">{ride.elevation} m</div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <RouteIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                    <div className="font-semibold">
+                      {ride.surface === "gravel" ? "Gravel" : "Road"}
+                    </div>
+                  </div>
+                </div>
+
+                {ride.maxGroupSize && (
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <UsersIcon className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">
+                        Max riders
+                      </div>
+                      <div className="font-semibold">{ride.maxGroupSize}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+
+          {/* Button */}
+          <Card className="overflow-hidden">
+            <div className="p-6">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {(isLeader || isAdmin) && (
                   <Link href={`/manage/${ride.slug}`}>
                     <Button
@@ -213,76 +279,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           </Card>
-
-          {/* Ride Details */}
-          <Card className="overflow-hidden">
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                    <WindIcon className="h-5 w-5 text-pink-500" />
-                  </div>
-                  <div>
-                    <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
-                    <div className="font-semibold">{ride.speed} kph</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                    <MapPinIcon className="h-5 w-5 text-pink-500" />
-                  </div>
-                  <div>
-                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
-                    <div className="font-semibold">{ride.distance} km</div>
-                  </div>
-                </div>
-
-                {ride.elevation && (
-                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                      <MountainIcon className="h-5 w-5 text-pink-500" />
-                    </div>
-                    <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
-                      <div className="font-semibold">{ride.elevation} m</div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                    <RouteIcon className="h-5 w-5 text-pink-500" />
-                  </div>
-                  <div>
-                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
-                    <div className="font-semibold">
-                      {ride.surface === "gravel" ? "Gravel" : "Road"}
-                    </div>
-                  </div>
-                </div>
-
-                {ride.maxGroupSize && (
-                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                      <UsersIcon className="h-5 w-5 text-pink-500" />
-                    </div>
-                    <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">
-                        Max riders
-                      </div>
-                      <div className="font-semibold">{ride.maxGroupSize}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
         </div>
 
         {/* Right column - Map */}
         <div className="basis-1/2">
-          <Card className="relative flex h-full items-center justify-center bg-gray-50">
+          <Card className="relative flex h-[300px] w-full items-center justify-center bg-gray-50 md:h-full">
             {ride.route && (
               <Link
                 href={ride.route}
@@ -307,15 +308,15 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </div>
       </div>
 
-      <div className="flex w-full flex-row gap-8">
+      <div className="flex w-full flex-col gap-8 md:flex-row">
         {/* Riders List */}
-        <Card className="w-min basis-1/2 rounded-2xl p-6 shadow-md">
+        <Card className="w-full basis-1/2 rounded-2xl p-6 shadow-md">
           {riders.length === 0 ? (
             <div className="m-auto flex h-full w-1/2 flex-col justify-center">
               <p>No one on this ride yet :(</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
               {riders.map((rider) => (
                 <div key={rider.id} className="flex items-center gap-3 p-3">
                   <UserAvatar user={unclaimed ? null : ride.leader} />

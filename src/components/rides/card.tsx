@@ -17,7 +17,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
   const href = `/rides/${ride.slug}`;
   return (
     <div className="group">
-      <div className="overflow-hidden rounded-2xl bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+      <div className="border-primary overflow-hidden rounded-2xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
         {/* Content */}
         <div className="relative p-6">
           <div className="mb-4 flex items-center justify-between">

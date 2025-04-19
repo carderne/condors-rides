@@ -12,7 +12,7 @@ export default async function UpcomingRidesPage() {
   const datedRideArray = groupRidesByDate(rides);
 
   return (
-    <main className="flex flex-col gap-16">
+    <main className="flex min-h-full flex-col gap-16">
       {datedRideArray.length === 0 ? (
         <div className="mx-auto mt-20">
           <H3>No upcoming rides! :(</H3>
