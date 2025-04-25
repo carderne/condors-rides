@@ -8,7 +8,7 @@ export default async function OldRides() {
   const rides = await db.query.ride.findMany({
     where: and(isNull(schema.ride.deletedAt), lt(schema.ride.date, new Date())),
     with: { leader: true, members: true },
-    orderBy: [schema.ride.date, schema.ride.time],
+    orderBy: [schema.ride.date, schema.ride.time, schema.ride.slug],
   });
   const datedRideArray = groupRidesByDate(rides);
 

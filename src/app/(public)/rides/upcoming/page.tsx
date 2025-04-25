@@ -13,7 +13,7 @@ export default async function UpcomingRidesPage() {
       lt(schema.ride.date, addDays(new Date(), 10)),
     ),
     with: { leader: true, members: true },
-    orderBy: [schema.ride.date, schema.ride.time],
+    orderBy: [schema.ride.date, schema.ride.time, schema.ride.slug],
   });
   const datedRideArray = groupRidesByDate(rides);
 

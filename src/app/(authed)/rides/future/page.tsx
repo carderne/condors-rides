@@ -9,7 +9,7 @@ export default async function FutureRidesPage() {
   const rides = await db.query.ride.findMany({
     where: and(isNull(schema.ride.deletedAt), gte(schema.ride.date, addDays(new Date(), 10))),
     with: { leader: true, members: true },
-    orderBy: [schema.ride.date, schema.ride.time],
+    orderBy: [schema.ride.date, schema.ride.time, schema.ride.slug],
   });
   const datedRideArray = groupRidesByDate(rides);
 
