@@ -4,6 +4,9 @@ import { decrypt, encrypt } from "@/lib/encryption";
 import { invariant } from "@/lib/invariant";
 import { addHours, isAfter } from "date-fns";
 import { eq } from "drizzle-orm";
+import type { IncomingMessage } from "http";
+import https from "https";
+import { URL } from "url";
 
 const {
   strava: { clientId, clientSecret },
@@ -98,4 +101,21 @@ async function getAccessToken(): Promise<StravaResponse<string>> {
     })
     .where(eq(schema.token.site, "strava"));
   return { success: true, data: newAccessToken };
+}
+
+export async function followStravaShortLink(url: string): Promise<string | undefined> {
+  const parsedUrl = new URL(url);
+  const options = { method: "HEAD", headers: { "User-Agent": "curl/7.79.1" } };
+
+  const response = await new Promise<IncomingMessage>((resolve, reject) => {
+    const req = https.request(parsedUrl, options, (res) => {
+      resolve(res);
+      res.resume(); // Don't read the body for HEAD request
+    });
+    req.on("error", reject);
+    req.end();
+  });
+
+  const location = response.headers.location;
+  return location;
 }
