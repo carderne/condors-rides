@@ -58,9 +58,11 @@ export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
           </div>
 
           {/* Rides Grid */}
-          <div className="flex flex-col flex-wrap gap-8 md:flex-row">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {dateGroup.rides.map((ride) => (
-              <RideCard key={ride.id} ride={ride} />
+              <div key={ride.id} className="h-full">
+                <RideCard ride={ride} />
+              </div>
             ))}
           </div>
         </div>

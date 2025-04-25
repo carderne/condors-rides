@@ -16,8 +16,8 @@ export type RideHydrated = Ride & { leader: User; members: RideMember[] };
 export function RideCard({ ride }: { ride: RideHydrated }) {
   const href = `/rides/${ride.slug}`;
   return (
-    <div className="group">
-      <div className="border-primary overflow-hidden rounded-2xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+    <div className="group h-full">
+      <div className="border-primary h-full overflow-hidden rounded-2xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
         {/* Content */}
         <div className="relative p-6">
           <div className="mb-4 flex items-center justify-between">
@@ -35,7 +35,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
           </div>
           {/* Title and Leader */}
           <Link href={href}>
-            <div className="mb-6">
+            <div className="mb-2">
               <h2 className="mb-2 text-2xl font-bold text-gray-800 transition-colors group-hover:text-pink-600">
                 {ride.name}
               </h2>
@@ -49,7 +49,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
           </Link>
 
           {/* Stats */}
-          <div className="mb-8 grid grid-cols-2 gap-4">
+          <div className="mb-2 grid grid-cols-2 gap-2">
             <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
                 <WindIcon className="h-5 w-5 text-pink-500" />
