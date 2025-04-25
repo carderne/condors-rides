@@ -248,6 +248,16 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     Duplicate
                   </Button>
                 </Link>
+                {!isLeader && isAdmin && !unclaimed && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                    onClick={unclaimRideAction.bind(null, ride.id)}
+                  >
+                    <HandHelpingIcon className="h-4 w-4" />
+                    Remove leader
+                  </Button>
+                )}
                 {isLeader ? (
                   <Button
                     variant="outline"

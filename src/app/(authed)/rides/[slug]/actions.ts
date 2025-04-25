@@ -25,10 +25,10 @@ export async function leaveRideAction(rideId: string) {
 
 export async function unclaimRideAction(rideId: string) {
   const user = await getMembership();
-  await db
-    .update(schema.ride)
-    .set({ unclaimed: true })
-    .where(and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id)));
+  const where = checkIsAdmin(user)
+    ? eq(schema.ride.id, rideId)
+    : and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id));
+  await db.update(schema.ride).set({ unclaimed: true }).where(where);
   revalidatePath("/rides");
 }
 
