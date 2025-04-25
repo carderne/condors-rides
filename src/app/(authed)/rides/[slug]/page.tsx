@@ -169,7 +169,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                       <MountainIcon className="h-5 w-5 text-pink-500" />
                     </div>
                     <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Elevation</div>
                       <div className="font-semibold">{ride.elevation} m</div>
                     </div>
                   </div>
