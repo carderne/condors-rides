@@ -1,12 +1,10 @@
 "use server";
 
-import { convertRouteToLineString, getRideWithGpsRoute } from "@/clients/ridewithgps";
-import { getStravaRoute } from "@/clients/strava";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
-import polyline from "@mapbox/polyline";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { type State, validator } from "./validate";
@@ -60,31 +58,4 @@ export async function action(
   invariant(ride, "no ride upserted");
 
   redirect(`/rides/${ride.slug}`);
-}
-
-async function getGeojson(route: string | undefined): Promise<GeoJSON.LineString | null> {
-  if (!route) {
-    return null;
-  }
-  if (route.includes("strava.com")) {
-    const routeId = route.split("/").at(-1);
-    invariant(routeId);
-    const stravaResponse = await getStravaRoute(routeId);
-    if (!stravaResponse.success) {
-      return null;
-    }
-    const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
-    return geojson;
-  }
-  if (route.includes("ridewithgps.com")) {
-    const routeId = route.split("/").at(-1);
-    invariant(routeId);
-    const response = await getRideWithGpsRoute(routeId);
-    if (!response.success) {
-      return null;
-    }
-    const geojson = convertRouteToLineString(response.data);
-    return geojson;
-  }
-  return null;
 }
