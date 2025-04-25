@@ -1,3 +1,6 @@
+# custom
+*.http
+
 # dependencies
 /node_modules
 /.pnp
