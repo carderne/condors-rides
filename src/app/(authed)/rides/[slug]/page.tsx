@@ -12,6 +12,7 @@ import {
   BikeIcon,
   CalendarIcon,
   ClockIcon,
+  CoffeeIcon,
   CopyIcon,
   EditIcon,
   ExternalLinkIcon,
@@ -179,12 +180,32 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <RouteIcon className="h-5 w-5 text-pink-500" />
                   </div>
                   <div>
-                    <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Surface</div>
                     <div className="font-semibold">
                       {ride.surface === "gravel" ? "Gravel" : "Road"}
                     </div>
                   </div>
                 </div>
+
+                {ride.cafeStop && (
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <CoffeeIcon className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Cafe Stop</div>
+                      <div className="text-primary font-semibold">
+                        <Link
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.cafeStop)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {ride.cafeStop}
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {ride.maxGroupSize && (
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
