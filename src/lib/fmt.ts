@@ -39,3 +39,15 @@ export function capitalize(text: string): string {
     .join(" ");
   return res;
 }
+
+export function formatStartPoint(text: string): string {
+  if (text === "Beeline Bicycles") {
+    return "Beeline";
+  }
+
+  if (text.match(/-?\d+\.\d+,\s*-?\d+\.\d+/)) {
+    return "Click to see";
+  }
+
+  return text;
+}

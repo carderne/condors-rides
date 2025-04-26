@@ -1,9 +1,11 @@
 import type { Ride, RideMember, User } from "@/db/zod";
+import { formatStartPoint } from "@/lib/fmt";
 import { cn } from "@/lib/utils";
 import {
   ArrowRightIcon,
   ClockIcon,
   ExternalLinkIcon,
+  LandPlotIcon,
   MapPinIcon,
   MountainIcon,
   UsersIcon,
@@ -49,9 +51,7 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
           </Link>
 
           {/* Stats */}
-          <Link href={href}>
-            <RideStats ride={ride} />
-          </Link>
+          <RideStats ride={ride} />
         </div>
 
         {/* Action Buttons */}
@@ -114,6 +114,24 @@ function RideStats({ ride }: { ride: RideHydrated }) {
         <div>
           <div className="text-xs tracking-wide text-gray-500 uppercase">Riders</div>
           <div className="font-semibold">{ride.members.length}</div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+          <LandPlotIcon className="h-5 w-5 text-pink-500" />
+        </div>
+        <div>
+          <div className="text-xs tracking-wide text-gray-500 uppercase">Start</div>
+          <div className="text-primary text-sm font-semibold">
+            <Link
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.startPoint)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {formatStartPoint(ride.startPoint)}
+            </Link>
+          </div>
         </div>
       </div>
 

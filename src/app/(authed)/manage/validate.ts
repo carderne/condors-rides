@@ -13,6 +13,7 @@ const schema = zfd.formData({
   route: zfd.text(z.string().optional()),
   maxGroupSize: zfd.numeric(z.number().optional()),
   cafeStop: zfd.text(z.string().optional()),
+  startPoint: zfd.text(),
   notes: zfd.text(z.string().optional()),
   surface: z.enum(rideSurfaceArray),
 });

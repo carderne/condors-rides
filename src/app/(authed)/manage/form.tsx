@@ -27,6 +27,9 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
 
   return (
     <Form className="flex flex-col gap-4" action={formAction}>
+      <div>
+        <span className="text-red-500">*</span> denotes required fields
+      </div>
       <FormInput
         required={true}
         name="name"
@@ -57,6 +60,16 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         label="Time"
         errors={state.errors?.time}
         defaultValue={(state.formData?.get("time") as string) ?? ride?.time ?? "09:00"}
+      />
+      <FormInput
+        required={true}
+        name="startPoint"
+        label="Start"
+        labelSuffix="can be lat/lon coords"
+        errors={state.errors?.startPoint}
+        defaultValue={
+          (state.formData?.get("startPoint") as string) ?? ride?.startPoint ?? "Beeline Bicycles"
+        }
       />
       <FormInput
         required={true}

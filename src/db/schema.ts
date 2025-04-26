@@ -146,6 +146,7 @@ export const ride = pgTable(
 
     maxGroupSize: integer("max_group_size"),
     cafeStop: text("cafe_stop"),
+    startPoint: text("start_point").notNull().default("Beeline Bicycles"),
 
     geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
 

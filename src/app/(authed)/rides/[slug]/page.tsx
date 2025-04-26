@@ -5,6 +5,7 @@ import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
+import { formatStartPoint } from "@/lib/fmt";
 import { checkIsAdmin } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -18,6 +19,7 @@ import {
   EditIcon,
   ExternalLinkIcon,
   HandHelpingIcon,
+  LandPlotIcon,
   MapPinIcon,
   MountainIcon,
   RecycleIcon,
@@ -191,6 +193,24 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <div className="text-xs tracking-wide text-gray-500 uppercase">Surface</div>
                     <div className="font-semibold">
                       {ride.surface === "gravel" ? "Gravel" : "Road"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <LandPlotIcon className="h-5 w-5 text-pink-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">Start point</div>
+                    <div className="text-primary font-semibold">
+                      <Link
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.startPoint)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {formatStartPoint(ride.startPoint)}
+                      </Link>
                     </div>
                   </div>
                 </div>

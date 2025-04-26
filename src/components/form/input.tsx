@@ -18,7 +18,10 @@ export function FormInput({ label, labelSuffix, errors, ...props }: FormInputPro
           htmlFor={props.name}
           className="mb-0 flex flex-row items-center gap-2 text-xl md:w-32 md:flex-col md:gap-0"
         >
-          <span>{label}</span>
+          <span>
+            {label}
+            {props.required && <sup className="text-xs text-red-500">*</sup>}
+          </span>
           <span className="!text-sm italic">{labelSuffix}</span>
         </Label>
         <Input
