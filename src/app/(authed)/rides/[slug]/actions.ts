@@ -53,6 +53,15 @@ export async function cancelRideAction(rideId: string) {
   revalidatePath("/rides");
 }
 
+export async function unCancelRideAction(rideId: string) {
+  const user = await getMembership();
+  const where = checkIsAdmin(user)
+    ? eq(schema.ride.id, rideId)
+    : and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id));
+  await db.update(schema.ride).set({ canceledAt: null }).where(where);
+  revalidatePath("/rides");
+}
+
 export async function deleteRideAction(rideId: string) {
   await getAdmin();
   await db.update(schema.ride).set({ deletedAt: new Date() }).where(eq(schema.ride.id, rideId));

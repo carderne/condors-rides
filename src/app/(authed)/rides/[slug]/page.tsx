@@ -6,6 +6,7 @@ import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { checkIsAdmin } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import {
@@ -19,6 +20,7 @@ import {
   HandHelpingIcon,
   MapPinIcon,
   MountainIcon,
+  RecycleIcon,
   RouteIcon,
   Trash2Icon,
   UsersIcon,
@@ -33,6 +35,7 @@ import {
   deleteRideAction,
   joinRideAction,
   leaveRideAction,
+  unCancelRideAction,
   unclaimRideAction,
 } from "./actions";
 import { NewCommentForm } from "./comment/form";
@@ -67,6 +70,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const isLeader = !unclaimed && ride.userId === user.id;
   const hasJoined = ride.members.some((member) => member.userId === user.id);
   const isAdmin = checkIsAdmin(user);
+  const isCanceled = !!ride.canceledAt;
 
   const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
 
@@ -77,7 +81,10 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         <div className="relative bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold">{ride.name}</h1>
+              <h1 className="text-3xl font-bold">
+                <span className={cn(isCanceled ? "line-through" : "")}>{ride.name}</span>
+                {isCanceled && <span className="ml-2">CANCELLED</span>}
+              </h1>
               <div className="flex items-center gap-3">
                 <UserAvatar user={unclaimed ? null : ride.leader} />
                 <div className="flex flex-col">
@@ -112,7 +119,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               {hasJoined ? (
                 <Button
                   className="w-full bg-red-100 bg-white py-6 text-lg text-black hover:bg-red-200"
-                  disabled={isLeader}
+                  disabled={isLeader || isCanceled}
                   onClick={leaveRideAction.bind(null, ride.id)}
                 >
                   Leave this ride
@@ -120,7 +127,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               ) : (
                 <Button
                   className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
-                  disabled={isLeader}
+                  disabled={isLeader || isCanceled}
                   onClick={joinRideAction.bind(null, ride.id)}
                 >
                   Join this ride
@@ -278,21 +285,31 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     Lead
                   </Button>
                 ) : null}
-                {(isLeader || isAdmin) && (
-                  <Confirmation
-                    title="Cancel?"
-                    description="Are you sure you want to cancel this ride?"
-                    action={cancelRideAction.bind(null, ride.id)}
-                  >
+                {(isLeader || isAdmin) &&
+                  (ride.canceledAt ? (
                     <Button
                       variant="outline"
                       className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
+                      onClick={unCancelRideAction.bind(null, ride.id)}
                     >
-                      <XIcon className="h-4 w-4" />
-                      Cancel
+                      <RecycleIcon className="h-4 w-4" />
+                      Un-cancel
                     </Button>
-                  </Confirmation>
-                )}
+                  ) : (
+                    <Confirmation
+                      title="Cancel?"
+                      description="Are you sure you want to cancel this ride?"
+                      action={cancelRideAction.bind(null, ride.id)}
+                    >
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
+                      >
+                        <XIcon className="h-4 w-4" />
+                        Cancel
+                      </Button>
+                    </Confirmation>
+                  ))}
                 {isAdmin && (
                   <Confirmation
                     title="Delete?"
