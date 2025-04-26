@@ -5,7 +5,7 @@ import { zfd } from "zod-form-data";
 
 const schema = zfd.formData({
   name: zfd.text(),
-  date: zfd.text(z.coerce.date()),
+  date: zfd.text(z.coerce.date().min(new Date(), { message: "Can't create events in the past!" })),
   time: zfd.text(),
   speed: zfd.text(),
   distance: zfd.numeric(z.number().int()),

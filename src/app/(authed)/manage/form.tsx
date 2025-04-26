@@ -21,6 +21,10 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
     },
     { errors: {} },
   );
+
+  const formErrorMsg =
+    state.errors && Object.keys(state.errors).length > 0 ? ["Scroll up to see errors"] : [];
+
   return (
     <Form className="flex flex-col gap-4" action={formAction}>
       <FormInput
@@ -127,6 +131,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
           <SelectItem value="gravel">Gravel</SelectItem>
         </SelectContent>
       </Select>
+      <div className="text-xl text-red-600 md:ml-auto">{formErrorMsg}</div>
       <FormSubmit className="w-full">{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>
   );
