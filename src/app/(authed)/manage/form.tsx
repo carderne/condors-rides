@@ -63,6 +63,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         type="text"
         name="speed"
         label="Speed"
+        labelSuffix="kph on the flat"
         placeholder="28"
         errors={state.errors?.speed}
         defaultValue={(state.formData?.get("speed") as string) ?? ride?.speed ?? ""}
@@ -72,6 +73,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         type="number"
         name="distance"
         label="Distance"
+        labelSuffix="km"
         placeholder="90"
         errors={state.errors?.distance}
         defaultValue={(state.formData?.get("distance") as string) ?? ride?.distance ?? ""}
@@ -81,6 +83,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         type="number"
         name="elevation"
         label="Elevation"
+        labelSuffix="m"
         placeholder="450"
         errors={state.errors?.elevation}
         defaultValue={(state.formData?.get("elevation") as string) ?? ride?.elevation ?? ""}
