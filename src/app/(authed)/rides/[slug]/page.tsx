@@ -7,7 +7,7 @@ import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { checkIsAdmin } from "@/lib/permissions";
 import { format } from "date-fns";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import {
   BikeIcon,
   CalendarIcon,
@@ -53,6 +53,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       comments: {
         where: isNull(schema.comment.deletedAt),
         with: { user: true, reactions: true },
+        orderBy: [desc(schema.comment.createdAt), desc(schema.comment.id)],
       },
       members: { with: { user: true } },
     },
