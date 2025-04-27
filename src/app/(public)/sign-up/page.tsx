@@ -1,5 +1,6 @@
 import { SignInFacebook } from "@/components/auth/facebook";
 import { SignInGoogle } from "@/components/auth/google";
+import { SignInStrava } from "@/components/auth/strava";
 import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/config";
@@ -42,6 +43,7 @@ export default async function SignIn({
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
         <SignInGoogle redirectUrl={redirectUrl} />
         <SignInFacebook redirectUrl={redirectUrl} />
+        <SignInStrava redirectUrl={redirectUrl} />
       </div>
       <div className="flex items-center justify-center gap-2 text-center">
         Already have an account?

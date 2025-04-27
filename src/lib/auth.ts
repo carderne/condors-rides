@@ -43,6 +43,19 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    // genericOAuth({
+    //   config: [
+    //     {
+    //       providerId: "strava",
+    //       clientId: config.strava.clientId,
+    //       clientSecret: config.strava.clientSecret,
+    //       authorizationUrl: "https://www.strava.com/oauth/authorize",
+    //       tokenUrl: "https://www.strava.com/oauth/token",
+    //       accessType: "authorization",
+    //       scopes: ["read,activity:read"],
+    //     },
+    //   ],
+    // }),
     nextCookies(), // make sure this is the last plugin in the array
   ],
   advanced: {

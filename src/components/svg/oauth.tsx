@@ -60,3 +60,27 @@ export const FacebookLogo = () => (
     </g>
   </svg>
 );
+
+export const StravaLogo = () => (
+  <svg
+    height="512px"
+    // style={{ enableBackground: "new 0 0 512 512" }}
+    version="1.1"
+    viewBox="0 0 512 512"
+    width="512px"
+  >
+    <g id="_x33_23-strava">
+      <g>
+        <polygon
+          points="226.172,26.001 90.149,288.345 170.29,288.345 226.172,184.036 281.605,288.345     361.116,288.345   "
+          style={{ fill: "#FF5500" }}
+        />
+        <polygon
+          points="361.116,288.345 321.675,367.586 281.605,288.345 220.871,288.345 321.675,485.999     421.851,288.345   "
+          style={{ fill: "#FFAF8A" }}
+        />
+      </g>
+    </g>
+    <g id="Layer_1" />
+  </svg>
+);
