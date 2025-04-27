@@ -158,7 +158,9 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <WindIcon className="h-5 w-5 text-pink-500" />
                   </div>
                   <div>
-                    <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
+                    <div className="text-xs tracking-wide text-gray-500 uppercase">
+                      Speed on the flat
+                    </div>
                     <div className="font-semibold">{ride.speed} kph</div>
                   </div>
                 </div>
