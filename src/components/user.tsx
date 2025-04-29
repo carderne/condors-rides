@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "@/db/zod";
+import { cn } from "@/lib/utils";
 
 function getInitials(user: User | null) {
   if (!user) {
@@ -11,9 +12,9 @@ function getInitials(user: User | null) {
   return res;
 }
 
-export function UserAvatar({ user }: { user: User | null }) {
+export function UserAvatar({ user, className }: { user: User | null; className?: string }) {
   return (
-    <Avatar className="size-12 rounded-full border-2 border-pink-200">
+    <Avatar className={cn("size-12 rounded-full border-2 border-pink-200", className)}>
       <AvatarImage src={user?.image ?? undefined} alt="user avatar" />
       <AvatarFallback className="text-md text-primary bg-white font-bold">
         {getInitials(user)}

@@ -1,9 +1,8 @@
 import { RideCard, type RideHydrated } from "@/components/rides/card";
 import { formatISODate } from "@/lib/fmt";
 import { format, getDate } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 
-interface DatedRide {
+export interface DatedRide {
   date: Date;
   rides: RideHydrated[];
 }
@@ -29,17 +28,17 @@ export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
   return (
     <main className="flex min-h-full flex-col gap-16">
       {datedRideArray.map((dateGroup) => (
-        <div key={formatISODate(dateGroup.date)} className="relative">
+        <div key={formatISODate(dateGroup.date)} className="relative flex flex-col gap-4">
           {/* Creative Date Header */}
-          <div className="relative mb-6">
+          <div className="relative">
             {/* Decorative line */}
             <div className="absolute top-1/2 left-0 h-0.5 w-full bg-gradient-to-r from-transparent via-pink-200 to-transparent"></div>
 
             {/* Date pill */}
-            <div className="relative mx-auto flex w-fit overflow-hidden rounded-2xl border-2 border-pink-200 bg-white shadow-xl">
+            <div className="relative mx-auto flex w-fit overflow-hidden rounded-xl border-2 border-pink-200 bg-white shadow-xl">
               {/* Left date box */}
-              <div className="flex min-w-[90px] flex-col items-center justify-center bg-gradient-to-br from-pink-500 to-pink-600 p-4 text-white">
-                <span className="text-3xl font-bold">{getDate(dateGroup.date)}</span>
+              <div className="flex min-w-[90px] flex-col items-center justify-center bg-gradient-to-br from-pink-500 to-pink-600 p-2 text-white">
+                <span className="text-xl font-bold">{getDate(dateGroup.date)}</span>
                 <span className="text-xs tracking-wider uppercase">
                   {format(dateGroup.date, "MMM")}
                 </span>
@@ -48,7 +47,6 @@ export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
               {/* Right weekday box */}
               <div className="flex items-center px-6">
                 <div className="flex items-center gap-3">
-                  <CalendarIcon className="h-5 w-5 text-pink-500" />
                   <span className="text-lg font-semibold text-gray-800">
                     {format(dateGroup.date, "EEEE")}
                   </span>

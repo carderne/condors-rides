@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 export function RidesTabSwitcher() {
   const pathname = usePathname();
   return (
-    <div className="flex justify-center">
-      <div className="flex gap-2 overflow-hidden rounded-2xl border-2 border-pink-200 bg-white p-1.5 shadow-lg">
+    <div className="-mt-4 flex justify-center">
+      <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg">
         <Link
           href="/rides/old"
           className={`rounded-xl px-6 py-3 font-medium transition-all ${

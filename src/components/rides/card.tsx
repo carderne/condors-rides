@@ -20,61 +20,61 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
   const href = `/rides/${ride.slug}`;
   return (
     <div className="group h-full">
-      <div className="border-primary relative flex h-full flex-col justify-between gap-2 overflow-hidden rounded-2xl border-2 bg-stone-50 p-6 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
-        <div className="flex flex-col gap-2">
-          {/* Time and gravel */}
-          <div className="flex items-center justify-between">
-            {/* Time Pill */}
-            <div className="rounded-full border-2 border-pink-200 bg-white px-4 py-1 shadow-lg">
-              <div className="flex items-center gap-2">
-                <ClockIcon className="h-3 w-3 text-pink-500" />
-                <span className="font-bold text-gray-700">{ride.time.slice(0, 5)}</span>
-              </div>
-            </div>
-            {/* Surface Badge */}
-            {ride.surface === "gravel" && (
-              <div className="text-xl font-bold text-amber-800 italic">Gravel</div>
-            )}
+      <div className="border-primary flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+        {/* Time and gravel */}
+        <div className="flex justify-between">
+          <div className="flex items-center gap-2 rounded-br-xl border-r-2 border-b-2 border-pink-200 bg-white p-2">
+            <ClockIcon className="h-3 w-3 text-pink-500" />
+            <span className="font-bold text-gray-700">{ride.time.slice(0, 5)}</span>
           </div>
-          {/* Title and Leader */}
-          <Link href={href} className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold text-gray-800 transition-colors group-hover:text-pink-600">
-              <span className={cn(ride.canceledAt ? "line-through" : "")}>{ride.name}</span>
-              {ride.canceledAt && <span className="ml-2">CANCELLED</span>}
-            </h2>
-            <div className="flex items-center gap-3">
-              <UserAvatar user={ride.unclaimed ? null : ride.leader} />
-              <span className="text-gray-600">
-                {ride.unclaimed ? "No leader!" : ride.leader.name}
-              </span>
-            </div>
-          </Link>
-
-          {/* Stats */}
-          <RideStats ride={ride} />
+          {ride.surface === "gravel" && (
+            <div className="p-2 text-xl font-bold text-amber-800 italic">Gravel</div>
+          )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-6 flex gap-4">
-          <Link
-            href={href}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg"
-          >
-            View details
-            <ArrowRightIcon className="h-4 w-4" />
-          </Link>
-
-          {ride.route && (
-            <Link
-              href={ride.route}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
-            >
-              View route
-              <ExternalLinkIcon className="h-4 w-4" />
+        {/* Everything else */}
+        <div className="flex h-full flex-col justify-between gap-4 p-4 pt-0">
+          <div className="flex flex-col gap-4">
+            {/* Title and Leader */}
+            <Link href={href} className="flex flex-col gap-2">
+              <h2 className="text-2xl font-bold text-gray-800 transition-colors group-hover:text-pink-600">
+                <span className={cn(ride.canceledAt ? "line-through" : "")}>{ride.name}</span>
+                {ride.canceledAt && <span className="ml-2">CANCELLED</span>}
+              </h2>
+              <div className="flex items-center gap-3">
+                <UserAvatar user={ride.unclaimed ? null : ride.leader} className="size-10" />
+                <span className="text-gray-600">
+                  {ride.unclaimed ? "No leader!" : ride.leader.name}
+                </span>
+              </div>
             </Link>
-          )}
+
+            {/* Stats */}
+            <RideStats ride={ride} />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <Link
+              href={href}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg"
+            >
+              View details
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+
+            {ride.route && (
+              <Link
+                href={ride.route}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
+              >
+                View route
+                <ExternalLinkIcon className="h-4 w-4" />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -86,8 +86,8 @@ function RideStats({ ride }: { ride: RideHydrated }) {
     return null;
   }
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+    <div className="grid grid-cols-2 gap-4">
+      <div className="flex items-center gap-3 rounded-xl bg-gray-50">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
           <WindIcon className="h-5 w-5 text-pink-500" />
         </div>
@@ -97,7 +97,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+      <div className="flex items-center gap-3 rounded-xl bg-gray-50">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
           <MapPinIcon className="h-5 w-5 text-pink-500" />
         </div>
@@ -107,7 +107,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+      <div className="flex items-center gap-3 rounded-xl bg-gray-50">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
           <UsersIcon className="h-5 w-5 text-pink-500" />
         </div>
@@ -117,7 +117,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+      <div className="flex items-center gap-3 rounded-xl bg-gray-50">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
           <LandPlotIcon className="h-5 w-5 text-pink-500" />
         </div>
@@ -136,7 +136,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
       </div>
 
       {ride.elevation && (
-        <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+        <div className="flex items-center gap-3 rounded-xl bg-gray-50">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
             <MountainIcon className="h-5 w-5 text-pink-500" />
           </div>
