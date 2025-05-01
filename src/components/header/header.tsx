@@ -36,6 +36,7 @@ export function HeaderBar({ user }: { user: User | null }) {
     { name: "Rides", href: "/rides" },
     { name: "Routes", href: "/routes" },
     { name: "Settings", href: "/settings" },
+    { name: "About", href: "/about" },
     ...(isAdmin ? [{ name: "Admin", href: "/admin" }] : []),
   ];
 

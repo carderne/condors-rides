@@ -18,12 +18,10 @@ export default async function SettingsPage() {
       <div>Name: {user.name}</div>
       <div>Email: {user.email}</div>
       <div>Rides led: {userHydrated.rides.length}</div>
-      <p className="mt-10">
-        To delete all your data, please contact the club at{" "}
-        <Link href="mailto:info@cowleyroadcondors.cc" className="text-primary">
-          info@cowleyroadcondors.cc
-        </Link>
-      </p>
+      <p className="mt-10">To delete all your data, please contact the club:</p>
+      <Link className="text-primary text-xl" href="https://cowleyroadcondors.cc/contact-us/">
+        Contact us
+      </Link>
     </div>
   );
 }
