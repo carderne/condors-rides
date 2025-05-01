@@ -2,14 +2,22 @@ import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function SettingsPage() {
   const user = await getMembership();
   const userHydrated = await db.query.user.findFirst({
     where: eq(schema.user.id, user.id),
-    with: { rides: true },
+    with: {
+      rides: {
+        where: and(
+          isNull(schema.ride.canceledAt),
+          isNull(schema.ride.deletedAt),
+          eq(schema.ride.unclaimed, false),
+        ),
+      },
+    },
   });
   invariant(userHydrated);
   return (

@@ -9,13 +9,21 @@ import {
 } from "@/components/ui/table";
 import { getAdmin } from "@/dal/membership";
 import { db, schema } from "@/db";
-import { asc } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { banUserAction, unbanUserAction } from "./actions";
 
 export default async function AdminPage() {
   await getAdmin();
   const users = await db.query.user.findMany({
-    with: { rides: true },
+    with: {
+      rides: {
+        where: and(
+          isNull(schema.ride.canceledAt),
+          isNull(schema.ride.deletedAt),
+          eq(schema.ride.unclaimed, false),
+        ),
+      },
+    },
     orderBy: asc(schema.user.name),
   });
 
