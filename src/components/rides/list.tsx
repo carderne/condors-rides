@@ -1,4 +1,5 @@
 import { RideCard, type RideHydrated } from "@/components/rides/card";
+import type { User } from "@/db/zod";
 import { formatISODate } from "@/lib/fmt";
 import { format, getDate } from "date-fns";
 
@@ -24,7 +25,13 @@ export function groupRidesByDate(rides: RideHydrated[]): DatedRide[] {
   return datedArray;
 }
 
-export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
+export function RideList({
+  datedRideArray,
+  user,
+}: {
+  datedRideArray: DatedRide[];
+  user: User | null;
+}) {
   return (
     <main className="flex min-h-full flex-col gap-16">
       {datedRideArray.map((dateGroup) => (
@@ -59,7 +66,7 @@ export function RideList({ datedRideArray }: { datedRideArray: DatedRide[] }) {
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {dateGroup.rides.map((ride) => (
               <div key={ride.id} className="h-full">
-                <RideCard ride={ride} />
+                <RideCard ride={ride} user={user} />
               </div>
             ))}
           </div>

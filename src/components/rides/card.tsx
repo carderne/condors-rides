@@ -16,7 +16,8 @@ import { UserAvatar } from "../user";
 
 export type RideHydrated = Ride & { leader: User; members: RideMember[] };
 
-export function RideCard({ ride }: { ride: RideHydrated }) {
+export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null }) {
+  const showLeader = !!user;
   const href = `/rides/${ride.slug}`;
   return (
     <div className="group h-full">
@@ -41,12 +42,14 @@ export function RideCard({ ride }: { ride: RideHydrated }) {
                 <span className={cn(ride.canceledAt ? "line-through" : "")}>{ride.name}</span>
                 {ride.canceledAt && <span className="ml-2">CANCELLED</span>}
               </h2>
-              <div className="flex items-center gap-3">
-                <UserAvatar user={ride.unclaimed ? null : ride.leader} className="size-10" />
-                <span className="text-gray-600">
-                  {ride.unclaimed ? "No leader!" : ride.leader.name}
-                </span>
-              </div>
+              {showLeader && (
+                <div className="flex items-center gap-3">
+                  <UserAvatar user={ride.unclaimed ? null : ride.leader} className="size-10" />
+                  <span className="text-gray-600">
+                    {ride.unclaimed ? "No leader!" : ride.leader.name}
+                  </span>
+                </div>
+              )}
             </Link>
 
             {/* Stats */}
