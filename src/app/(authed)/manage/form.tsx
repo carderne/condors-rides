@@ -3,11 +3,14 @@
 import { FormInput } from "@/components/form/input";
 import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import type { Ride } from "@/db/zod";
-import { addDays, format } from "date-fns";
+import { formatISODate } from "@/lib/fmt";
+import { cn } from "@/lib/utils";
+import { addDays, format, getDate } from "date-fns";
 import Form from "next/form";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { action } from "./actions";
 import { type State, validator } from "./validate";
 
@@ -21,9 +24,19 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
     },
     { errors: {} },
   );
+  const [date, setDate] = useState<string>(
+    (state.formData?.get("date") as string) ?? formatISODate(ride?.date ?? addDays(new Date(), 1)),
+  );
 
   const formErrorMsg =
     state.errors && Object.keys(state.errors).length > 0 ? ["Scroll up to see errors"] : [];
+
+  const onClickAutoDate = (d: Date) => {
+    setDate(formatISODate(d));
+  };
+
+  const now = new Date();
+  const nextweek = Array.from({ length: 6 }, (_, i) => addDays(now, i));
 
   return (
     <Form className="flex flex-col gap-4" action={formAction}>
@@ -38,6 +51,21 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         errors={state.errors?.name}
         defaultValue={(state.formData?.get("name") as string) ?? ride?.name ?? ""}
       />
+
+      <div className="grid grid-cols-3 items-center justify-around gap-2 px-2 md:ml-32 md:grid-cols-6">
+        {nextweek.map((d) => (
+          <Button
+            type="button"
+            onClick={() => onClickAutoDate(d)}
+            key={d.toISOString()}
+            className={cn("text-xs", formatISODate(d) === date ? "!bg-primary/40" : "")}
+            variant="outline"
+          >
+            {formatDay(d)}
+          </Button>
+        ))}
+      </div>
+
       <FormInput
         required={true}
         // doesn't show full-width on safari otherwise
@@ -46,10 +74,8 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         name="date"
         label="Date"
         errors={state.errors?.date}
-        defaultValue={
-          (state.formData?.get("date") as string) ??
-          format(ride?.date ?? addDays(new Date(), 1), "yyyy-MM-dd")
-        }
+        value={date}
+        onChange={(e) => setDate(e.target.value)}
       />
       <FormInput
         required={true}
@@ -151,4 +177,16 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
       <FormSubmit className="w-full">{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>
   );
+}
+
+function formatDay(d: Date): string {
+  const now = new Date();
+  const tomorrow = addDays(now, 1);
+  if (getDate(d) === getDate(now)) {
+    return "today";
+  }
+  if (getDate(d) === getDate(tomorrow)) {
+    return "tmrw";
+  }
+  return format(d, "EEE do");
 }
