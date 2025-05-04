@@ -1,15 +1,16 @@
-import { Confirmation } from "@/components/confirmation";
+import { Confirmation, Modal } from "@/components/confirmation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { H3 } from "@/components/ui/typography";
 import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { formatStartPoint } from "@/lib/fmt";
-import { checkIsAdmin } from "@/lib/permissions";
+import { checkIsAdmin, rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import {
   BikeIcon,
   CalendarIcon,
@@ -60,7 +61,10 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         with: { user: true, reactions: true },
         orderBy: [desc(schema.comment.createdAt), desc(schema.comment.id)],
       },
-      members: { with: { user: true } },
+      members: {
+        with: { user: true },
+        orderBy: [asc(schema.rideMember.createdAt), asc(schema.rideMember.id)],
+      },
     },
   });
 
@@ -73,19 +77,24 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const hasJoined = ride.members.some((member) => member.userId === user.id);
   const isAdmin = checkIsAdmin(user);
   const isCanceled = !!ride.canceledAt;
+  const isFull = rideIsFull(ride);
 
-  const riders = [...ride.members.map((m) => m.user), ...(unclaimed ? [] : [ride.leader])];
+  const riders = [...(unclaimed ? [] : [ride.leader]), ...ride.members.map((m) => m.user)];
 
   return (
     <div className="flex flex-col gap-8">
       {/* Ride Header */}
       <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="relative bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
+        <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold">
+                {isCanceled ? (
+                  <span className="mr-2">(CANCELLED)</span>
+                ) : isFull ? (
+                  <span className="mr-2">(FULL)</span>
+                ) : null}
                 <span className={cn(isCanceled ? "line-through" : "")}>{ride.name}</span>
-                {isCanceled && <span className="ml-2">CANCELLED</span>}
               </h1>
               <div className="flex items-center gap-3">
                 <UserAvatar user={unclaimed ? null : ride.leader} />
@@ -120,12 +129,24 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </div>
               {hasJoined ? (
                 <Button
-                  className="w-full bg-red-100 bg-white py-6 text-lg text-black hover:bg-red-200"
+                  className="w-full bg-gray-600 py-6 text-lg text-white hover:bg-gray-800"
                   disabled={isLeader || isCanceled}
                   onClick={leaveRideAction.bind(null, ride.id)}
                 >
                   Leave this ride
                 </Button>
+              ) : isFull ? (
+                <Modal
+                  title="Ride is full"
+                  description="Write a comment noting your interest and keep an eye on this page. If someone leaves you can snag a spot. Or maybe someone will duplicate this ride and lead a second group? Maybe you?"
+                >
+                  <Button
+                    className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
+                    disabled={isLeader || isCanceled}
+                  >
+                    Ride FULL: what should I do
+                  </Button>
+                </Modal>
               ) : (
                 <Button
                   className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
@@ -387,21 +408,27 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               <p>No one on this ride yet :(</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              {riders.map((rider) => (
-                <div key={rider.id} className="flex items-center gap-3 p-3">
-                  <UserAvatar user={rider} />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-800">{rider.name}</span>
-                    {rider.id === ride.leader.id && (
-                      <span className="flex items-center text-xs text-pink-500">
-                        <BikeIcon className="mr-1 h-3 w-3" />
-                        Leader
-                      </span>
-                    )}
+            <div className="flex flex-col">
+              <H3>
+                Riders {riders.length}/{ride.maxGroupSize}
+              </H3>
+
+              <div className="grid grid-cols-2 gap-4">
+                {riders.map((rider) => (
+                  <div key={rider.id} className="flex items-center gap-3 p-3">
+                    <UserAvatar user={rider} />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-800">{rider.name}</span>
+                      {rider.id === user.id && (
+                        <span className="flex items-center text-xs text-pink-500">
+                          <BikeIcon className="mr-1 h-3 w-3" />
+                          Leader
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </Card>

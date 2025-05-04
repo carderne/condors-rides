@@ -1,5 +1,6 @@
 import type { Ride, RideMember, User } from "@/db/zod";
 import { formatStartPoint } from "@/lib/fmt";
+import { rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
   ArrowRightIcon,
@@ -19,6 +20,9 @@ export type RideHydrated = Ride & { leader: User; members: RideMember[] };
 export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null }) {
   const showLeader = !!user;
   const href = `/rides/${ride.slug}`;
+  const isCanceled = !!ride.canceledAt;
+  const isFull = rideIsFull(ride);
+
   return (
     <div className="group h-full">
       <div className="border-primary flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
@@ -39,8 +43,12 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
             {/* Title and Leader */}
             <Link href={href} className="flex flex-col gap-2">
               <h2 className="text-2xl font-bold text-gray-800 transition-colors group-hover:text-pink-600">
+                {isCanceled ? (
+                  <span className="mr-2">(CANCELLED)</span>
+                ) : isFull ? (
+                  <span className="mr-2">(FULL)</span>
+                ) : null}
                 <span className={cn(ride.canceledAt ? "line-through" : "")}>{ride.name}</span>
-                {ride.canceledAt && <span className="ml-2">CANCELLED</span>}
               </h2>
               {showLeader && (
                 <div className="flex items-center gap-3">
