@@ -140,9 +140,10 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         type="number"
         name="maxGroupSize"
         label="Max riders"
+        labelSuffix="app will enforce!"
         placeholder="8"
         errors={state.errors?.maxGroupSize}
-        defaultValue={(state.formData?.get("maxGroupSize") as string) ?? ride?.maxGroupSize ?? "8"}
+        defaultValue={(state.formData?.get("maxGroupSize") as string) ?? ride?.maxGroupSize}
       />
       <FormInput
         required={false}
