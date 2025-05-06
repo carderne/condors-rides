@@ -6,7 +6,7 @@ import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
-import { formatStartPoint } from "@/lib/fmt";
+import { formatStartPoint, isHref } from "@/lib/fmt";
 import { checkIsAdmin, rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -376,7 +376,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         {/* Right column - Map */}
         <div className="basis-1/2">
           <Card className="relative flex h-[300px] w-full items-center justify-center bg-gray-50 md:h-full">
-            {ride.route && (
+            {ride.route && isHref(ride.route) && (
               <Link
                 href={ride.route}
                 target="_blank"

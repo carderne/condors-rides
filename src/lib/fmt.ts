@@ -51,3 +51,24 @@ export function formatStartPoint(text: string): string {
 
   return text;
 }
+
+export function isHref(text: string): boolean {
+  if (text.startsWith("https://")) {
+    return true;
+  }
+  return false;
+}
+
+export function formatUrl(url: string): string {
+  const trimmedUrl = url.trim();
+  if (trimmedUrl.includes("mailto:")) {
+    return trimmedUrl;
+  }
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+  if (url.startsWith("/")) {
+    return trimmedUrl;
+  }
+  return `https://${trimmedUrl}`;
+}
