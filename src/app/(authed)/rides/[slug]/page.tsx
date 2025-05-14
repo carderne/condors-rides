@@ -410,7 +410,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           ) : (
             <div className="flex flex-col">
               <H3>
-                Riders {riders.length}/{ride.maxGroupSize}
+                Riders {riders.length}
+                {ride.maxGroupSize && `/${ride.maxGroupSize}`}
               </H3>
 
               <div className="grid grid-cols-2 gap-4">
