@@ -1,11 +1,14 @@
 import { rideSurfaceArray } from "@/db/schema";
 import { createValidator, type ActionState } from "@/lib/forms";
+import { addDays } from "date-fns";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 const schema = zfd.formData({
   name: zfd.text(),
-  date: zfd.text(z.coerce.date().min(new Date(), { message: "Can't create events in the past!" })),
+  date: zfd.text(
+    z.coerce.date().min(addDays(new Date(), -1), { message: "Don't create rides in the past!" }),
+  ),
   time: zfd.text(),
   speed: zfd.text(),
   distance: zfd.numeric(z.number().int()),
