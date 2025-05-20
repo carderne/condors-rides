@@ -1,3 +1,4 @@
+import { emitRideView } from "@/clients/posthog";
 import { Confirmation, Modal } from "@/components/confirmation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -71,6 +72,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   if (!ride) {
     notFound();
   }
+  emitRideView({ user, ride });
 
   const { unclaimed } = ride;
   const isLeader = !unclaimed && ride.userId === user.id;

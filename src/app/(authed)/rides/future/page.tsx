@@ -1,3 +1,4 @@
+import { emitPageView } from "@/clients/posthog";
 import { groupRidesByDate } from "@/components/rides/list";
 import { GenericRidesPage } from "@/components/rides/rides-page";
 import { getMembership } from "@/dal/membership";
@@ -7,6 +8,7 @@ import { and, gte, isNull } from "drizzle-orm";
 
 export default async function FutureRidesPage() {
   const user = await getMembership();
+  emitPageView({ user, page: "rides_future" });
   const rides = await db.query.ride.findMany({
     where: and(isNull(schema.ride.deletedAt), gte(schema.ride.date, addDays(new Date(), 10))),
     with: { leader: true, members: true },

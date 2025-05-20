@@ -1,3 +1,4 @@
+import { emitPageView } from "@/clients/posthog";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -7,12 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { count, sql } from "drizzle-orm";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
 export default async function RoutesPage() {
+  const user = await getMembership();
+  emitPageView({ user, page: "routes" });
   const routes = await db
     .select({
       route: sql<string>`${schema.ride.route}`,

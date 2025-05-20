@@ -1,3 +1,4 @@
+import { emitPageView } from "@/clients/posthog";
 import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
@@ -7,6 +8,7 @@ import Link from "next/link";
 
 export default async function SettingsPage() {
   const user = await getMembership();
+  emitPageView({ user, page: "settings" });
   const userHydrated = await db.query.user.findFirst({
     where: eq(schema.user.id, user.id),
     with: {

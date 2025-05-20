@@ -28,6 +28,9 @@ type Config = {
 
   osKey: string;
 
+  posthog: {
+    key: string;
+  };
   strava: {
     clientId: string;
     clientSecret: string;
@@ -54,6 +57,9 @@ function getDefaultConfig() {
 
     osKey: get("OS_KEY"),
 
+    posthog: {
+      key: get("POSTHOG_KEY"),
+    },
     strava: {
       clientId: get("STRAVA_CLIENT_ID"),
       clientSecret: get("STRAVA_CLIENT_SECRET"),
