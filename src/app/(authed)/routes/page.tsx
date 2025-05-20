@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
-import { count, sql } from "drizzle-orm";
+import { and, count, isNull, sql } from "drizzle-orm";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -28,7 +28,7 @@ export default async function RoutesPage() {
       rideSlug: sql<string>`MIN(${schema.ride.slug})`,
     })
     .from(schema.ride)
-    .where(sql`${schema.ride.route} IS NOT NULL`)
+    .where(and(isNull(schema.ride.deletedAt), sql`${schema.ride.route} IS NOT NULL`))
     .groupBy(schema.ride.route);
 
   const routesParsed = routes.map((r) => ({
