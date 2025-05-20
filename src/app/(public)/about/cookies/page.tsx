@@ -5,7 +5,6 @@ export default function CookiePage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-2">
       <H2>Cookie policy</H2>
-      <p>There is no "tracking" or "analytics" or anything of that sort on this site.</p>
       <p>Our website uses a cookie to allow you to sign in and remain signed in.</p>
       <p>
         The cookie is stored on your computer, and is an encrypted sequence of letters and numbers
