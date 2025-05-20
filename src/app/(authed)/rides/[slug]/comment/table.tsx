@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user";
-import { formatRelative } from "date-fns";
+import { formatShortDateTime } from "@/lib/fmt";
 import { ThumbsUpIcon, Trash2Icon } from "lucide-react";
 import { deleteCommentAction, upvoteCommentAction } from "./actions";
 import { useOptimisticContext } from "./optimistic";
@@ -19,7 +19,7 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
               <div>
                 <div className="font-medium text-gray-800">{comment.user.name}</div>
                 <div className="text-xs text-gray-500">
-                  {formatRelative(comment.createdAt, new Date())}
+                  {formatShortDateTime(comment.createdAt)}
                 </div>
               </div>
             </div>

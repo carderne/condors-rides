@@ -1,7 +1,12 @@
-import { format, formatISO } from "date-fns";
+import { format, formatISO, formatRelative } from "date-fns";
+import { enGB } from "date-fns/locale";
 
 export function formatShortDate(date: Date) {
   return format(date, "EEE, d MMM");
+}
+
+export function formatShortDateTime(date: Date) {
+  return format(date, "EEE, d MMM, h:mm a");
 }
 
 export function formatFullDate(date: Date) {
@@ -30,6 +35,26 @@ export function formatTime(time: string | null): string {
 const numberFormatter = new Intl.NumberFormat("en-UK", {});
 export function formatNumber(number: number): string {
   return numberFormatter.format(number);
+}
+
+export function relativeDate(date: Date): string {
+  const formatRelativeLocale = {
+    ...enGB,
+    lastWeek: "'Last' eeee",
+    yesterday: "'Yesterday'",
+    today: "'Today'",
+    tomorrow: "'Tomorrow'",
+    nextWeek: "'Next' eeee",
+    other: "EEE, d MMM",
+  };
+  const res = formatRelative(date, new Date(), {
+    locale: {
+      formatLong: enGB.formatLong,
+      localize: enGB.localize,
+      formatRelative: (token) => formatRelativeLocale[token],
+    },
+  });
+  return res;
 }
 
 export function capitalize(text: string): string {

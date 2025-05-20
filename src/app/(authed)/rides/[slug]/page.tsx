@@ -9,7 +9,7 @@ import { getConfig } from "@/lib/config";
 import { formatStartPoint, isHref } from "@/lib/fmt";
 import { checkIsAdmin, rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import {
   BikeIcon,
@@ -78,6 +78,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const isAdmin = checkIsAdmin(user);
   const isCanceled = !!ride.canceledAt;
   const isFull = rideIsFull(ride);
+  const isPast = ride.date < addDays(new Date(), -1);
 
   const riders = [...(unclaimed ? [] : [ride.leader]), ...ride.members.map((m) => m.user)];
 
@@ -130,7 +131,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               {hasJoined ? (
                 <Button
                   className="w-full bg-gray-600 py-6 text-lg text-white hover:bg-gray-800"
-                  disabled={isLeader || isCanceled}
+                  disabled={isLeader || isCanceled || isPast}
                   onClick={leaveRideAction.bind(null, ride.id)}
                 >
                   Leave this ride
@@ -142,7 +143,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                 >
                   <Button
                     className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
-                    disabled={isLeader || isCanceled}
+                    disabled={isLeader || isCanceled || isPast}
                   >
                     Ride FULL: what should I do
                   </Button>
@@ -150,7 +151,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               ) : (
                 <Button
                   className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
-                  disabled={isLeader || isCanceled}
+                  disabled={isLeader || isCanceled || isPast}
                   onClick={joinRideAction.bind(null, ride.id)}
                 >
                   Join this ride
@@ -283,6 +284,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   <Link href={`/manage/${ride.slug}`}>
                     <Button
                       variant="outline"
+                      disabled={isPast}
                       className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-blue-600"
                     >
                       <EditIcon className="h-4 w-4" />
@@ -312,6 +314,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                 {isLeader ? (
                   <Button
                     variant="outline"
+                    disabled={isPast}
                     className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
                     onClick={unclaimRideAction.bind(null, ride.id)}
                   >
@@ -320,6 +323,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   </Button>
                 ) : unclaimed ? (
                   <Button
+                    disabled={isPast}
                     variant="outline"
                     className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
                     onClick={claimRideAction.bind(null, ride.id)}
@@ -332,6 +336,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   (ride.canceledAt ? (
                     <Button
                       variant="outline"
+                      disabled={isPast}
                       className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
                       onClick={unCancelRideAction.bind(null, ride.id)}
                     >
@@ -420,7 +425,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <UserAvatar user={rider} />
                     <div className="flex flex-col">
                       <span className="font-medium text-gray-800">{rider.name}</span>
-                      {rider.id === user.id && (
+                      {rider.id === ride.leader.id && (
                         <span className="flex items-center text-xs text-pink-500">
                           <BikeIcon className="mr-1 h-3 w-3" />
                           Leader
