@@ -93,6 +93,7 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
 }
 
 function RideStats({ ride }: { ride: RideHydrated }) {
+  const numRiders = ride.members.length + (ride.unclaimed ? 0 : 1);
   if (ride.canceledAt) {
     return null;
   }
@@ -124,7 +125,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
         </div>
         <div>
           <div className="text-xs tracking-wide text-gray-500 uppercase">Riders</div>
-          <div className="font-semibold">{ride.members.length}</div>
+          <div className="font-semibold">{numRiders}</div>
         </div>
       </div>
 
