@@ -41,11 +41,13 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
                     <span>{comment.reactions.length}</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="flex flex-col gap-1">
-                  {comment.reactions.map((r) => (
-                    <p>{r.user.name}</p>
-                  ))}
-                </TooltipContent>
+                {comment.reactions.length > 0 && (
+                  <TooltipContent className="flex flex-col gap-1">
+                    {comment.reactions.map((r) => (
+                      <p key={r.id}>{r.user.name}</p>
+                    ))}
+                  </TooltipContent>
+                )}
               </Tooltip>
 
               {(comment.userId == userId || isAdmin) && (
