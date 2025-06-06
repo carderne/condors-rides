@@ -1,3 +1,3 @@
-import type { Comment, CommentReaction, User } from "@/db/zod";
+import type { Comment, CommentReactionHydrated, User } from "@/db/zod";
 
-export type CommentHydrated = Comment & { user: User; reactions: CommentReaction[] };
+export type CommentHydrated = Comment & { user: User; reactions: CommentReactionHydrated[] };

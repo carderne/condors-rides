@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { UserAvatar } from "@/components/user";
 import { formatShortDateTime } from "@/lib/fmt";
 import { cn } from "@/lib/utils";
@@ -25,18 +26,28 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  "h-8 px-2 text-gray-500 hover:text-pink-600",
-                  comment.reactions.some((r) => r.userId === userId) && "text-pink-600",
-                )}
-                onClick={toggleUpvoteCommentAction.bind(null, comment.id)}
-              >
-                <ThumbsUpIcon className="mr-1 h-4 w-4" />
-                <span>{comment.reactions.length}</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "h-8 px-2 text-gray-500 hover:text-pink-600",
+                      comment.reactions.some((r) => r.userId === userId) && "text-pink-600",
+                    )}
+                    onClick={toggleUpvoteCommentAction.bind(null, comment.id)}
+                  >
+                    <ThumbsUpIcon className="mr-1 h-4 w-4" />
+                    <span>{comment.reactions.length}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="flex flex-col gap-1">
+                  {comment.reactions.map((r) => (
+                    <p>{r.user.name}</p>
+                  ))}
+                </TooltipContent>
+              </Tooltip>
+
               {(comment.userId == userId || isAdmin) && (
                 <Button
                   variant="ghost"

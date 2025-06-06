@@ -59,7 +59,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       leader: true,
       comments: {
         where: isNull(schema.comment.deletedAt),
-        with: { user: true, reactions: true },
+        with: { user: true, reactions: { with: { user: true } } },
         orderBy: [desc(schema.comment.createdAt), desc(schema.comment.id)],
       },
       members: {
