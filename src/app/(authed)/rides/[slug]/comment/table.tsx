@@ -3,8 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/user";
 import { formatShortDateTime } from "@/lib/fmt";
+import { cn } from "@/lib/utils";
 import { ThumbsUpIcon, Trash2Icon } from "lucide-react";
-import { deleteCommentAction, upvoteCommentAction } from "./actions";
+import { deleteCommentAction, toggleUpvoteCommentAction } from "./actions";
 import { useOptimisticContext } from "./optimistic";
 
 export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
@@ -27,8 +28,11 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-gray-500 hover:text-pink-600"
-                onClick={upvoteCommentAction.bind(null, comment.id)}
+                className={cn(
+                  "h-8 px-2 text-gray-500 hover:text-pink-600",
+                  comment.reactions.some((r) => r.userId === userId) && "text-pink-600",
+                )}
+                onClick={toggleUpvoteCommentAction.bind(null, comment.id)}
               >
                 <ThumbsUpIcon className="mr-1 h-4 w-4" />
                 <span>{comment.reactions.length}</span>

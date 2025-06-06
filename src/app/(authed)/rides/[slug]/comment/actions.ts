@@ -32,16 +32,28 @@ export async function deleteCommentAction(commentId: string) {
   revalidatePath("/rides");
 }
 
-export async function upvoteCommentAction(commentId: string) {
+export async function toggleUpvoteCommentAction(commentId: string) {
   const user = await getMembership();
   const { id: userId } = user;
 
-  await db
-    .insert(schema.commentReaction)
-    .values({
-      userId,
-      commentId,
-    })
-    .onConflictDoNothing();
+  const where = and(
+    eq(schema.commentReaction.userId, userId),
+    eq(schema.commentReaction.commentId, commentId),
+  );
+
+  await db.transaction(async (tx) => {
+    const existingComment = await tx.query.commentReaction.findFirst({ where });
+    if (existingComment) {
+      await tx.delete(schema.commentReaction).where(where);
+    } else {
+      await tx
+        .insert(schema.commentReaction)
+        .values({
+          userId,
+          commentId,
+        })
+        .onConflictDoNothing();
+    }
+  });
   revalidatePath("/rides");
 }
