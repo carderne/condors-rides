@@ -3,6 +3,7 @@
 import { FormInput } from "@/components/form/input";
 import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
+import { FormTextarea } from "@/components/form/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import type { Ride } from "@/db/zod";
@@ -153,7 +154,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         errors={state.errors?.cafeStop}
         defaultValue={(state.formData?.get("cafeStop") as string) ?? ride?.cafeStop ?? ""}
       />
-      <FormInput
+      <FormTextarea
         required={false}
         name="notes"
         placeholder="Not too hily but we will regroup at the top."
