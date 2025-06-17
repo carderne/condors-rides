@@ -11,7 +11,6 @@ export const posthog = new PostHog(config.posthog.key, {
 });
 
 export function posthogIdentify(user: User) {
-  console.log("ID");
   posthog.identify({
     distinctId: user.id,
     properties: {
