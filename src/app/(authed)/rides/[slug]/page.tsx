@@ -166,7 +166,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       </div>
 
       {ride.notes && (
-        <div className="w-full text-center text-xl font-medium text-gray-700">
+        <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 w-full text-center text-xl font-medium text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
           <Markdown>{ride.notes}</Markdown>
         </div>
       )}
