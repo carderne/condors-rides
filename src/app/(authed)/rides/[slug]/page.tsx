@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Markdown from "react-markdown";
 import {
   cancelRideAction,
   claimRideAction,
@@ -166,7 +167,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
       {ride.notes && (
         <div className="w-full text-center text-xl font-medium text-gray-700">
-          <p>{ride.notes}</p>
+          <Markdown>{ride.notes}</Markdown>
         </div>
       )}
 

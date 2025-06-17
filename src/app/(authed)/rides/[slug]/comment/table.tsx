@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user";
 import { formatShortDateTime } from "@/lib/fmt";
 import { cn } from "@/lib/utils";
 import { ThumbsUpIcon, Trash2Icon } from "lucide-react";
+import Markdown from "react-markdown";
 import { deleteCommentAction, toggleUpvoteCommentAction } from "./actions";
 import { useOptimisticContext } from "./optimistic";
 
@@ -63,7 +64,9 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
               )}
             </div>
           </div>
-          <p className="text-gray-700">{comment.text}</p>
+          <div className="text-gray-700">
+            <Markdown>{comment.text}</Markdown>
+          </div>
         </div>
       ))}
     </div>
