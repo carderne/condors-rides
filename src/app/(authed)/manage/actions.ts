@@ -80,7 +80,7 @@ export async function action(
 
 function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): string[] {
   if (!ride) {
-    return ["New ride"];
+    return ["Created"];
   }
 
   const keysChanged = (Object.keys(data) as (keyof Ride)[]).filter((key) => {
