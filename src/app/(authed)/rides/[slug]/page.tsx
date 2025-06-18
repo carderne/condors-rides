@@ -81,7 +81,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   await viewedRide(ride.id);
   emitRideView({ user, ride });
 
-  const hasChanged = true; //ride.views.length === 0 || ride.views[0]!.updatedAt < ride.updatedAt;
+  const hasChanged = ride.views.length >= 1 && ride.views[0]!.updatedAt < ride.updatedAt;
 
   const { unclaimed } = ride;
   const isLeader = !unclaimed && ride.userId === user.id;
