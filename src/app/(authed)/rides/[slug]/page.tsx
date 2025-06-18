@@ -5,9 +5,10 @@ import { Card } from "@/components/ui/card";
 import { H3 } from "@/components/ui/typography";
 import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
+import { viewedRide } from "@/dal/rideView";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
-import { formatStartPoint, isHref } from "@/lib/fmt";
+import { formatShortDateTime, formatStartPoint, isHref } from "@/lib/fmt";
 import { checkIsAdmin, rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
@@ -58,6 +59,10 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
     where: and(eq(schema.ride.slug, slug), isNull(schema.ride.deletedAt)),
     with: {
       leader: true,
+      changes: true,
+      views: {
+        where: eq(schema.rideView.userId, user.id),
+      },
       comments: {
         where: isNull(schema.comment.deletedAt),
         with: { user: true, reactions: { with: { user: true } } },
@@ -73,7 +78,10 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   if (!ride) {
     notFound();
   }
+  await viewedRide(ride.id);
   emitRideView({ user, ride });
+
+  const hasChanged = true; //ride.views.length === 0 || ride.views[0]!.updatedAt < ride.updatedAt;
 
   const { unclaimed } = ride;
   const isLeader = !unclaimed && ride.userId === user.id;
@@ -87,8 +95,19 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Change notifications */}
+      {hasChanged && (
+        <div className="-mb-8 flex animate-bounce justify-center">
+          <div className="flex gap-2 overflow-hidden rounded-t-xl border-pink-200 bg-white p-1.5">
+            <div className="flex flex-col items-start gap-3 p-1 md:flex-row md:items-center">
+              Details have changed! Check the changelog.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ride Header */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+      <div className="overflow-hidden rounded-xl bg-white shadow-xl">
         <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
@@ -121,16 +140,6 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             </div>
 
             <div className="flex flex-col justify-between gap-2">
-              <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
-                <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
-                  <CalendarIcon className="h-5 w-5" />
-                  <span>{format(ride.date, "EEE, dd MMM yyyy")}</span>
-                </div>
-                <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
-                  <ClockIcon className="h-5 w-5" />
-                  <span>{ride.time.slice(0, 5)}</span>
-                </div>
-              </div>
               {hasJoined ? (
                 <Button
                   className="w-full bg-gray-600 py-6 text-lg text-white hover:bg-gray-800"
@@ -160,6 +169,22 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   Join this ride
                 </Button>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Time and date */}
+      <div className="-mt-8 flex justify-center">
+        <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg">
+          <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
+            <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
+              <CalendarIcon className="h-5 w-5" />
+              <span>{format(ride.date, "EEE, dd MMM yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
+              <ClockIcon className="h-5 w-5" />
+              <span>{ride.time.slice(0, 5)}</span>
             </div>
           </div>
         </div>
@@ -278,107 +303,6 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           </Card>
-
-          {/* Button */}
-          <Card className="overflow-hidden">
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                {(isLeader || isAdmin) && (
-                  <Link href={`/manage/${ride.slug}`}>
-                    <Button
-                      variant="outline"
-                      disabled={isPast}
-                      className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-blue-600"
-                    >
-                      <EditIcon className="h-4 w-4" />
-                      Edit
-                    </Button>
-                  </Link>
-                )}
-                <Link href={`/manage/from-ride/${ride.slug}`}>
-                  <Button
-                    variant="outline"
-                    className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
-                  >
-                    <CopyIcon className="h-4 w-4" />
-                    Duplicate
-                  </Button>
-                </Link>
-                {!isLeader && isAdmin && !unclaimed && (
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
-                    onClick={unclaimRideAction.bind(null, ride.id)}
-                  >
-                    <HandHelpingIcon className="h-4 w-4" />
-                    Remove leader
-                  </Button>
-                )}
-                {isLeader ? (
-                  <Button
-                    variant="outline"
-                    disabled={isPast}
-                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
-                    onClick={unclaimRideAction.bind(null, ride.id)}
-                  >
-                    <HandHelpingIcon className="h-4 w-4" />
-                    Unlead
-                  </Button>
-                ) : unclaimed ? (
-                  <Button
-                    disabled={isPast}
-                    variant="outline"
-                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
-                    onClick={claimRideAction.bind(null, ride.id)}
-                  >
-                    <BikeIcon className="h-4 w-4" />
-                    Lead
-                  </Button>
-                ) : null}
-                {(isLeader || isAdmin) &&
-                  (ride.canceledAt ? (
-                    <Button
-                      variant="outline"
-                      disabled={isPast}
-                      className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
-                      onClick={unCancelRideAction.bind(null, ride.id)}
-                    >
-                      <RecycleIcon className="h-4 w-4" />
-                      Un-cancel
-                    </Button>
-                  ) : (
-                    <Confirmation
-                      title="Cancel?"
-                      description="Are you sure you want to cancel this ride?"
-                      action={cancelRideAction.bind(null, ride.id)}
-                    >
-                      <Button
-                        variant="outline"
-                        className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
-                      >
-                        <XIcon className="h-4 w-4" />
-                        Cancel
-                      </Button>
-                    </Confirmation>
-                  ))}
-                {isAdmin && (
-                  <Confirmation
-                    title="Delete?"
-                    description="Are you sure you want to DELETE this ride?"
-                    action={deleteRideAction.bind(null, ride.id)}
-                  >
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-red-600"
-                    >
-                      <Trash2Icon className="h-4 w-4" />
-                      Delete
-                    </Button>
-                  </Confirmation>
-                )}
-              </div>
-            </div>
-          </Card>
         </div>
 
         {/* Right column - Map */}
@@ -389,7 +313,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                 href={ride.route}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute top-4 left-4 z-10 flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
+                className="absolute top-4 left-4 z-10 flex items-center justify-center gap-2 rounded-lg border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
               >
                 View route
                 <ExternalLinkIcon className="h-4 w-4" />
@@ -410,7 +334,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
       <div className="flex w-full flex-col gap-8 md:flex-row">
         {/* Riders List */}
-        <Card className="w-full basis-1/2 rounded-2xl p-6 shadow-md">
+        <Card className="w-full basis-1/2 p-6">
           {riders.length === 0 ? (
             <div className="m-auto flex h-full w-1/2 flex-col justify-center">
               <p>No one on this ride yet :(</p>
@@ -443,7 +367,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         </Card>
 
         {/* Comments Section */}
-        <Card className="basis-1/2 rounded-2xl p-6 shadow-md">
+        <Card className="basis-1/2 p-6">
           <OptimisticProvider items={ride.comments}>
             {/* Comment Input */}
             <div className="mb-4">
@@ -453,6 +377,124 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             {/* Comments List */}
             <CommentsList userId={user.id} isAdmin={isAdmin} />
           </OptimisticProvider>
+        </Card>
+      </div>
+
+      <div className="flex w-full flex-col gap-8 md:flex-row">
+        {/* Control panel */}
+        <Card className="basis-1/2 overflow-hidden">
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {(isLeader || isAdmin) && (
+                <Link href={`/manage/${ride.slug}`}>
+                  <Button
+                    variant="outline"
+                    disabled={isPast}
+                    className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-blue-600"
+                  >
+                    <EditIcon className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+              )}
+              <Link href={`/manage/from-ride/${ride.slug}`}>
+                <Button
+                  variant="outline"
+                  className="flex w-full items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                >
+                  <CopyIcon className="h-4 w-4" />
+                  Duplicate
+                </Button>
+              </Link>
+              {!isLeader && isAdmin && !unclaimed && (
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                  onClick={unclaimRideAction.bind(null, ride.id)}
+                >
+                  <HandHelpingIcon className="h-4 w-4" />
+                  Remove leader
+                </Button>
+              )}
+              {isLeader ? (
+                <Button
+                  variant="outline"
+                  disabled={isPast}
+                  className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                  onClick={unclaimRideAction.bind(null, ride.id)}
+                >
+                  <HandHelpingIcon className="h-4 w-4" />
+                  Unlead
+                </Button>
+              ) : unclaimed ? (
+                <Button
+                  disabled={isPast}
+                  variant="outline"
+                  className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                  onClick={claimRideAction.bind(null, ride.id)}
+                >
+                  <BikeIcon className="h-4 w-4" />
+                  Lead
+                </Button>
+              ) : null}
+              {(isLeader || isAdmin) &&
+                (ride.canceledAt ? (
+                  <Button
+                    variant="outline"
+                    disabled={isPast}
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
+                    onClick={unCancelRideAction.bind(null, ride.id)}
+                  >
+                    <RecycleIcon className="h-4 w-4" />
+                    Un-cancel
+                  </Button>
+                ) : (
+                  <Confirmation
+                    title="Cancel?"
+                    description="Are you sure you want to cancel this ride?"
+                    action={cancelRideAction.bind(null, ride.id)}
+                  >
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-yellow-600"
+                    >
+                      <XIcon className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                  </Confirmation>
+                ))}
+              {isAdmin && (
+                <Confirmation
+                  title="Delete?"
+                  description="Are you sure you want to DELETE this ride?"
+                  action={deleteRideAction.bind(null, ride.id)}
+                >
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-red-600"
+                  >
+                    <Trash2Icon className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </Confirmation>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Changelog */}
+        <Card className="w-full basis-1/2 p-6">
+          <div className="flex flex-col">
+            <H3>Changelog</H3>
+
+            <ul className="list-disc pl-6">
+              {ride.changes.map((change) => (
+                <li key={change.id} className="mb-1">
+                  {formatShortDateTime(change.createdAt)}: {change.note}
+                </li>
+              ))}
+            </ul>
+          </div>
         </Card>
       </div>
     </div>

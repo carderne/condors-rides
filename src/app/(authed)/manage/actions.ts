@@ -2,6 +2,8 @@
 
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import type { InsertRide, Ride } from "@/db/zod";
+import { formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
@@ -47,15 +49,61 @@ export async function action(
     geojson,
   };
 
-  const [ride] = await db
-    .insert(schema.ride)
-    .values({ id: existingRideId, slug, userId: user.id, ...insertable })
-    .onConflictDoUpdate({
-      target: schema.ride.id,
-      set: insertable,
-    })
-    .returning();
-  invariant(ride, "no ride upserted");
+  const ride = await db.transaction(async (tx) => {
+    const existingRide = existingRideId
+      ? await tx.query.ride.findFirst({
+          where: eq(schema.ride.id, existingRideId),
+        })
+      : undefined;
+    const [ride] = await tx
+      .insert(schema.ride)
+      .values({ id: existingRideId, slug, userId: user.id, ...insertable })
+      .onConflictDoUpdate({
+        target: schema.ride.id,
+        set: insertable,
+      })
+      .returning();
+    invariant(ride, "no ride upserted");
+
+    const changeNotes = createChangeNotes(existingRide, data);
+    const changes = changeNotes.map((note) => ({ rideId: ride.id, note }));
+    await tx.insert(schema.rideChange).values(changes);
+    return ride;
+  });
 
   redirect(`/rides/${ride.slug}`);
+}
+
+function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): string[] {
+  if (!ride) {
+    return ["New ride"];
+  }
+
+  const keysChanged = (Object.keys(data) as (keyof Ride)[]).filter((key) => {
+    const r = ride[key];
+    const d = data[key];
+
+    // we're not changing this field as it's empty
+    if (d === undefined) {
+      return false;
+    }
+    // they're the same: not changed
+    if (r === d) {
+      return false;
+    }
+    // dates compare just the date part
+    if (r instanceof Date && d instanceof Date) {
+      return formatISODate(r) !== formatISODate(d);
+    }
+    // if we get here there are real changes, so we keep it!
+    return true;
+  });
+
+  for (const key of keysChanged) {
+    console.log("CHANGE", { e: ride[key], d: data[key] });
+  }
+
+  const result = keysChanged.map((k) => `${k} changed`);
+
+  return result;
 }

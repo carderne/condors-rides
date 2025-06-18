@@ -166,6 +166,55 @@ export const rideRelations = relations(ride, ({ one, many }) => ({
   }),
   members: many(rideMember),
   comments: many(comment),
+  changes: many(rideChange),
+  views: many(rideView),
+}));
+
+export const rideChange = pgTable(
+  "ride_change",
+  {
+    id: id(),
+    rideId: text("ride_id")
+      .references(() => ride.id)
+      .notNull(),
+    note: text("note").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [index("ride_change__ride_id_idx").on(table.rideId)],
+);
+export const rideChangeRelations = relations(rideChange, ({ one }) => ({
+  ride: one(ride, {
+    fields: [rideChange.rideId],
+    references: [ride.id],
+  }),
+}));
+
+export const rideView = pgTable(
+  "ride_view",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    rideId: text("ride_id")
+      .notNull()
+      .references(() => ride.id, { onDelete: "cascade" }),
+    viewedAt: timestamp("viewed_at").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [uniqueIndex("activity__user_id_ride_id_unique_idx").on(table.userId, table.rideId)],
+);
+export const activityRelations = relations(rideView, ({ one }) => ({
+  user: one(user, {
+    fields: [rideView.userId],
+    references: [user.id],
+  }),
+  ride: one(ride, {
+    fields: [rideView.rideId],
+    references: [ride.id],
+  }),
 }));
 
 // *****************************************
