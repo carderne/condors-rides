@@ -174,6 +174,9 @@ export const rideChange = pgTable(
   "ride_change",
   {
     id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
     rideId: text("ride_id")
       .references(() => ride.id)
       .notNull(),

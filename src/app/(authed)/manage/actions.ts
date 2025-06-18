@@ -66,7 +66,11 @@ export async function action(
     invariant(ride, "no ride upserted");
 
     const changeNotes = createChangeNotes(existingRide, data);
-    const changes = changeNotes.map((note) => ({ rideId: ride.id, note }));
+    const changes = changeNotes.map((note) => ({
+      userId: user.id,
+      rideId: ride.id,
+      note,
+    }));
     await tx.insert(schema.rideChange).values(changes);
     return ride;
   });
