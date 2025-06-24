@@ -60,11 +60,7 @@ interface StravaAccessToken {
 
 async function getAccessToken(): Promise<StravaResponse<string>> {
   const result = await db.transaction(async (tx): Promise<StravaResponse<string>> => {
-    const [auth] = await tx
-      .select()
-      .from(schema.token)
-      .where(eq(schema.token.site, "strava"))
-      .for("update");
+    const [auth] = await tx.select().from(schema.token).where(eq(schema.token.site, "strava"));
     invariant(auth, "no strava auth details in db");
     const accessToken = decrypt(auth.accessToken);
 
