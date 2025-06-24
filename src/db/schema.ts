@@ -68,7 +68,7 @@ export const session = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (table) => [index("session__token_idx").on(table.token)],
+  (_table) => [],
 );
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
@@ -237,7 +237,6 @@ export const rideMember = pgTable(
     updatedAt: updatedAt(),
   },
   (table) => [
-    index("ride_member__ride_id_idx").on(table.rideId),
     index("ride_member__user_id_idx").on(table.userId),
     uniqueIndex("ride_member__ride_id_user_id_unique_idx").on(table.rideId, table.userId),
   ],
@@ -303,7 +302,6 @@ export const commentReaction = pgTable(
     updatedAt: updatedAt(),
   },
   (table) => [
-    index("comment_reaction__comment_id_idx").on(table.commentId),
     index("comment_reaction__user_id_idx").on(table.userId),
     uniqueIndex("comment_reaction__comment_id_user_id_unique_idx").on(
       table.commentId,
