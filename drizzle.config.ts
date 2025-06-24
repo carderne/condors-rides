@@ -5,7 +5,7 @@ export default defineConfig({
   schema: "./src/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    // this URL needs ssl=true
     url: process.env.DATABASE_URL!,
   },
+  tablesFilter: ["!pg_stat_statements", "!pg_stat_statements_info"],
 });
