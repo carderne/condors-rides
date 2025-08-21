@@ -13,6 +13,7 @@ export default async function SettingsPage() {
   const userHydrated = await db.query.user.findFirst({
     where: eq(schema.user.id, user.id),
     with: {
+      ridesJoined: true,
       rides: {
         where: and(
           isNull(schema.ride.canceledAt),
@@ -23,15 +24,23 @@ export default async function SettingsPage() {
     },
   });
   invariant(userHydrated);
+
+  const stats = [
+    { label: "Rides led", value: userHydrated.rides.length },
+    { label: "Rides joined", value: userHydrated.ridesJoined.length },
+  ];
+
   return (
     <div className="grid gap-4">
       <H2>User settings</H2>
       <UserSettingsForm user={user} />
-      <div className="flex w-full flex-col items-center gap-1 md:flex-row md:gap-4">
-        <p className="mb-0 flex flex-row items-center gap-2 text-xl md:w-32 md:flex-col md:gap-0">
-          Rides led:
-        </p>
-        <p>{userHydrated.rides.length}</p>
+      <div className="flex flex-col gap-4 md:flex-row md:gap-8">
+        {stats.map(({ label, value }) => (
+          <div key={label} className="flex flex-col items-center gap-1 md:items-start">
+            <span className="text-sm font-medium text-gray-600">{label}</span>
+            <span className="text-2xl font-bold">{value}</span>
+          </div>
+        ))}
       </div>
       <p className="mt-10">To delete all your data, please contact the club:</p>
       <Link className="text-primary text-xl" href="https://cowleyroadcondors.cc/contact-us/">
