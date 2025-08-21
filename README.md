@@ -33,7 +33,7 @@ npm run db:down
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:5210](http://localhost:5210)
 with your browser to see the result.
 
 ### Format, lint, typecheck

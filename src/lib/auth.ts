@@ -47,6 +47,8 @@ export const auth = betterAuth({
   ],
   advanced: {
     cookiePrefix: "condors-app",
-    generateId: false, // nanoid generation controlled in db/schema.ts
+    database: {
+      generateId: false, // nanoid generation controlled in db/schema.ts
+    },
   },
 });
