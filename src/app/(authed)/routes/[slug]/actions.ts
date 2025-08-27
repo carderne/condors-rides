@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdmin } from "@/dal/membership";
+import { getSuperUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
@@ -11,7 +11,7 @@ export async function action(
   _: State,
   formData: FormData,
 ): Promise<State> {
-  await getAdmin();
+  await getSuperUser();
   const where = eq(schema.route.id, existingRouteId);
   const existingRoute = await db.query.route.findFirst({ where });
 

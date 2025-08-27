@@ -5,6 +5,10 @@ export function checkIsAdmin(user: User): boolean {
   return user.type === "admin";
 }
 
+export function checkIsSuper(user: User): boolean {
+  return user.type === "admin" || user.type === "super";
+}
+
 export function rideIsFull(ride: RideHydrated): boolean {
   if (!ride.maxGroupSize) {
     return false;

@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdmin, getMembership } from "@/dal/membership";
+import { getMembership, getSuperUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -20,13 +20,13 @@ export async function getGeojsonAction(routeId: string) {
 }
 
 export async function hideRouteAction(routeId: string) {
-  await getAdmin();
+  await getSuperUser();
   await db.update(schema.route).set({ hiddenAt: new Date() }).where(eq(schema.route.id, routeId));
   revalidatePath("/routes");
 }
 
 export async function unHideRouteAction(routeId: string) {
-  await getAdmin();
+  await getSuperUser();
   await db.update(schema.route).set({ hiddenAt: null }).where(eq(schema.route.id, routeId));
   revalidatePath("/routes");
 }

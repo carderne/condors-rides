@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Route, User } from "@/db/zod";
-import { checkIsAdmin } from "@/lib/permissions";
+import { checkIsSuper } from "@/lib/permissions";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { ExternalLinkIcon, MoreHorizontalIcon, StarIcon } from "lucide-react";
 import Link from "next/link";
@@ -70,7 +70,7 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
 
 function Actions({ row, user }: { row: Row<RouteHydrated>; user: User }) {
   const route = row.original;
-  const isAdmin = checkIsAdmin(user);
+  const isSuper = checkIsSuper(user);
 
   return (
     <div className="flex items-center gap-2">
@@ -96,12 +96,12 @@ function Actions({ row, user }: { row: Row<RouteHydrated>; user: User }) {
           <DropdownMenuItem asChild>
             <Link href={`/manage/from-route/${route.id}`}>Do it again</Link>
           </DropdownMenuItem>
-          {isAdmin && (
+          {isSuper && (
             <DropdownMenuItem asChild>
               <Link href={`/routes/${route.id}`}>Edit</Link>
             </DropdownMenuItem>
           )}
-          {isAdmin && (
+          {isSuper && (
             <DropdownMenuItem
               onClick={async () => {
                 await hideRouteAction(route.id);

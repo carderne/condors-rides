@@ -1,12 +1,12 @@
 import { H2 } from "@/components/ui/typography";
-import { getAdmin } from "@/dal/membership";
+import { getSuperUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { UpsertForm } from "./form";
 
 export default async function UpsertRoutePage({ params }: { params: Promise<{ slug: string }> }) {
-  await getAdmin();
+  await getSuperUser();
   const { slug } = await params;
 
   const route = await db.query.route.findFirst({

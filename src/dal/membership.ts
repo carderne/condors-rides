@@ -6,9 +6,17 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-export async function getAdmin(): Promise<User> {
+export async function getAdminUser(): Promise<User> {
   const user = await getMembership();
   if (user.type !== "admin") {
+    return notFound();
+  }
+  return user;
+}
+
+export async function getSuperUser(): Promise<User> {
+  const user = await getMembership();
+  if (user.type !== "admin" && user.type !== "super") {
     return notFound();
   }
   return user;

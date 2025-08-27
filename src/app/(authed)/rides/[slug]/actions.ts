@@ -1,6 +1,6 @@
 "use server";
 
-import { getAdmin, getMembership } from "@/dal/membership";
+import { getAdminUser, getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { checkIsAdmin } from "@/lib/permissions";
 import { and, eq } from "drizzle-orm";
@@ -63,7 +63,7 @@ export async function unCancelRideAction(rideId: string) {
 }
 
 export async function deleteRideAction(rideId: string) {
-  await getAdmin();
+  await getAdminUser();
   await db.update(schema.ride).set({ deletedAt: new Date() }).where(eq(schema.ride.id, rideId));
   redirect("/rides");
 }

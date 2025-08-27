@@ -1,10 +1,10 @@
-import { getAdmin } from "@/dal/membership";
+import { getAdminUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { AdminTable } from "./table";
 
 export default async function AdminPage() {
-  await getAdmin();
+  await getAdminUser();
   const users = await db.query.user.findMany({
     with: {
       ridesJoined: true,

@@ -30,7 +30,7 @@ const updatedAt = () =>
 // *****************************************
 // Core user session tables from better-auth
 // *****************************************
-export const userTypeArray = ["user", "admin"] as const;
+export const userTypeArray = ["user", "admin", "super"] as const;
 export const userType = pgEnum("user_type", userTypeArray);
 export const user = pgTable(
   "user",

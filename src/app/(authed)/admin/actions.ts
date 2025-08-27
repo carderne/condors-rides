@@ -1,13 +1,13 @@
 "use server";
 
-import { getAdmin } from "@/dal/membership";
+import { getAdminUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function banUserAction(userId: string) {
-  await getAdmin();
+  await getAdminUser();
 
   const where = and(eq(schema.user.id, userId), ne(schema.user.type, "admin"));
   const userToBan = await db.query.user.findFirst({ where });
@@ -23,7 +23,7 @@ export async function banUserAction(userId: string) {
 }
 
 export async function unbanUserAction(userId: string) {
-  await getAdmin();
+  await getAdminUser();
   const userToUnban = await db.query.user.findFirst({ where: eq(schema.user.id, userId) });
   invariant(userToUnban);
   const [name] = userToUnban.name.split(" [");
