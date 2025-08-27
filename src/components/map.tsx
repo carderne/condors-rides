@@ -9,7 +9,9 @@ export function Map({ geojson, osKey }: { geojson: GeoJSON.LineString; osKey: st
   const map: RefObject<maplibregl.Map | null> = useRef(null);
 
   useEffect(() => {
-    if (map.current) return;
+    if (map.current) {
+      return;
+    }
 
     map.current = new maplibregl.Map({
       container: mapContainer.current!,
@@ -21,7 +23,9 @@ export function Map({ geojson, osKey }: { geojson: GeoJSON.LineString; osKey: st
     });
 
     map.current.on("load", () => {
-      if (!map.current || !geojson) return;
+      if (!map.current || !geojson) {
+        return;
+      }
 
       map.current.addSource("route", {
         type: "geojson",

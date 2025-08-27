@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default async function RootLayout({
       </head>
       <body>
         <div className="min-h-screen w-screen overflow-y-auto font-sans antialiased">
+          <Toaster />
           {children}
         </div>
       </body>

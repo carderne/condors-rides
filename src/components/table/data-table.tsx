@@ -26,11 +26,6 @@ export interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
-export interface ExpandableRowConfig<TData> {
-  renderExpandedContent: (row: TData) => React.ReactNode;
-  toggleComponent?: (isExpanded: boolean, toggle: () => void) => React.ReactNode;
-}
-
 function DefaultToggle({ isExpanded, toggle }: { isExpanded: boolean; toggle: () => void }) {
   return (
     <Button variant="ghost" size="icon" onClick={toggle}>
@@ -46,7 +41,7 @@ export function DataTable<TData extends object, TValue>({
   expandableRows,
 }: DataTableProps<TData, TValue> & {
   filterCol?: keyof TData & string;
-  expandableRows?: ExpandableRowConfig<TData>;
+  expandableRows?: (row: TData) => React.ReactNode;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -136,7 +131,7 @@ export function DataTable<TData extends object, TValue>({
                     {expandableRows && isExpanded && (
                       <TableRow>
                         <TableCell colSpan={columns.length + 1} className="bg-gray-50/50 p-0">
-                          <div>{expandableRows.renderExpandedContent(row.original)}</div>
+                          <div>{expandableRows(row.original)}</div>
                         </TableCell>
                       </TableRow>
                     )}

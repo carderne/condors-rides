@@ -149,8 +149,6 @@ export const ride = pgTable(
     cafeStop: text("cafe_stop"),
     startPoint: text("start_point").notNull().default("Beeline Bicycles"),
 
-    geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
-
     unclaimed: boolean("unclaimed").notNull().default(false),
     canceledAt: timestamp("canceled_at"),
     deletedAt: timestamp("deleted_at"),
@@ -273,6 +271,7 @@ export const route = pgTable(
     notes: text("notes"),
     geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
 
+    hiddenAt: timestamp("hidden_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -286,20 +285,26 @@ export const routeRelations = relations(route, ({ many }) => ({
 export const routeRank = pgTable(
   "route_rank",
   {
-    id: id(),
     routeId: text("route_id")
+      .references(() => route.id)
+      .notNull(),
+    userId: text("user_id")
       .references(() => user.id)
       .notNull(),
     rank: integer("rank").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (_table) => [],
+  (table) => [uniqueIndex("route_rank__route_id_user_id_uniq_idx").on(table.routeId, table.userId)],
 );
 export const routeRankRelations = relations(routeRank, ({ one }) => ({
   route: one(route, {
     fields: [routeRank.routeId],
     references: [route.id],
+  }),
+  user: one(user, {
+    fields: [routeRank.userId],
+    references: [user.id],
   }),
 }));
 

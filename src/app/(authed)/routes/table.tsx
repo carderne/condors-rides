@@ -1,22 +1,26 @@
 "use client";
 
-import { Map } from "@/components/map";
 import { DataTable } from "@/components/table/data-table";
-import { columns, type RouteHydrated } from "./columns";
+import type { User } from "@/db/zod";
+import { getColumns, type RouteHydrated } from "./columns";
+import { RoutesTableMap } from "./map";
 
-export function RoutesTable({ routes, osKey }: { routes: RouteHydrated[]; osKey: string }) {
+export function RoutesTable({
+  user,
+  routes,
+  osKey,
+}: {
+  user: User;
+  routes: RouteHydrated[];
+  osKey: string;
+}) {
+  const columns = getColumns(user);
   return (
     <DataTable
       filterCol="name"
       data={routes}
       columns={columns}
-      expandableRows={{
-        renderExpandedContent: (row) => (
-          <div className="h-80 w-full">
-            {row.geojson && <Map geojson={row.geojson} osKey={osKey} />}
-          </div>
-        ),
-      }}
+      expandableRows={(route) => <RoutesTableMap route={route} osKey={osKey} />}
     />
   );
 }

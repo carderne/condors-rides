@@ -58,6 +58,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const ride = await db.query.ride.findFirst({
     where: and(eq(schema.ride.slug, slug), isNull(schema.ride.deletedAt)),
     with: {
+      route: true,
       leader: true,
       changes: true,
       views: {
@@ -320,8 +321,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </Link>
             )}
             <div className="h-full w-full">
-              {ride.geojson ? (
-                <Map geojson={ride.geojson} osKey={osKey} />
+              {ride.route?.geojson ? (
+                <Map geojson={ride.route.geojson} osKey={osKey} />
               ) : (
                 <div className="m-auto flex h-full w-1/2 flex-col justify-center">
                   <p>Use Strava or MapMyRide if you want your route to show up here :)</p>
