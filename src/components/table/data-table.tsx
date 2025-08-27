@@ -28,10 +28,8 @@ export function DataTable<TData extends object, TValue>({
   columns,
   data,
   filterCol,
-  leftPad = false,
 }: DataTableProps<TData, TValue> & {
   filterCol?: keyof TData & string;
-  leftPad?: boolean;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -51,7 +49,7 @@ export function DataTable<TData extends object, TValue>({
   });
 
   return (
-    <div>
+    <>
       <div className="flex items-center py-4">
         {filterCol && (
           <Input
@@ -65,7 +63,7 @@ export function DataTable<TData extends object, TValue>({
         )}
       </div>
 
-      <div className="border-muted max-h-[500px] overflow-y-auto rounded-lg border">
+      <div className="border-muted max-h-[70vh] overflow-x-auto overflow-y-auto rounded-lg border">
         <Table>
           <TableHeader className="bg-muted">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -73,9 +71,10 @@ export function DataTable<TData extends object, TValue>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    style={{ minWidth: header.column.columnDef.size }}
-                    // Space for the locate button
-                    className={leftPad ? "pl-8" : ""}
+                    style={{
+                      minWidth: header.column.columnDef.size,
+                      maxWidth: header.column.columnDef.size,
+                    }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -106,6 +105,6 @@ export function DataTable<TData extends object, TValue>({
           </TableBody>
         </Table>
       </div>
-    </div>
+    </>
   );
 }
