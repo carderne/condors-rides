@@ -74,9 +74,9 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
 
-            {ride.route && (
+            {ride.routeUrl && (
               <Link
-                href={ride.route}
+                href={ride.routeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"

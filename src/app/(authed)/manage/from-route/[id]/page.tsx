@@ -7,19 +7,19 @@ import { UpsertForm } from "../../form";
 export default async function NewRideFromRoutePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }) {
-  const { slug } = await params;
+  const { id } = await params;
 
-  const ride = await db.query.ride.findFirst({
-    where: eq(schema.ride.slug, slug),
+  const route = await db.query.route.findFirst({
+    where: eq(schema.route.id, id),
   });
-  if (!ride) {
+  if (!route) {
     return notFound();
   }
 
-  const { name, route, distance, elevation, cafeStop } = ride;
-  const routeOnly = { name, route, distance, elevation, cafeStop };
+  const { name, url: routeUrl, distance, elevation, cafeStop } = route;
+  const routeOnly = { name, routeUrl, distance, elevation, cafeStop };
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col gap-4">

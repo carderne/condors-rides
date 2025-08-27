@@ -143,7 +143,7 @@ export const ride = pgTable(
     distance: integer("distance").notNull(),
     elevation: integer("elevation"),
     surface: rideSurface("surface").notNull().default("road"),
-    route: text("route"),
+    routeUrl: text("route_url"),
 
     maxGroupSize: integer("max_group_size"),
     cafeStop: text("cafe_stop"),
@@ -164,6 +164,10 @@ export const rideRelations = relations(ride, ({ one, many }) => ({
   leader: one(user, {
     fields: [ride.userId],
     references: [user.id],
+  }),
+  route: one(route, {
+    fields: [ride.routeUrl],
+    references: [route.url],
   }),
   members: many(rideMember),
   comments: many(comment),
@@ -250,6 +254,52 @@ export const rideMemberRelations = relations(rideMember, ({ one }) => ({
   user: one(user, {
     fields: [rideMember.userId],
     references: [user.id],
+  }),
+}));
+
+// *****************************************
+// Routes
+// *****************************************
+export const route = pgTable(
+  "route",
+  {
+    id: id(),
+    url: text("url").notNull().unique(),
+    name: text("name").notNull(),
+    distance: integer("distance").notNull(),
+    elevation: integer("elevation"),
+    surface: rideSurface("surface").notNull().default("road"),
+    cafeStop: text("cafe_stop"),
+    notes: text("notes"),
+    geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
+
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (_table) => [],
+);
+export const routeRelations = relations(route, ({ many }) => ({
+  ranks: many(routeRank),
+  rides: many(ride),
+}));
+
+export const routeRank = pgTable(
+  "route_rank",
+  {
+    id: id(),
+    routeId: text("route_id")
+      .references(() => user.id)
+      .notNull(),
+    rank: integer("rank").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (_table) => [],
+);
+export const routeRankRelations = relations(routeRank, ({ one }) => ({
+  route: one(route, {
+    fields: [routeRank.routeId],
+    references: [route.id],
   }),
 }));
 

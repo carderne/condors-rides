@@ -36,14 +36,14 @@ export async function action(
 
   const slug = existingRideId ? undefined : await createSlug(data.date, data.name);
 
-  const geojson = await getGeojson(data.route);
+  const geojson = await getGeojson(data.routeUrl);
   const insertable = {
     ...data,
     // convert undefined to null
     // so they clear the db column if not set
     notes: data.notes ?? null,
     elevation: data.elevation ?? null,
-    route: data.route ?? null,
+    routeUrl: data.routeUrl ?? null,
     maxGroupSize: data.maxGroupSize ?? null,
     cafeStop: data.cafeStop ?? null,
     geojson,
@@ -72,6 +72,30 @@ export async function action(
       note,
     }));
     await tx.insert(schema.rideChange).values(changes);
+
+    const { routeUrl: url } = data;
+    if (!url || !geojson) {
+      return ride;
+    }
+    const existingRoute = await tx.query.route.findFirst({
+      where: eq(schema.route.url, url),
+    });
+
+    if (existingRoute) {
+      return ride;
+    }
+
+    await tx.insert(schema.route).values({
+      url: url,
+      name: data.name,
+      distance: data.distance,
+      elevation: data.elevation,
+      surface: data.surface,
+      cafeStop: data.cafeStop,
+      notes: data.notes,
+      geojson: geojson,
+    });
+
     return ride;
   });
 

@@ -21,9 +21,9 @@ export function SortableColumn<T>({
       {sorted === false ? (
         <ChevronsUpDownIcon className="group-hover:text-brand-foreground ml-2 size-4" />
       ) : sorted === "asc" ? (
-        <ChevronDownIcon className="text-brand-foreground ml-2 size-4" />
-      ) : (
         <ChevronUpIcon className="text-brand-foreground ml-2 size-4" />
+      ) : (
+        <ChevronDownIcon className="text-brand-foreground ml-2 size-4" />
       )}
     </Button>
   );

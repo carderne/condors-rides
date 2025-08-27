@@ -11,6 +11,8 @@ export type InsertRide = typeof schema.ride.$inferInsert;
 export const insertRideMember = createInsertSchema(schema.rideMember);
 export type RideMember = typeof schema.rideMember.$inferSelect;
 
+export type Route = typeof schema.route.$inferSelect;
+
 export type Comment = typeof schema.comment.$inferSelect;
 export type CommentReaction = typeof schema.commentReaction.$inferSelect;
 export type CommentReactionHydrated = CommentReaction & { user: User };

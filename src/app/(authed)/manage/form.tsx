@@ -13,7 +13,7 @@ import { addDays, format, getDate } from "date-fns";
 import Form from "next/form";
 import { useActionState, useState } from "react";
 import { action } from "./actions";
-import { type State, validator } from "./validate";
+import { names, type State, validator } from "./validate";
 
 export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
   const [state, formAction] = useActionState<State, FormData>(
@@ -46,11 +46,11 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
       </div>
       <FormInput
         required={true}
-        name="name"
+        name={names.name}
         placeholder="Chilterns 100"
         label="Ride name"
         errors={state.errors?.name}
-        defaultValue={(state.formData?.get("name") as string) ?? ride?.name ?? ""}
+        defaultValue={(state.formData?.get(names.name) as string) ?? ride?.name ?? ""}
       />
 
       <div className="grid grid-cols-3 items-center justify-around gap-2 px-2 md:ml-32 md:grid-cols-6">
@@ -72,7 +72,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         // doesn't show full-width on safari otherwise
         className="w-[calc(100vw-2rem)] md:w-full"
         type="date"
-        name="date"
+        name={names.date}
         label="Date"
         errors={state.errors?.date}
         value={date}
@@ -83,89 +83,91 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         // doesn't show full-width on safari otherwise
         className="w-[calc(100vw-2rem)] md:w-full"
         type="time"
-        name="time"
+        name={names.time}
         label="Time"
         errors={state.errors?.time}
-        defaultValue={(state.formData?.get("time") as string) ?? ride?.time ?? "09:00"}
+        defaultValue={(state.formData?.get(names.time) as string) ?? ride?.time ?? "09:00"}
       />
       <FormInput
         required={true}
-        name="startPoint"
+        name={names.startPoint}
         label="Start"
         labelSuffix="can be lat/lon coords"
         errors={state.errors?.startPoint}
         defaultValue={
-          (state.formData?.get("startPoint") as string) ?? ride?.startPoint ?? "Beeline Bicycles"
+          (state.formData?.get(names.startPoint) as string) ??
+          ride?.startPoint ??
+          "Beeline Bicycles"
         }
       />
       <FormInput
         required={true}
         type="text"
-        name="speed"
+        name={names.speed}
         label="Speed"
         labelSuffix="kph on the flat"
         placeholder="28"
         errors={state.errors?.speed}
-        defaultValue={(state.formData?.get("speed") as string) ?? ride?.speed ?? ""}
+        defaultValue={(state.formData?.get(names.speed) as string) ?? ride?.speed ?? ""}
       />
       <FormInput
         required={true}
         type="number"
-        name="distance"
+        name={names.distance}
         label="Distance"
         labelSuffix="km"
         placeholder="90"
         errors={state.errors?.distance}
-        defaultValue={(state.formData?.get("distance") as string) ?? ride?.distance ?? ""}
+        defaultValue={(state.formData?.get(names.distance) as string) ?? ride?.distance ?? ""}
       />
       <FormInput
         required={false}
         type="number"
-        name="elevation"
+        name={names.elevation}
         label="Elevation"
         labelSuffix="m"
         placeholder="450"
         errors={state.errors?.elevation}
-        defaultValue={(state.formData?.get("elevation") as string) ?? ride?.elevation ?? ""}
+        defaultValue={(state.formData?.get(names.elevation) as string) ?? ride?.elevation ?? ""}
       />
       <FormInput
         required={false}
-        name="route"
+        name={names.routeUrl}
         placeholder="https://www.strava.com/routes/..."
         label="Route"
-        errors={state.errors?.route}
-        defaultValue={(state.formData?.get("route") as string) ?? ride?.route ?? ""}
+        errors={state.errors?.routeUrl}
+        defaultValue={(state.formData?.get(names.routeUrl) as string) ?? ride?.routeUrl ?? ""}
       />
       <FormInput
         required={false}
         type="number"
-        name="maxGroupSize"
+        name={names.maxGroupSize}
         label="Max riders"
         labelSuffix="app will enforce!"
         placeholder="8"
         errors={state.errors?.maxGroupSize}
-        defaultValue={(state.formData?.get("maxGroupSize") as string) ?? ride?.maxGroupSize}
+        defaultValue={(state.formData?.get(names.maxGroupSize) as string) ?? ride?.maxGroupSize}
       />
       <FormInput
         required={false}
-        name="cafeStop"
+        name={names.cafeStop}
         placeholder="Waterperry Gardens Tea Stop"
         label="Cafe stop"
         errors={state.errors?.cafeStop}
-        defaultValue={(state.formData?.get("cafeStop") as string) ?? ride?.cafeStop ?? ""}
+        defaultValue={(state.formData?.get(names.cafeStop) as string) ?? ride?.cafeStop ?? ""}
       />
       <FormTextarea
         required={false}
-        name="notes"
+        name={names.notes}
         placeholder="Not too hily but we will regroup at the top."
         label="Notes"
         errors={state.errors?.notes}
-        defaultValue={(state.formData?.get("notes") as string) ?? ride?.notes ?? ""}
+        defaultValue={(state.formData?.get(names.notes) as string) ?? ride?.notes ?? ""}
       />
 
       <Select
-        name="surface"
-        defaultValue={(state.formData?.get("surface") as string) ?? ride?.surface ?? "road"}
+        name={names.surface}
+        defaultValue={(state.formData?.get(names.surface) as string) ?? ride?.surface ?? "road"}
       >
         <FormSelectTrigger label="Surface" errors={state.errors?.surface}>
           <SelectValue />

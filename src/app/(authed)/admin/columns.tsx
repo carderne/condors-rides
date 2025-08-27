@@ -48,19 +48,19 @@ export const columns: ColumnDef<UserHydrated>[] = [
     id: "type",
     accessorFn: (row) => row.type,
     header: ({ column }) => <SortableColumn column={column}>Type</SortableColumn>,
-    size: 50,
+    size: 100,
   },
   {
     id: "numRidesLed",
     accessorFn: (row) => row.rides.length,
     header: ({ column }) => <SortableColumn column={column}>Rides led</SortableColumn>,
-    size: 50,
+    size: 100,
   },
   {
     id: "numRidesJoined",
     accessorFn: (row) => row.ridesJoined.length,
     header: ({ column }) => <SortableColumn column={column}>Rides joined</SortableColumn>,
-    size: 50,
+    size: 100,
   },
   {
     id: "createdAt",

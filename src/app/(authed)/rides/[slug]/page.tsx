@@ -1,5 +1,6 @@
 import { emitRideView } from "@/clients/posthog";
 import { Confirmation, Modal } from "@/components/confirmation";
+import { Map } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { H3 } from "@/components/ui/typography";
@@ -47,7 +48,6 @@ import {
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
-import { Map } from "./map";
 
 const { osKey } = getConfig();
 
@@ -308,9 +308,9 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
         {/* Right column - Map */}
         <div className="basis-1/2">
           <Card className="relative flex h-[300px] w-full items-center justify-center bg-gray-50 md:h-full">
-            {ride.route && isHref(ride.route) && (
+            {ride.routeUrl && isHref(ride.routeUrl) && (
               <Link
-                href={ride.route}
+                href={ride.routeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute top-4 left-4 z-10 flex items-center justify-center gap-2 rounded-lg border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"

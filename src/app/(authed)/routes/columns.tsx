@@ -7,21 +7,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { Route } from "@/db/zod";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { ExternalLinkIcon, MoreHorizontalIcon } from "lucide-react";
 import Link from "next/link";
 
-export type RouteCustom = {
-  route: string;
-  numRides: number;
-  meanDistance: string;
-  meanElevation: string;
-  distinctCafeStops: string;
-  name: string;
-  rideSlug: string;
-};
+export type RouteHydrated = Route & { rides: unknown[] };
 
-export const columns: ColumnDef<RouteCustom>[] = [
+export const columns: ColumnDef<RouteHydrated>[] = [
   {
     id: "actions",
     cell: ({ row }) => <Actions row={row} />,
@@ -36,39 +29,39 @@ export const columns: ColumnDef<RouteCustom>[] = [
   },
   {
     id: "numRides",
-    accessorFn: (row) => row.numRides,
+    accessorFn: (row) => row.rides.length,
     header: ({ column }) => <SortableColumn column={column}>Rides</SortableColumn>,
     size: 140,
   },
   {
-    id: "meanDistance",
-    accessorFn: (row) => row.meanDistance,
+    id: "distance",
+    accessorFn: (row) => row.distance,
     header: ({ column }) => <SortableColumn column={column}>Distance (km)</SortableColumn>,
     size: 140,
   },
   {
-    id: "meanElevation",
-    accessorFn: (row) => row.meanElevation,
+    id: "elevation",
+    accessorFn: (row) => row.elevation,
     header: ({ column }) => <SortableColumn column={column}>Elevation (m)</SortableColumn>,
     size: 140,
   },
   {
-    id: "distinctCafeStops",
-    accessorFn: (row) => row.distinctCafeStops,
+    id: "cafeStop",
+    accessorFn: (row) => row.cafeStop,
     header: ({ column }) => <SortableColumn column={column}>Cafe stops</SortableColumn>,
     cell: ({ getValue }) => <div className="max-w-[30ch] truncate">{getValue() as string}</div>,
     size: 300,
   },
 ];
 
-function Actions({ row }: { row: Row<RouteCustom> }) {
+function Actions({ row }: { row: Row<RouteHydrated> }) {
   const route = row.original;
 
   return (
     <div className="flex items-center gap-2">
       <Button variant="ghost" size="icon" asChild>
         <Link
-          href={route.route}
+          href={route.url}
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary hover:text-primary"
@@ -86,7 +79,7 @@ function Actions({ row }: { row: Row<RouteCustom> }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem asChild className="relative">
-            <Link href={`/manage/from-route/${route.rideSlug}`} className="relative z-10">
+            <Link href={`/manage/from-route/${route.id}`} className="relative z-10">
               Do it again
             </Link>
           </DropdownMenuItem>
