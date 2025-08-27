@@ -36,14 +36,20 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
       id: "name",
       accessorFn: (row) => row.name,
       header: ({ column }) => <SortableColumn column={column}>Name</SortableColumn>,
-      cell: ({ getValue }) => <div className="max-w-[30ch] truncate">{getValue() as string}</div>,
-      size: 200,
+      cell: ({ getValue }) => <div className="max-w-[25ch] truncate">{getValue() as string}</div>,
+      size: 180,
+    },
+    {
+      id: "surface",
+      accessorFn: (row) => row.surface,
+      header: ({ column }) => <SortableColumn column={column}>Surface</SortableColumn>,
+      size: 140,
     },
     {
       id: "numRides",
       accessorFn: (row) => row.numRides,
       header: ({ column }) => <SortableColumn column={column}>Rides</SortableColumn>,
-      size: 140,
+      size: 100,
     },
     {
       id: "distance",
