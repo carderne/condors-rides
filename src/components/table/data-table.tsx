@@ -1,4 +1,11 @@
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,7 +24,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -37,10 +44,12 @@ function DefaultToggle({ isExpanded, toggle }: { isExpanded: boolean; toggle: ()
 export function DataTable<TData extends object, TValue>({
   columns,
   data,
-  filterCol,
+  searchCol,
+  filterCols,
   expandableRows,
 }: DataTableProps<TData, TValue> & {
-  filterCol?: keyof TData & string;
+  searchCol?: keyof TData & string;
+  filterCols?: Array<keyof TData>;
   expandableRows?: (row: TData) => React.ReactNode;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -61,6 +70,28 @@ export function DataTable<TData extends object, TValue>({
     },
   });
 
+  // Get unique values for each filter column
+  const filterOptions = useMemo(() => {
+    if (!filterCols) {
+      return {};
+    }
+
+    const options: Record<string, string[]> = {};
+    filterCols.forEach((col) => {
+      const colKey = String(col);
+      const uniqueValues = Array.from(
+        new Set(
+          data
+            .map((row) => row[col])
+            .filter((value) => value != null && value !== "")
+            .map((value) => String(value)),
+        ),
+      ).sort();
+      options[colKey] = uniqueValues;
+    });
+    return options;
+  }, [data, filterCols]);
+
   const toggleRow = (rowId: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set(prev);
@@ -73,18 +104,56 @@ export function DataTable<TData extends object, TValue>({
     });
   };
 
+  const handleFilterChange = (columnId: string, value: string) => {
+    const column = table.getColumn(columnId);
+    if (column) {
+      column.setFilterValue(value === "all" ? "" : value);
+    }
+  };
+
   return (
     <>
-      <div className="flex items-center py-4">
-        {filterCol && (
+      <div className="flex items-center gap-4 py-4">
+        {searchCol && (
           <Input
-            placeholder={`Filter by ${filterCol}...`}
-            value={(table?.getColumn(filterCol)?.getFilterValue() as string) ?? ""}
+            placeholder={`Filter by ${searchCol}...`}
+            value={(table?.getColumn(searchCol)?.getFilterValue() as string) ?? ""}
             onChange={(event) => {
-              table?.getColumn(filterCol)?.setFilterValue(event.target.value);
+              table?.getColumn(searchCol)?.setFilterValue(event.target.value);
             }}
             className="max-w-sm"
           />
+        )}
+
+        {filterCols && (
+          <div className="ml-4 flex items-center gap-2">
+            Filters:
+            {filterCols.map((col) => {
+              const colKey = String(col);
+              const options = filterOptions[colKey] || [];
+              const currentValue = (table.getColumn(colKey)?.getFilterValue() as string) || "";
+
+              return (
+                <Select
+                  key={colKey}
+                  value={currentValue || "all"}
+                  onValueChange={(value) => handleFilterChange(colKey, value)}
+                >
+                  <SelectTrigger className="!h-10 w-[150px]">
+                    <SelectValue placeholder={`Filter ${colKey}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All {colKey}</SelectItem>
+                    {options.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            })}
+          </div>
         )}
       </div>
 

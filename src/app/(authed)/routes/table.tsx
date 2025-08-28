@@ -20,7 +20,8 @@ export function RoutesTable({
     <main className="flex min-h-full flex-col gap-4">
       <RoutesTabSwitcher />
       <DataTable
-        filterCol="name"
+        searchCol="name"
+        filterCols={["surface"]}
         data={routes}
         columns={columns}
         expandableRows={(route) => <RoutesTableMap route={route} osKey={osKey} />}
