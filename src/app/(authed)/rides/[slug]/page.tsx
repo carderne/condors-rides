@@ -226,7 +226,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                {ride.elevation && (
+                {ride.elevation !== null && (
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
                       <MountainIcon className="h-5 w-5 text-pink-500" />
@@ -268,7 +268,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
 
-                {ride.cafeStop && (
+                {ride.cafeStop !== null && (
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
                       <CoffeeIcon className="h-5 w-5 text-pink-500" />
@@ -288,7 +288,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   </div>
                 )}
 
-                {ride.maxGroupSize && (
+                {ride.maxGroupSize !== null && (
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
                       <UsersIcon className="h-5 w-5 text-pink-500" />
