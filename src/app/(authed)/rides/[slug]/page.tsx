@@ -109,7 +109,12 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
       {/* Ride Header */}
       <div className="overflow-hidden rounded-xl bg-white shadow-xl">
-        <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white">
+        <div
+          className={cn(
+            "bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white",
+            ride.surface === "gravel" ? "from-amber-700 to-amber-800" : "",
+          )}
+        >
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold">

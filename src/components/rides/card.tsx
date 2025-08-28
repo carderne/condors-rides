@@ -25,7 +25,12 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
 
   return (
     <div className="group h-full">
-      <div className="border-primary flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
+      <div
+        className={cn(
+          "flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl",
+          ride.surface === "gravel" ? "border-amber-800" : "border-primary",
+        )}
+      >
         {/* Time and gravel */}
         <div className="flex justify-between">
           <div className="flex items-center gap-2 rounded-br-xl border-r-2 border-b-2 border-pink-200 bg-white p-2">
@@ -68,9 +73,12 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
           <div className="flex gap-4">
             <Link
               href={href}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg"
+              className={cn(
+                "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
+                ride.surface === "gravel" ? "bg-amber-800 hover:bg-amber-900" : "",
+              )}
             >
-              View details
+              Details
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
 
@@ -81,7 +89,7 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
               >
-                View route
+                Route
                 <ExternalLinkIcon className="h-4 w-4" />
               </Link>
             )}
