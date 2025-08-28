@@ -1,5 +1,6 @@
 "use client";
 
+import { RoutesTabSwitcher } from "@/components/routes/tabs";
 import { DataTable } from "@/components/table/data-table";
 import type { User } from "@/db/zod";
 import { getColumns, type RouteHydrated } from "./columns";
@@ -16,11 +17,14 @@ export function RoutesTable({
 }) {
   const columns = getColumns(user);
   return (
-    <DataTable
-      filterCol="name"
-      data={routes}
-      columns={columns}
-      expandableRows={(route) => <RoutesTableMap route={route} osKey={osKey} />}
-    />
+    <main className="flex min-h-full flex-col gap-4">
+      <RoutesTabSwitcher />
+      <DataTable
+        filterCol="name"
+        data={routes}
+        columns={columns}
+        expandableRows={(route) => <RoutesTableMap route={route} osKey={osKey} />}
+      />
+    </main>
   );
 }

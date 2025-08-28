@@ -118,7 +118,7 @@ export function DataTable<TData extends object, TValue>({
                   <Fragment key={row.id}>
                     <TableRow data-state={row.getIsSelected() && "selected"}>
                       {expandableRows && (
-                        <TableCell>
+                        <TableCell className="px-1">
                           <DefaultToggle isExpanded={isExpanded} toggle={() => toggleRow(row.id)} />
                         </TableCell>
                       )}

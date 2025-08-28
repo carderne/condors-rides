@@ -35,7 +35,7 @@ export function UpsertForm({ route }: { route: Route }) {
         placeholder="Chilterns 100"
         label="Ride name"
         errors={state.errors?.name}
-        defaultValue={(state.formData?.get(names.name) as string) ?? route?.name ?? ""}
+        defaultValue={(state.formData?.get(names.name) as string) ?? route.name ?? ""}
       />
 
       <FormInput
@@ -46,7 +46,7 @@ export function UpsertForm({ route }: { route: Route }) {
         labelSuffix="km"
         placeholder="90"
         errors={state.errors?.distance}
-        defaultValue={(state.formData?.get(names.distance) as string) ?? route?.distance ?? ""}
+        defaultValue={(state.formData?.get(names.distance) as string) ?? route.distance ?? ""}
       />
       <FormInput
         required={false}
@@ -56,7 +56,7 @@ export function UpsertForm({ route }: { route: Route }) {
         labelSuffix="m"
         placeholder="450"
         errors={state.errors?.elevation}
-        defaultValue={(state.formData?.get(names.elevation) as string) ?? route?.elevation ?? ""}
+        defaultValue={(state.formData?.get(names.elevation) as string) ?? route.elevation ?? ""}
       />
       <FormInput
         required={false}
@@ -64,7 +64,7 @@ export function UpsertForm({ route }: { route: Route }) {
         placeholder="Waterperry Gardens Tea Stop"
         label="Cafe stop"
         errors={state.errors?.cafeStop}
-        defaultValue={(state.formData?.get(names.cafeStop) as string) ?? route?.cafeStop ?? ""}
+        defaultValue={(state.formData?.get(names.cafeStop) as string) ?? route.cafeStop ?? ""}
       />
       <FormTextarea
         required={false}
@@ -72,12 +72,13 @@ export function UpsertForm({ route }: { route: Route }) {
         placeholder="Not too hily but we will regroup at the top."
         label="Notes"
         errors={state.errors?.notes}
-        defaultValue={(state.formData?.get(names.notes) as string) ?? route?.notes ?? ""}
+        defaultValue={(state.formData?.get(names.notes) as string) ?? route.notes ?? ""}
       />
+      <FormInput disabled={true} label="URL" value={route?.url} />
 
       <Select
         name={names.surface}
-        defaultValue={(state.formData?.get(names.surface) as string) ?? route?.surface ?? "road"}
+        defaultValue={(state.formData?.get(names.surface) as string) ?? route.surface ?? "road"}
       >
         <FormSelectTrigger label="Surface" errors={state.errors?.surface}>
           <SelectValue />

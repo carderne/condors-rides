@@ -47,7 +47,15 @@ export function emitEvent({
   }
 }
 
-export type PosthogPage = "settings" | "rides_upcoming" | "rides_old" | "rides_future" | "routes";
+export type PosthogPage =
+  | "settings"
+  | "rides_upcoming"
+  | "rides_old"
+  | "rides_future"
+  | "rides_joined"
+  | "routes_all"
+  | "routes_promoted"
+  | "routes_liked";
 
 export function emitPageView({ user, page }: { user: User | null; page: PosthogPage }) {
   return emitEvent({ event: "page_view", user, properties: { page } });

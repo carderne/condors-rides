@@ -3,50 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function RidesTabSwitcher() {
+export function RoutesTabSwitcher() {
   const pathname = usePathname();
   return (
     <div className="-mt-4 flex justify-center">
       <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg">
         <Link
-          href="/rides/old"
+          href="/routes/all"
           className={`rounded-xl px-6 py-3 font-medium transition-all ${
-            pathname.includes("old")
+            pathname.includes("all")
               ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md"
               : "text-gray-600 hover:bg-pink-50 hover:text-pink-600"
           }`}
         >
-          Old
+          All
         </Link>
         <Link
-          href="/rides/upcoming"
+          href="/routes/promoted"
           className={`rounded-xl px-6 py-3 font-medium transition-all ${
-            pathname.includes("upcoming")
+            pathname.includes("promoted")
               ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md"
               : "text-gray-600 hover:bg-pink-50 hover:text-pink-600"
           }`}
         >
-          Upcoming
+          Promoted
         </Link>
         <Link
-          href="/rides/future"
+          href="/routes/liked"
           className={`rounded-xl px-6 py-3 font-medium transition-all ${
-            pathname.includes("future")
+            pathname.includes("liked")
               ? "bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-md"
               : "text-gray-600 hover:bg-pink-50 hover:text-pink-600"
           }`}
         >
-          Future
-        </Link>
-        <Link
-          href="/rides/joined"
-          className={`rounded-xl px-6 py-3 font-medium transition-all ${
-            pathname.includes("joined")
-              ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
-              : "text-gray-600 hover:bg-pink-50 hover:text-pink-600"
-          }`}
-        >
-          Joined
+          Liked
         </Link>
       </div>
     </div>

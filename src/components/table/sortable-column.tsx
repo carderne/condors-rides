@@ -10,20 +10,24 @@ export function SortableColumn<T>({
   children: React.ReactNode;
 }) {
   const sorted = column.getIsSorted();
+  const notSorted = sorted === false;
+
   const isSortedAsc = sorted === "asc";
+  const sortDescending = notSorted ? true : isSortedAsc;
+
   return (
     <Button
       className="group mr-8 !px-0 text-left"
       variant="ghost"
-      onClick={() => column.toggleSorting(isSortedAsc)}
+      onClick={() => column.toggleSorting(sortDescending)}
     >
       {children}
-      {sorted === false ? (
+      {notSorted ? (
         <ChevronsUpDownIcon className="group-hover:text-brand-foreground ml-2 size-4" />
-      ) : sorted === "asc" ? (
-        <ChevronUpIcon className="text-brand-foreground ml-2 size-4" />
+      ) : isSortedAsc ? (
+        <ChevronUpIcon className="text-primary ml-2 size-4" />
       ) : (
-        <ChevronDownIcon className="text-brand-foreground ml-2 size-4" />
+        <ChevronDownIcon className="text-primary ml-2 size-4" />
       )}
     </Button>
   );
