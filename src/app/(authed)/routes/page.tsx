@@ -2,7 +2,7 @@ import { emitPageView } from "@/clients/posthog";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
-import { count, eq, isNull, sql } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { RoutesTable } from "./table";
 
 const { osKey } = getConfig();
@@ -20,16 +20,15 @@ export default async function RoutesPage() {
       surface: schema.route.surface,
       cafeStop: schema.route.cafeStop,
       notes: schema.route.notes,
-      hiddenAt: schema.route.hiddenAt,
+      promoted: schema.route.promoted,
       createdAt: schema.route.createdAt,
       updatedAt: schema.route.updatedAt,
       numRides: count(schema.ride.id).as("num_rides"),
-      rank: sql<number>`CAST(AVG(${schema.routeRank.rank}) AS INTEGER)`.as("rank"),
+      numVotes: count(schema.routeVote.userId).as("num_votes"),
     })
     .from(schema.route)
     .leftJoin(schema.ride, eq(schema.ride.routeUrl, schema.route.url))
-    .leftJoin(schema.routeRank, eq(schema.routeRank.routeId, schema.route.id))
-    .where(isNull(schema.route.hiddenAt))
+    .leftJoin(schema.routeVote, eq(schema.routeVote.routeId, schema.route.id))
     .groupBy(schema.route.id);
 
   return <RoutesTable user={user} routes={routes} osKey={osKey} />;

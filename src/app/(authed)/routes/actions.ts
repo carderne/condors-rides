@@ -2,7 +2,8 @@
 
 import { getMembership, getSuperUser } from "@/dal/membership";
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
+import { invariant } from "@/lib/invariant";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 
@@ -19,30 +20,35 @@ export async function getGeojsonAction(routeId: string) {
   return route.geojson;
 }
 
-export async function hideRouteAction(routeId: string) {
+export async function togglePromoteRouteAction(routeId: string) {
   await getSuperUser();
-  await db.update(schema.route).set({ hiddenAt: new Date() }).where(eq(schema.route.id, routeId));
+  const where = eq(schema.route.id, routeId);
+  const route = await db.query.route.findFirst({ where });
+  invariant(route);
+  const promoted = !route.promoted;
+  await db.update(schema.route).set({ promoted }).where(where);
   revalidatePath("/routes");
 }
 
-export async function unHideRouteAction(routeId: string) {
-  await getSuperUser();
-  await db.update(schema.route).set({ hiddenAt: null }).where(eq(schema.route.id, routeId));
-  revalidatePath("/routes");
-}
-
-export async function setRouteRankAction(routeId: string, rank: number) {
+export async function toggleUpvoteRouteAction(routeId: string) {
   const user = await getMembership();
-  await db
-    .insert(schema.routeRank)
-    .values({
-      routeId,
-      userId: user.id,
-      rank,
-    })
-    .onConflictDoUpdate({
-      target: [schema.routeRank.routeId, schema.routeRank.userId],
-      set: { rank },
-    });
-  revalidatePath("/routes");
+  const { id: userId } = user;
+
+  const where = and(eq(schema.routeVote.userId, userId), eq(schema.routeVote.routeId, routeId));
+
+  await db.transaction(async (tx) => {
+    const existingVote = await tx.query.routeVote.findFirst({ where });
+    if (existingVote) {
+      await tx.delete(schema.routeVote).where(where);
+    } else {
+      await tx
+        .insert(schema.routeVote)
+        .values({
+          userId,
+          routeId,
+        })
+        .onConflictDoNothing();
+    }
+  });
+  revalidatePath("/rides");
 }

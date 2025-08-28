@@ -10,12 +10,12 @@ import {
 import type { Route, User } from "@/db/zod";
 import { checkIsSuper } from "@/lib/permissions";
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import { ExternalLinkIcon, MoreHorizontalIcon } from "lucide-react";
+import { ExternalLinkIcon, MoreHorizontalIcon, ThumbsUpIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { hideRouteAction, unHideRouteAction } from "./actions";
+import { togglePromoteRouteAction, toggleUpvoteRouteAction } from "./actions";
 
-export type RouteHydrated = Omit<Route, "geojson"> & { rank: number; numRides: number };
+export type RouteHydrated = Omit<Route, "geojson"> & { numVotes: number; numRides: number };
 
 export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
   const columns: ColumnDef<RouteHydrated>[] = [
@@ -72,6 +72,9 @@ function Actions({ row, user }: { row: Row<RouteHydrated>; user: User }) {
 
   return (
     <div className="flex items-center gap-2">
+      <Button variant="ghost" size="icon" onClick={() => toggleUpvoteRouteAction(route.id)}>
+        <ThumbsUpIcon />
+      </Button>
       <Button variant="ghost" size="icon" asChild>
         <Link
           href={route.url}
@@ -102,16 +105,16 @@ function Actions({ row, user }: { row: Row<RouteHydrated>; user: User }) {
           {isSuper && (
             <DropdownMenuItem
               onClick={async () => {
-                await hideRouteAction(route.id);
+                await togglePromoteRouteAction(route.id);
                 toast("Route hidden", {
                   action: {
                     label: "Undo",
-                    onClick: () => unHideRouteAction(route.id),
+                    onClick: () => togglePromoteRouteAction(route.id),
                   },
                 });
               }}
             >
-              Hide
+              {route.promoted ? "Un-promote" : "Promote"}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

@@ -271,19 +271,19 @@ export const route = pgTable(
     notes: text("notes"),
     geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
 
-    hiddenAt: timestamp("hidden_at"),
+    promoted: boolean("promoted"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (_table) => [],
 );
 export const routeRelations = relations(route, ({ many }) => ({
-  ranks: many(routeRank),
+  votes: many(routeVote),
   rides: many(ride),
 }));
 
-export const routeRank = pgTable(
-  "route_rank",
+export const routeVote = pgTable(
+  "route_vote",
   {
     routeId: text("route_id")
       .references(() => route.id)
@@ -291,19 +291,18 @@ export const routeRank = pgTable(
     userId: text("user_id")
       .references(() => user.id)
       .notNull(),
-    rank: integer("rank").notNull(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (table) => [uniqueIndex("route_rank__route_id_user_id_uniq_idx").on(table.routeId, table.userId)],
+  (table) => [uniqueIndex("route_vote__route_id_user_id_uniq_idx").on(table.routeId, table.userId)],
 );
-export const routeRankRelations = relations(routeRank, ({ one }) => ({
+export const routeVoteRelations = relations(routeVote, ({ one }) => ({
   route: one(route, {
-    fields: [routeRank.routeId],
+    fields: [routeVote.routeId],
     references: [route.id],
   }),
   user: one(user, {
-    fields: [routeRank.userId],
+    fields: [routeVote.userId],
     references: [user.id],
   }),
 }));
