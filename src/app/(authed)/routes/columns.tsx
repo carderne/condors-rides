@@ -10,11 +10,10 @@ import {
 import type { Route, User } from "@/db/zod";
 import { checkIsSuper } from "@/lib/permissions";
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import { ExternalLinkIcon, MoreHorizontalIcon, StarIcon } from "lucide-react";
+import { ExternalLinkIcon, MoreHorizontalIcon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { toast } from "sonner";
-import { hideRouteAction, setRouteRankAction, unHideRouteAction } from "./actions";
+import { hideRouteAction, unHideRouteAction } from "./actions";
 
 export type RouteHydrated = Omit<Route, "geojson"> & { rank: number; numRides: number };
 
@@ -24,13 +23,6 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
       id: "actions",
       cell: ({ row }) => <Actions row={row} user={user} />,
       size: 20,
-    },
-    {
-      id: "rank",
-      accessorFn: (row) => row.rank,
-      header: ({ column }) => <SortableColumn column={column}>Rank</SortableColumn>,
-      cell: ({ row }) => <Ranker routeId={row.original.id} rank={row.original.rank} />,
-      size: 100,
     },
     {
       id: "name",
@@ -124,32 +116,6 @@ function Actions({ row, user }: { row: Row<RouteHydrated>; user: User }) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
-  );
-}
-
-function Ranker({ routeId, rank }: { routeId: string; rank: number | null }) {
-  const [hoveredIndex, setHoveredIndex] = useState<number>(-1);
-  const rankDisplay = rank
-    ? Array.from({ length: rank }, (_, index) => (
-        <StarIcon className="size-3 fill-current text-amber-400" key={index} />
-      ))
-    : null;
-  const rankDisplaySet = Array.from({ length: 5 }, (_, index) => (
-    <StarIcon
-      className="size-3 cursor-pointer hover:text-black"
-      key={index}
-      fill={hoveredIndex !== null && index <= hoveredIndex ? "currentColor" : "none"}
-      onMouseEnter={() => setHoveredIndex(index)}
-      onMouseLeave={() => setHoveredIndex(-1)}
-      onClick={() => setRouteRankAction(routeId, index + 1)}
-    />
-  ));
-
-  return (
-    <div className="group h-full min-h-3 w-15">
-      <div className="flex group-hover:hidden">{rankDisplay}</div>
-      <div className="z-20 hidden group-hover:flex">{rankDisplaySet}</div>
     </div>
   );
 }
