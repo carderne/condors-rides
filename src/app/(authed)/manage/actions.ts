@@ -71,7 +71,9 @@ export async function action(
       rideId: ride.id,
       note,
     }));
-    await tx.insert(schema.rideChange).values(changes);
+    if (changes.length > 0) {
+      await tx.insert(schema.rideChange).values(changes);
+    }
 
     const { routeUrl: url } = data;
     if (!url || !geojson) {
@@ -126,10 +128,6 @@ function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): s
     // if we get here there are real changes, so we keep it!
     return true;
   });
-
-  for (const key of keysChanged) {
-    console.log("CHANGE", { e: ride[key], d: data[key] });
-  }
 
   const result = keysChanged.map((k) => `${k} changed`);
 
