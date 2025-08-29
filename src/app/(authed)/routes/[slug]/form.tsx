@@ -5,6 +5,7 @@ import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
 import { FormTextarea } from "@/components/form/textarea";
 import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { routeDirectionArray } from "@/db/schema";
 import type { Route } from "@/db/zod";
 import Form from "next/form";
 import { useActionState } from "react";
@@ -75,6 +76,22 @@ export function UpsertForm({ route }: { route: Route }) {
         defaultValue={(state.formData?.get(names.notes) as string) ?? route.notes ?? ""}
       />
       <FormInput disabled={true} label="URL" value={route?.url} />
+
+      <Select
+        name={names.direction}
+        defaultValue={(state.formData?.get(names.direction) as string) ?? route?.direction ?? ""}
+      >
+        <FormSelectTrigger label="Direction" errors={state.errors?.direction}>
+          <SelectValue placeholder="Select..." />
+        </FormSelectTrigger>
+        <SelectContent>
+          {routeDirectionArray.map((d) => (
+            <SelectItem key={d} value={d}>
+              {d}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <Select
         name={names.surface}

@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { RouteDirection } from "@/db/schema";
 import type { Route, User } from "@/db/zod";
 import { checkIsSuper } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,12 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
       size: 90,
     },
     {
+      id: "numRides",
+      accessorFn: (row) => row.numRides,
+      header: ({ column }) => <SortableColumn column={column}>Rides</SortableColumn>,
+      size: 100,
+    },
+    {
       id: "name",
       accessorFn: (row) => row.name,
       header: ({ column }) => <SortableColumn column={column}>Name</SortableColumn>,
@@ -50,10 +57,13 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
       size: 140,
     },
     {
-      id: "numRides",
-      accessorFn: (row) => row.numRides,
-      header: ({ column }) => <SortableColumn column={column}>Rides</SortableColumn>,
-      size: 100,
+      id: "direction",
+      accessorFn: (row) => row.direction,
+      header: ({ column }) => <SortableColumn column={column}>Direction</SortableColumn>,
+      cell: ({ getValue }) => (
+        <div className="max-w-[25ch] truncate">{getValue() as RouteDirection}</div>
+      ),
+      size: 140,
     },
     {
       id: "distance",
@@ -68,9 +78,9 @@ export function getColumns(user: User): ColumnDef<RouteHydrated>[] {
       size: 140,
     },
     {
-      id: "cafeStop",
+      id: "destination",
       accessorFn: (row) => row.cafeStop,
-      header: ({ column }) => <SortableColumn column={column}>Cafe stops</SortableColumn>,
+      header: ({ column }) => <SortableColumn column={column}>Destination</SortableColumn>,
       cell: ({ getValue }) => <div className="max-w-[30ch] truncate">{getValue() as string}</div>,
       size: 300,
     },

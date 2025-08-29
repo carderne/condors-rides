@@ -16,6 +16,7 @@ export default async function RoutesPage() {
       url: schema.route.url,
       name: schema.route.name,
       distance: schema.route.distance,
+      direction: schema.route.direction,
       elevation: schema.route.elevation,
       surface: schema.route.surface,
       cafeStop: schema.route.cafeStop,

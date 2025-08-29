@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 export function RoutesTabSwitcher() {
   const pathname = usePathname();
   return (
-    <div className="mx-auto -mt-4 flex w-full gap-2 rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg md:w-fit">
+    <div className="mx-auto -mt-4 flex w-full justify-center gap-2 rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg md:w-fit">
       <Link
         href="/routes/all"
         className={`rounded-xl px-3 py-3 font-medium transition-all md:px-6 ${

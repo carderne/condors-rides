@@ -258,16 +258,22 @@ export const rideMemberRelations = relations(rideMember, ({ one }) => ({
 // *****************************************
 // Routes
 // *****************************************
+export const routeDirectionArray = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
+export type RouteDirection = (typeof routeDirectionArray)[number];
+export const routeDirectionEnum = pgEnum("route_direction", routeDirectionArray);
 export const route = pgTable(
   "route",
   {
     id: id(),
     url: text("url").notNull().unique(),
     name: text("name").notNull(),
+
     distance: integer("distance").notNull(),
     elevation: integer("elevation"),
     surface: rideSurface("surface").notNull().default("road"),
     cafeStop: text("cafe_stop"),
+    direction: routeDirectionEnum("direction"),
+
     notes: text("notes"),
     geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
 

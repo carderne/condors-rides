@@ -21,7 +21,7 @@ export function RoutesTable({
       <RoutesTabSwitcher />
       <DataTable
         searchCol="name"
-        filterCols={["surface"]}
+        filterCols={["surface", "direction"]}
         data={routes}
         columns={columns}
         expandableRows={(route) => <RoutesTableMap route={route} osKey={osKey} />}

@@ -116,7 +116,7 @@ export function DataTable<TData extends object, TValue>({
       <div className="flex items-center gap-4 py-4">
         {searchCol && (
           <Input
-            placeholder={`Filter by ${searchCol}...`}
+            placeholder={`Search by ${searchCol}...`}
             value={(table?.getColumn(searchCol)?.getFilterValue() as string) ?? ""}
             onChange={(event) => {
               table?.getColumn(searchCol)?.setFilterValue(event.target.value);
@@ -126,7 +126,7 @@ export function DataTable<TData extends object, TValue>({
         )}
 
         {filterCols && (
-          <div className="ml-4 flex items-center gap-2">
+          <div className="ml-4 flex items-center gap-2 flex-wrap">
             Filters:
             {filterCols.map((col) => {
               const colKey = String(col);
@@ -143,7 +143,7 @@ export function DataTable<TData extends object, TValue>({
                     <SelectValue placeholder={`Filter ${colKey}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All {colKey}</SelectItem>
+                    <SelectItem value="all">All {colKey}s</SelectItem>
                     {options.map((option) => (
                       <SelectItem key={option} value={option}>
                         {option}
