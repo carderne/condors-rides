@@ -10,7 +10,7 @@ export default async function AuthedLayout({
   return (
     <>
       <HeaderBar user={user} />
-      <div className="mx-auto w-full p-4 md:max-w-90vw">{children}</div>
+      <div className="md:max-w-90vw mx-auto w-full p-4">{children}</div>
     </>
   );
 }

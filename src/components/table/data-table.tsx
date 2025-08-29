@@ -126,7 +126,7 @@ export function DataTable<TData extends object, TValue>({
         )}
 
         {filterCols && (
-          <div className="ml-4 flex items-center gap-2 flex-wrap">
+          <div className="ml-4 flex flex-wrap items-center gap-2">
             Filters:
             {filterCols.map((col) => {
               const colKey = String(col);
