@@ -93,6 +93,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const isPast = ride.date < addDays(new Date(), -1);
 
   const riders = [...(unclaimed ? [] : [ride.leader]), ...ride.members.map((m) => m.user)];
+  console.log("RIDERS", riders.length);
 
   return (
     <div className="flex flex-col gap-8">
@@ -349,7 +350,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <div className="flex flex-col">
               <H3>
                 Riders {riders.length}
-                {ride.maxGroupSize && `/${ride.maxGroupSize}`}
+                {ride.maxGroupSize !== null && `/${ride.maxGroupSize}`}
               </H3>
 
               <div className="grid grid-cols-2 gap-4">

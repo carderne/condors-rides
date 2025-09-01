@@ -10,7 +10,7 @@ export function checkIsSuper(user: User): boolean {
 }
 
 export function rideIsFull(ride: RideHydrated): boolean {
-  if (!ride.maxGroupSize) {
+  if (ride.maxGroupSize === null) {
     return false;
   }
   const leaderCount = ride.unclaimed ? 0 : 1;
