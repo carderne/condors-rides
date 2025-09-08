@@ -38,7 +38,8 @@ export default async function SignIn({
       )}
       <H2 className="text-primary z-10 font-sans text-5xl">Sign In</H2>
       <div>
-        <H3 className="">You must be a paid-up Club Member to continue</H3>
+        <H3 className="">Not yet a member? Not a problem!</H3>
+        <p>You can join up to three rides, then we ask you to join the club</p>
         <p className="text-accent-foreground">
           You can read about joining the club{" "}
           <Link href="https://cowleyroadcondors.cc/join/" className="text-primary hover:underline">
@@ -46,16 +47,9 @@ export default async function SignIn({
           </Link>
         </p>
       </div>
-      <H3 className="">Sign in to create and join rides, comment etc!</H3>
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
         <SignInGoogle redirectUrl={redirectUrl} />
         <SignInFacebook redirectUrl={redirectUrl} />
-      </div>
-      <div className="flex items-center justify-center gap-2 text-center">
-        Need an account?
-        <Link href="/sign-up" className="text-primary">
-          sign up!
-        </Link>
       </div>
     </main>
   );
