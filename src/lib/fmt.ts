@@ -69,6 +69,14 @@ export function capitalize(text: string): string {
   return res;
 }
 
+export function formatRideName(text: string): string {
+  if (text.length > 40) {
+    return text.slice(0, 40) + "...";
+  }
+
+  return text;
+}
+
 export function formatStartPoint(text: string): string {
   if (text === "Beeline Bicycles") {
     return "Beeline";
@@ -76,6 +84,10 @@ export function formatStartPoint(text: string): string {
 
   if (text.match(/-?\d+\.\d+,\s*-?\d+\.\d+/)) {
     return "Click to see";
+  }
+
+  if (text.length > 20) {
+    return text.slice(0, 20) + "...";
   }
 
   return text;

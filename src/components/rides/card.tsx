@@ -1,5 +1,5 @@
 import type { Ride, RideMember, User } from "@/db/zod";
-import { formatStartPoint } from "@/lib/fmt";
+import { formatRideName, formatStartPoint } from "@/lib/fmt";
 import { rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
@@ -58,7 +58,9 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
                 ) : isFull ? (
                   <span className="mr-2">(FULL)</span>
                 ) : null}
-                <span className={cn(ride.canceledAt ? "line-through" : "")}>{ride.name}</span>
+                <span className={cn("", ride.canceledAt ? "line-through" : "")}>
+                  {formatRideName(ride.name)}
+                </span>
               </h2>
               {showLeader && (
                 <div className="flex items-center gap-3">
