@@ -18,11 +18,25 @@ export default async function NewRideFromRidePage({
     return notFound();
   }
 
-  const { name, time, speed, routeUrl, distance, elevation, cafeStop, maxGroupSize, notes } = ride;
+  const {
+    name,
+    time,
+    speed,
+    surface,
+    startPoint,
+    routeUrl,
+    distance,
+    elevation,
+    cafeStop,
+    maxGroupSize,
+    notes,
+  } = ride;
   const detailsOnly = {
     name,
     time,
     speed,
+    surface,
+    startPoint,
     routeUrl,
     distance,
     elevation,
