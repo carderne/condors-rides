@@ -5,6 +5,10 @@ export function formatShortDate(date: Date) {
   return format(date, "EEE, d MMM");
 }
 
+export function formatShortDateYear(date: Date) {
+  return format(date, "d MMM yyyy");
+}
+
 export function formatShortDateTime(date: Date) {
   return format(date, "EEE, d MMM, h:mm a");
 }

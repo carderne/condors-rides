@@ -19,10 +19,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Ride, User } from "@/db/zod";
-import { formatFullDateTime } from "@/lib/fmt";
+import { formatShortDateYear } from "@/lib/fmt";
+import { cn } from "@/lib/utils";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import type { ColumnDef, Row } from "@tanstack/react-table";
+import { differenceInMonths } from "date-fns";
 import { MoreHorizontalIcon } from "lucide-react";
-import { banUserAction, unbanUserAction } from "./actions";
+import { banUserAction, unbanUserAction, verifyUserAction } from "./actions";
 
 export type UserHydrated = User & { rides: Array<Ride>; ridesJoined: Array<unknown> };
 
@@ -63,12 +66,36 @@ export const columns: ColumnDef<UserHydrated>[] = [
     size: 100,
   },
   {
+    id: "verifiedAt",
+    accessorFn: (row) => row.verifiedAt,
+    cell: ({ row }) => {
+      const verifiedAt = row.original.verifiedAt;
+      if (!verifiedAt) {
+        return <span className="bg-red-300">never</span>;
+      }
+      const months = differenceInMonths(new Date(), verifiedAt);
+      return (
+        <span className={cn(months > 12 ? "bg-red-300" : "bg-green-300")}>
+          {formatShortDateYear(verifiedAt)}
+        </span>
+      );
+    },
+    header: ({ column }) => <SortableColumn column={column}>Verified</SortableColumn>,
+    size: 200,
+  },
+  {
     id: "createdAt",
     accessorFn: (row) => row.createdAt,
     cell: ({ row }) => (
-      <span className="text-xs">{formatFullDateTime(row.original.createdAt)}</span>
+      <span className="text-xs">{formatShortDateYear(row.original.createdAt)}</span>
     ),
     header: ({ column }) => <SortableColumn column={column}>Joined</SortableColumn>,
+    size: 200,
+  },
+  {
+    id: "status",
+    accessorFn: (row) => (row.deactivatedAt === null ? "Active" : "Banned"),
+    header: ({ column }) => <SortableColumn column={column}>Status</SortableColumn>,
     size: 200,
   },
 ];
@@ -89,6 +116,12 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none"
+            onClick={verifyUserAction.bind(null, userId)}
+          >
+            Verify User
+          </DropdownMenuItem>
           {user.type !== "admin" &&
             (user.deactivatedAt ? (
               <AlertDialog>

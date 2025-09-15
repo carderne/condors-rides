@@ -31,3 +31,9 @@ export async function unbanUserAction(userId: string) {
   await db.update(schema.user).set({ name, deactivatedAt: null }).where(eq(schema.user.id, userId));
   revalidatePath("/admin");
 }
+
+export async function verifyUserAction(userId: string) {
+  await getAdminUser();
+  await db.update(schema.user).set({ verifiedAt: new Date() }).where(eq(schema.user.id, userId));
+  revalidatePath("/admin");
+}
