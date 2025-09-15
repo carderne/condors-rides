@@ -103,6 +103,7 @@ export function UpsertForm({ route }: { route: Route }) {
         <SelectContent>
           <SelectItem value="road">Road</SelectItem>
           <SelectItem value="gravel">Gravel</SelectItem>
+          <SelectItem value="virtual">Virtual</SelectItem>
         </SelectContent>
       </Select>
       <div className="text-xl text-red-600 md:ml-auto">{formErrorMsg}</div>

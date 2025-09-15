@@ -28,7 +28,9 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
       <div
         className={cn(
           "flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl",
-          ride.surface === "gravel" ? "border-amber-800" : "border-primary",
+          "border-primary",
+          ride.surface === "gravel" && "border-amber-800",
+          ride.surface === "virtual" && "border-purple-800",
         )}
       >
         {/* Time and gravel */}
@@ -39,6 +41,9 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
           </div>
           {ride.surface === "gravel" && (
             <div className="p-2 text-xl font-bold text-amber-800 italic">Gravel</div>
+          )}
+          {ride.surface === "virtual" && (
+            <div className="p-2 text-xl font-bold text-purple-800 italic">Virtual</div>
           )}
         </div>
 
@@ -76,6 +81,7 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
                 ride.surface === "gravel" ? "bg-amber-800 hover:bg-amber-900" : "",
+                ride.surface === "virtual" ? "bg-purple-800 hover:bg-purple-900" : "",
               )}
             >
               Details
