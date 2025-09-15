@@ -51,6 +51,22 @@ export default async function SignIn({
         <SignInGoogle redirectUrl={redirectUrl} />
         <SignInFacebook redirectUrl={redirectUrl} />
       </div>
+      <div className="text-muted-foreground text-sm md:hidden">
+        <p>
+          <strong>Come here from the Facebook app?</strong>
+        </p>
+        <p>Make sure you open this page in your normal browser, not the in-app one!</p>
+        <p>
+          <Link
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://chatgpt.com/share/68c7eda4-f558-800a-b806-4d566c81de01"
+            className="text-primary"
+          >
+            Click here for instructions
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }
