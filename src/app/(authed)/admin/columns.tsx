@@ -63,7 +63,7 @@ export const columns: ColumnDef<UserHydrated>[] = [
     id: "numRidesJoined",
     accessorFn: (row) => row.ridesJoined.length,
     header: ({ column }) => <SortableColumn column={column}>Rides joined</SortableColumn>,
-    size: 100,
+    size: 140,
   },
   {
     id: "verifiedAt",
