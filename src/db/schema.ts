@@ -399,3 +399,42 @@ export const token = pgTable(
   },
   (_table) => [],
 );
+
+// *****************************************
+// Surveys
+// *****************************************
+export const survey = pgTable(
+  "survey",
+  {
+    id: id(),
+    active: boolean("active").notNull().default(false),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    options: jsonb("options").$type<string[]>(),
+    optionsExclusive: boolean("options_exclusive").notNull().default(true),
+    allowComment: boolean("allow_comment").notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (_table) => [],
+);
+
+export const surveyResponse = pgTable(
+  "survey_response",
+  {
+    id: id(),
+    surveyId: text("survey_id")
+      .notNull()
+      .references(() => survey.id, { onDelete: "restrict" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "restrict" }),
+    comment: text("comment"),
+    selectedOptions: jsonb("selected_options").$type<string[]>(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("survey_response__survey_id_user_id_uniqidx").on(table.surveyId, table.userId),
+  ],
+);

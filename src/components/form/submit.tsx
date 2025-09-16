@@ -14,7 +14,7 @@ export function FormSubmit({ disabled, children, className, ...props }: Componen
         size="lg"
         type="submit"
         disabled={pending || disabled}
-        className="!h-20 w-full text-xl md:w-fit"
+        className="w-full md:w-fit"
         {...props}
       >
         {pending ? <LoaderIcon className="animate-spin" /> : children}

@@ -179,7 +179,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         </SelectContent>
       </Select>
       <div className="text-xl text-red-600 md:ml-auto">{formErrorMsg}</div>
-      <FormSubmit className="w-full">{ride ? "Save" : "Add ride"}</FormSubmit>
+      <FormSubmit className="!h-20 w-full text-xl">{ride ? "Save" : "Add ride"}</FormSubmit>
     </Form>
   );
 }

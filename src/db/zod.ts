@@ -18,3 +18,5 @@ export type CommentReaction = typeof schema.commentReaction.$inferSelect;
 export type CommentReactionHydrated = CommentReaction & { user: User };
 
 export type ExternalAuth = typeof schema.token.$inferSelect;
+
+export type Survey = typeof schema.survey.$inferSelect;
