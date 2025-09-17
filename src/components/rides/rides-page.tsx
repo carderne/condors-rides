@@ -16,7 +16,9 @@ export function GenericRidesPage({
   return (
     <main className="flex min-h-full flex-col gap-4">
       <RidesTabSwitcher />
-      {surveys?.map((survey) => <SurveyForm key={survey.id} survey={survey} />)}
+      {surveys?.map((survey) => (
+        <SurveyForm key={survey.id} survey={survey} />
+      ))}
       {rides.length === 0 ? (
         <div className="mx-auto mt-20">
           <H3>No rides :(</H3>

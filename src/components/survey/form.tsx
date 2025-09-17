@@ -1,25 +1,20 @@
 "use client";
 
-import { FormSubmit } from "@/components/form/submit";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { H3, Lead } from "@/components/ui/typography";
 import type { Survey } from "@/db/zod";
-import { MessageSquareIcon } from "lucide-react";
 import Form from "next/form";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { toast } from "sonner";
 import { action, undoAction } from "./actions";
 import { type State, validator } from "./validate";
 
 export function SurveyForm({ survey }: { survey: Survey }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [comment, setComment] = useState("");
-  const [showComment, setShowComment] = useState(false);
 
   const [_, formAction] = useActionState<State, FormData>(
     async (prev, formData) => {
@@ -41,6 +36,14 @@ export function SurveyForm({ survey }: { survey: Survey }) {
     { errors: {} },
   );
 
+  const triggerForm = () => {
+    const form = formRef.current;
+    if (!form) {
+      return;
+    }
+    form.submit();
+  };
+
   const handleOptionChange = (option: string, checked: boolean) => {
     if (survey.optionsExclusive) {
       setSelectedOptions(checked ? [option] : []);
@@ -53,28 +56,19 @@ export function SurveyForm({ survey }: { survey: Survey }) {
 
   const handleRadioChange = (value: string) => {
     setSelectedOptions([value]);
+    triggerForm();
   };
 
   return (
-    <Form className="border-primary space-y-4 rounded-xl border p-4 shadow" action={formAction}>
+    <Form
+      ref={formRef}
+      className="border-primary space-y-4 rounded-xl border p-4 shadow"
+      action={formAction}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <H3 className="text-primary">{survey.name}</H3>
           <Lead className="text-sm">{survey.description}</Lead>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          {survey.allowComment && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowComment(!showComment)}
-            >
-              <MessageSquareIcon />
-              {showComment ? "Hide comment" : "Add comment"}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -103,19 +97,7 @@ export function SurveyForm({ survey }: { survey: Survey }) {
             ))}
           </OptionWrapper>
         )}
-        <FormSubmit>Submit</FormSubmit>
       </div>
-
-      {survey.allowComment && showComment && (
-        <div className="animate-in slide-in-from-top-2 flex gap-2 duration-200">
-          <Textarea
-            name="comment"
-            placeholder="Share your thoughts..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
-      )}
     </Form>
   );
 }
