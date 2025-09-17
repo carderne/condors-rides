@@ -41,7 +41,7 @@ export function SurveyForm({ survey }: { survey: Survey }) {
     if (!form) {
       return;
     }
-    form.submit();
+    form.requestSubmit();
   };
 
   const handleOptionChange = (option: string, checked: boolean) => {
