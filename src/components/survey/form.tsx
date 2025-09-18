@@ -38,7 +38,7 @@ export function SurveyForm({ survey }: { survey: Survey }) {
                 <RadioGroupItem
                   value={option}
                   id={option}
-                  className="border-primary text-primary"
+                  className="border-primary text-primary cursor-pointer"
                 />
                 <div className="text-sm leading-none font-medium">{option}</div>
               </Label>
