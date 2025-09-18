@@ -16,7 +16,7 @@
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "fmt": "prettier --log-level warn --write .",
-    "lint": "next lint",
+    "lint": "eslint --fix . --ext .js,.jsx,.ts,.tsx",
     "check": "tsc --noEmit",
     "test": "NO_CHECK_ENV_VARS=1 vitest",
     "test:dev": "IN_TEST=1 next dev --turbo --port 2999",
@@ -94,7 +94,7 @@
   },
   "engines": {
     "node": ">=22.0.0 <23.0.0",
-    "npm": ">=10.0.0 <11.0.0"
+    "pnpm": ">=10.13.0 <11.0.0"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {

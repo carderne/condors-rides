@@ -41,7 +41,7 @@ const config = tseslint.config(
     },
   },
   {
-    ignores: [".next/*"],
+    ignores: [".next/*", "next-env.d.ts"],
   },
   tseslint.configs.recommended,
   {

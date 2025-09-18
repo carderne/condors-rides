@@ -1,0 +1,2 @@
+ignoreDepScripts: true
+minimumReleaseAge: 4320 # minutes (set to 3 days)
