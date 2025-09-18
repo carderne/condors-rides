@@ -27,7 +27,13 @@ export default async function UpcomingRidesPage() {
     ? await db
         .select({ ...getTableColumns(schema.survey) })
         .from(schema.survey)
-        .leftJoin(schema.surveyResponse, eq(schema.surveyResponse.surveyId, schema.survey.id))
+        .leftJoin(
+          schema.surveyResponse,
+          and(
+            eq(schema.surveyResponse.surveyId, schema.survey.id),
+            eq(schema.surveyResponse.userId, user.id),
+          ),
+        )
         .where(and(eq(schema.survey.active, true), isNull(schema.surveyResponse.id)))
     : [];
 
