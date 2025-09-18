@@ -25,7 +25,7 @@ jobs:
           version: 10
 
       - run: pnpm install --frozen-lockfile
-      - run: npm run ci:fmt
-      - run: npm run lint
-      - run: npm run check
-      - run: npm run ci:test
+      - run: pnpm run ci:fmt
+      - run: pnpm run lint
+      - run: pnpm run check
+      - run: pnpm run ci:test
