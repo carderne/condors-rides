@@ -31,7 +31,7 @@ export default async function RootLayout({
       </head>
       <body>
         <div className="min-h-screen w-screen overflow-y-auto font-sans antialiased">
-          <Toaster />
+          <Toaster position="top-right" />
           {children}
         </div>
       </body>

@@ -4,16 +4,11 @@ import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { type State, validator } from "./validate";
 
-export async function action(surveyId: string, _: State, formData: FormData): Promise<State> {
+export async function action(surveyId: string, option: string) {
   const user = await getMembership();
 
-  const validated = validator(formData);
-  if (validated.errors) return validated;
-  const { data } = validated;
-
-  const insertable = { selectedOptions: data.options, comment: data.comment };
+  const insertable = { selectedOptions: [option] };
 
   await db
     .insert(schema.surveyResponse)
@@ -28,10 +23,9 @@ export async function action(surveyId: string, _: State, formData: FormData): Pr
     });
 
   revalidatePath("/");
-  return { errors: {} };
 }
 
-export async function undoAction(surveyId: string): Promise<State> {
+export async function undoAction(surveyId: string) {
   const user = await getMembership();
 
   await db
@@ -41,5 +35,4 @@ export async function undoAction(surveyId: string): Promise<State> {
     );
 
   revalidatePath("/");
-  return { errors: {} };
 }
