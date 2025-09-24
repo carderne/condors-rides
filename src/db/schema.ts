@@ -148,7 +148,7 @@ export const ride = pgTable(
 
     maxGroupSize: integer("max_group_size"),
     cafeStop: text("cafe_stop"),
-    startPoint: text("start_point").notNull().default("Beeline Bicycles"),
+    startPoint: text("start_point").notNull(),
 
     unclaimed: boolean("unclaimed").notNull().default(false),
     canceledAt: timestamp("canceled_at"),

@@ -45,6 +45,7 @@ async function insertRides() {
       maxGroupSize: 8,
       cafeStop: "Blakes at Clanfield",
       notes: "Route is a bit lumpy to start",
+      startPoint: "Oxford",
     },
     {
       userId: "1",
@@ -57,6 +58,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       maxGroupSize: 8,
       cafeStop: "Blakes at Clanfield",
+      startPoint: "Oxford",
     },
     {
       userId: "2",
@@ -70,6 +72,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       cafeStop: "Blakes at Clanfield",
       notes: "Route is a bit lumpy to start",
+      startPoint: "Oxford",
     },
     // Current rides
     {
@@ -84,6 +87,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       maxGroupSize: 8,
       notes: "Route is a bit lumpy to start",
+      startPoint: "Oxford",
     },
     {
       userId: "1",
@@ -95,6 +99,7 @@ async function insertRides() {
       distance: 40,
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       cafeStop: "Blakes at Clanfield",
+      startPoint: "Oxford",
     },
     {
       userId: "1",
@@ -107,6 +112,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       maxGroupSize: 8,
       notes: "Route is a bit lumpy to start",
+      startPoint: "Oxford",
     },
     {
       userId: "2",
@@ -120,6 +126,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       maxGroupSize: 8,
       cafeStop: "Blakes at Clanfield",
+      startPoint: "Oxford",
     },
     {
       id: "9",
@@ -134,6 +141,7 @@ async function insertRides() {
       routeUrl: "https://www.strava.com/routes/3339543184132710790",
       maxGroupSize: 8,
       notes: "Route is a bit lumpy to start",
+      startPoint: "Oxford",
     },
   ]);
 
