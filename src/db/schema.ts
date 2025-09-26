@@ -13,6 +13,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
+import type { PushSubscription } from "web-push";
 
 // Note: we're using `timestamp` throughout, rather than `timestamptz`
 // Node dates are always UTC and we avoid the (unlikely) case
@@ -41,6 +42,8 @@ export const user = pgTable(
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
+
+    webpushSub: jsonb("webpush_sub").$type<PushSubscription>(),
 
     verifiedAt: timestamp("verified_at"),
     deactivatedAt: timestamp("deactivated_at"),

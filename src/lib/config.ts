@@ -28,6 +28,11 @@ type Config = {
 
   osKey: string;
 
+  vapid: {
+    public: string;
+    private: string;
+  };
+
   posthog: {
     key: string;
   };
@@ -56,6 +61,11 @@ function getDefaultConfig() {
     encryptionKeys: getEncryptionKeys("ENCRYPTION_KEYS"),
 
     osKey: get("OS_KEY"),
+
+    vapid: {
+      public: get("NEXT_PUBLIC_VAPID_PUBLIC_KEY"),
+      private: get("VAPID_PRIVATE_KEY"),
+    },
 
     posthog: {
       key: get("POSTHOG_KEY"),

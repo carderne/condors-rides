@@ -1,8 +1,10 @@
 "use server";
 
+import { webpush } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { InsertRide, Ride } from "@/db/zod";
+import { getConfig } from "@/lib/config";
 import { formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
@@ -10,6 +12,8 @@ import { createSlug } from "@/lib/slug";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { type State, validator } from "./validate";
+
+const config = getConfig();
 
 export async function action(
   existingRideId: string | undefined,
@@ -20,6 +24,7 @@ export async function action(
   const existingRide = existingRideId
     ? await db.query.ride.findFirst({
         where: eq(schema.ride.id, existingRideId),
+        with: { members: { with: { user: true } } },
       })
     : undefined;
 
@@ -49,12 +54,7 @@ export async function action(
     geojson,
   };
 
-  const ride = await db.transaction(async (tx) => {
-    const existingRide = existingRideId
-      ? await tx.query.ride.findFirst({
-          where: eq(schema.ride.id, existingRideId),
-        })
-      : undefined;
+  const { ride, changes } = await db.transaction(async (tx) => {
     const [ride] = await tx
       .insert(schema.ride)
       .values({ id: existingRideId, slug, userId: user.id, ...insertable })
@@ -71,20 +71,21 @@ export async function action(
       rideId: ride.id,
       note,
     }));
+
     if (changes.length > 0) {
       await tx.insert(schema.rideChange).values(changes);
     }
 
     const { routeUrl: url } = data;
     if (!url || !geojson) {
-      return ride;
+      return { ride, changes };
     }
     const existingRoute = await tx.query.route.findFirst({
       where: eq(schema.route.url, url),
     });
 
     if (existingRoute) {
-      return ride;
+      return { ride, changes };
     }
 
     await tx.insert(schema.route).values({
@@ -98,8 +99,36 @@ export async function action(
       geojson: geojson,
     });
 
-    return ride;
+    return { ride, changes };
   });
+
+  if (changes.length > 0 && existingRide) {
+    // notify people
+    const activeWebPushSubs = existingRide.members
+      .map((m) => m.user.webpushSub)
+      .filter((s) => s !== null);
+
+    const url = new URL(`/rides/${existingRide.slug}`, config.baseUrl).toString();
+
+    const notifications = await Promise.allSettled(
+      activeWebPushSubs.map(async (sub) => {
+        await webpush.sendNotification(
+          sub,
+          JSON.stringify({
+            title: "Ride update",
+            body: existingRide.name,
+            icon: "/icon.png",
+            url,
+          }),
+        );
+      }),
+    );
+    notifications.forEach((r, i) => {
+      if (r.status === "rejected") {
+        console.warn("Push failed for:", activeWebPushSubs[i], r.reason);
+      }
+    });
+  }
 
   redirect(`/rides/${ride.slug}`);
 }

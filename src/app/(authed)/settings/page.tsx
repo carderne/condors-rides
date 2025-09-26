@@ -6,6 +6,7 @@ import { invariant } from "@/lib/invariant";
 import { and, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
 import { UserSettingsForm } from "./form";
+import { InstallPrompt, PushNotificationManager } from "./notifications";
 
 export default async function SettingsPage() {
   const user = await getMembership();
@@ -34,7 +35,7 @@ export default async function SettingsPage() {
     <div className="grid gap-4">
       <H2>User settings</H2>
       <UserSettingsForm user={user} />
-      <div className="flex flex-col gap-4 md:flex-row md:gap-8">
+      <div className="flex gap-4 md:flex-row md:gap-8">
         {stats.map(({ label, value }) => (
           <div key={label} className="flex flex-col items-center gap-1 md:items-start">
             <span className="text-sm font-medium text-gray-600">{label}</span>
@@ -42,7 +43,13 @@ export default async function SettingsPage() {
           </div>
         ))}
       </div>
-      <p className="mt-10">To delete all your data, please contact the club:</p>
+
+      <H2>Notifications</H2>
+      <PushNotificationManager />
+      <InstallPrompt />
+
+      <H2>Data management</H2>
+      <p className="">To delete all your data, please contact the club:</p>
       <Link className="text-primary text-xl" href="https://cowleyroadcondors.cc/contact-us/">
         Contact us
       </Link>
