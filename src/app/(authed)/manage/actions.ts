@@ -1,19 +1,18 @@
 "use server";
 
+import { emitEvent } from "@/clients/posthog";
 import { webpush } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
-import type { InsertRide, Ride } from "@/db/zod";
-import { getConfig } from "@/lib/config";
+import type { InsertRide, Ride, User } from "@/db/zod";
 import { formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
+import type { PushSubscription } from "web-push";
 import { type State, validator } from "./validate";
-
-const config = getConfig();
 
 export async function action(
   existingRideId: string | undefined,
@@ -65,15 +64,16 @@ export async function action(
       .returning();
     invariant(ride, "no ride upserted");
 
-    const changeNotes = createChangeNotes(existingRide, data);
-    const changes = changeNotes.map((note) => ({
-      userId: user.id,
-      rideId: ride.id,
-      note,
-    }));
+    const changes = createChangeNotes(existingRide, data);
 
     if (changes.length > 0) {
-      await tx.insert(schema.rideChange).values(changes);
+      await tx.insert(schema.rideChange).values(
+        changes.map((change) => ({
+          userId: user.id,
+          rideId: ride.id,
+          note: change === "createdAt" ? "Created" : `${change} changed`,
+        })),
+      );
     }
 
     const { routeUrl: url } = data;
@@ -105,20 +105,21 @@ export async function action(
   if (changes.length > 0 && existingRide) {
     // notify people
     const activeWebPushSubs = existingRide.members
-      .map((m) => m.user.webpushSub)
-      .filter((s) => s !== null);
+      .map((m) => m.user)
+      .filter((x): x is User & { webpushSub: PushSubscription } => x.webpushSub !== null);
 
-    const url = new URL(`/rides/${existingRide.slug}`, config.baseUrl).toString();
+    const event = "notification";
+    const properties = { rideSlug: ride.slug, type: "change" };
 
+    const message = getNotificationMsg(changes);
     const notifications = await Promise.allSettled(
-      activeWebPushSubs.map(async (sub) => {
+      activeWebPushSubs.map(async (user) => {
+        emitEvent({ user, event, properties });
         await webpush.sendNotification(
-          sub,
+          user.webpushSub,
           JSON.stringify({
-            title: "Ride update",
-            body: existingRide.name,
-            icon: "/icon.png",
-            url,
+            title: `Change to ${existingRide.name}`,
+            body: message,
           }),
         );
       }),
@@ -133,9 +134,9 @@ export async function action(
   redirect(`/rides/${ride.slug}`);
 }
 
-function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): string[] {
+function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): (keyof Ride)[] {
   if (!ride) {
-    return ["Created"];
+    return ["createdAt"];
   }
 
   const keysChanged = (Object.keys(data) as (keyof Ride)[]).filter((key) => {
@@ -158,7 +159,26 @@ function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): s
     return true;
   });
 
-  const result = keysChanged.map((k) => `${k} changed`);
+  return keysChanged;
+}
 
-  return result;
+function getNotificationMsg(notes: (keyof Ride)[]): string {
+  const [firstNote, ...rest] = notes;
+  if (!firstNote) {
+    return "";
+  }
+  if (rest.length === 0) {
+    return firstNote;
+  }
+  if (notes.some((n) => n === "date")) {
+    return "Date changed";
+  }
+  if (notes.some((n) => n === "time")) {
+    return "Time changed";
+  }
+  if (notes.some((n) => n === "startPoint")) {
+    return "Start point changed";
+  }
+
+  return firstNote;
 }
