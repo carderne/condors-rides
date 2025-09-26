@@ -69,6 +69,12 @@ export function capitalize(text: string): string {
   return res;
 }
 
+export function camelToSentence(input: string): string {
+  const withSpaces = input.replace(/([A-Z])/g, " $1");
+  const result = withSpaces.toLowerCase();
+  return result;
+}
+
 export function formatRideName(text: string): string {
   if (text.length > 40) {
     return text.slice(0, 40) + "...";

@@ -5,7 +5,7 @@ import { webpush } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { InsertRide, Ride, User } from "@/db/zod";
-import { formatISODate } from "@/lib/fmt";
+import { camelToSentence, formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
@@ -111,15 +111,16 @@ export async function action(
     const event = "notification";
     const properties = { rideSlug: ride.slug, type: "change" };
 
-    const message = getNotificationMsg(changes);
+    const changeKey = getMainChange(changes as [RideKey, ...RideKey[]]);
+    const message = camelToSentence(changeKey);
     const notifications = await Promise.allSettled(
       activeWebPushSubs.map(async (user) => {
         emitEvent({ user, event, properties });
         await webpush.sendNotification(
           user.webpushSub,
           JSON.stringify({
-            title: `Change to ${existingRide.name}`,
-            body: message,
+            title: existingRide.name,
+            body: `Changed ${message}`,
           }),
         );
       }),
@@ -134,12 +135,14 @@ export async function action(
   redirect(`/rides/${ride.slug}`);
 }
 
-function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): (keyof Ride)[] {
+type RideKey = keyof Ride;
+
+function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): RideKey[] {
   if (!ride) {
     return ["createdAt"];
   }
 
-  const keysChanged = (Object.keys(data) as (keyof Ride)[]).filter((key) => {
+  const keysChanged = (Object.keys(data) as RideKey[]).filter((key) => {
     const r = ride[key];
     const d = data[key];
 
@@ -162,22 +165,19 @@ function createChangeNotes(ride: Ride | undefined, data: Partial<InsertRide>): (
   return keysChanged;
 }
 
-function getNotificationMsg(notes: (keyof Ride)[]): string {
+function getMainChange(notes: [RideKey, ...RideKey[]]): RideKey {
   const [firstNote, ...rest] = notes;
-  if (!firstNote) {
-    return "";
-  }
   if (rest.length === 0) {
     return firstNote;
   }
   if (notes.some((n) => n === "date")) {
-    return "Date changed";
+    return "date";
   }
   if (notes.some((n) => n === "time")) {
-    return "Time changed";
+    return "time";
   }
   if (notes.some((n) => n === "startPoint")) {
-    return "Start point changed";
+    return "startPoint";
   }
 
   return firstNote;

@@ -42,7 +42,7 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
       await webpush.sendNotification(
         user.webpushSub,
         JSON.stringify({
-          title: `Comment on ${ride.name}`,
+          title: ride.name,
           body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
         }),
       );
