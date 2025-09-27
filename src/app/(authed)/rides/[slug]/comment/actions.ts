@@ -37,10 +37,10 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   const properties = { rideSlug: ride.slug, type: "comment" };
 
   const notifications = await Promise.allSettled(
-    activeWebPushSubs.map(async (user) => {
-      emitEvent({ user, event, properties });
+    activeWebPushSubs.map(async (notificationUser) => {
+      emitEvent({ user: notificationUser, event, properties });
       await webpush.sendNotification(
-        user.webpushSub,
+        notificationUser.webpushSub,
         JSON.stringify({
           title: ride.name,
           body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
