@@ -105,7 +105,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
         )}
       >
-        <div className="relative flex justify-end p-2 md:justify-center">
+        <div className="relative flex h-10 justify-end p-2 md:justify-center">
           <BackButton className="absolute left-1" />
           {hasChanged && (
             <div className="animate-bounce px-4 py-2 text-sm">Details have changed!</div>
