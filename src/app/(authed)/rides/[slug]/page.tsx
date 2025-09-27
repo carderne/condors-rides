@@ -3,7 +3,7 @@ import { Confirmation, Modal } from "@/components/confirmation";
 import { Map } from "@/components/map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { H3 } from "@/components/ui/typography";
+import { H1, H3 } from "@/components/ui/typography";
 import { UserAvatar } from "@/components/user";
 import { getMembership } from "@/dal/membership";
 import { viewedRide } from "@/dal/rideView";
@@ -45,6 +45,7 @@ import {
   unCancelRideAction,
   unclaimRideAction,
 } from "./actions";
+import { BackButton } from "./back";
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
@@ -96,101 +97,98 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Change notifications */}
-      {hasChanged && (
-        <div className="-mb-8 flex animate-bounce justify-center">
-          <div className="flex gap-2 overflow-hidden rounded-t-xl border-pink-200 bg-white p-1.5">
-            <div className="flex flex-col items-start gap-3 p-1 md:flex-row md:items-center">
-              Details have changed! Check the changelog.
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Ride Header */}
-      <div className="overflow-hidden rounded-xl bg-white shadow-xl">
-        <div
-          className={cn(
-            "bg-gradient-to-r from-pink-500 to-pink-600 p-8 text-white",
-            ride.surface === "gravel" ? "from-amber-700 to-amber-800" : "",
-            ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
+      <div
+        className={cn(
+          "to-primary -mx-4 -mt-4 grow bg-gradient-to-r from-red-400 text-white",
+          ride.surface === "gravel" ? "from-amber-700 to-amber-800" : "",
+          ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
+        )}
+      >
+        <div className="relative flex justify-end p-2 md:justify-center">
+          <BackButton className="absolute left-1" />
+          {hasChanged && (
+            <div className="animate-bounce px-4 py-2 text-sm">Details have changed!</div>
           )}
-        >
-          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold">
-                {isCanceled ? (
-                  <span className="mr-2">(CANCELLED)</span>
-                ) : isFull ? (
-                  <span className="mr-2">(FULL)</span>
-                ) : null}
-                <span className={cn(isCanceled ? "line-through" : "")}>{ride.name}</span>
-              </h1>
-              <div className="flex items-center gap-3">
-                <UserAvatar user={unclaimed ? null : ride.leader} />
-                <div className="flex flex-col">
-                  {unclaimed ? (
-                    <>
-                      <span className="font-medium">No leader!</span>
-                      <span className="text-sm opacity-90">
-                        Hit the Lead button below if you're up to it!
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm opacity-90">Led by</span>
-                      <span className="font-medium">{ride.leader.name}</span>
-                    </>
-                  )}
-                </div>
+        </div>
+        <div className="flex items-center justify-between gap-4 px-8 pb-4">
+          <div className="flex grow flex-col gap-2">
+            <H1>
+              <span className={cn("text-3xl font-bold", isCanceled ? "line-through" : "")}>
+                {ride.name}
+              </span>
+              {isCanceled && <span className="ml-2 text-sm">(CANCELLED)</span>}
+            </H1>
+            <div className="flex items-center gap-3">
+              <UserAvatar user={unclaimed ? null : ride.leader} />
+              <div className="flex flex-col">
+                {unclaimed ? (
+                  <>
+                    <span className="font-medium">No leader!</span>
+                    <span className="text-sm opacity-90">
+                      Hit the Lead button below if you're up to it!
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-sm opacity-90">Led by</span>
+                    <span className="font-medium">{ride.leader.name}</span>
+                  </>
+                )}
               </div>
             </div>
+          </div>
 
-            <div className="flex flex-col justify-between gap-2">
-              {hasJoined ? (
+          <div className="flex">
+            {hasJoined ? (
+              <Button
+                variant="outline"
+                extra="action"
+                className="text-foreground aspect-square h-16 text-lg"
+                disabled={isLeader || isCanceled || isPast}
+                onClick={leaveRideAction.bind(null, ride.id)}
+              >
+                Leave
+              </Button>
+            ) : isFull ? (
+              <Modal
+                title="Ride is full"
+                description="Write a comment noting your interest and keep an eye on this page. If someone leaves you can snag a spot. Or maybe someone will duplicate this ride and lead a second group? Maybe you?"
+              >
                 <Button
-                  className="w-full bg-gray-600 py-6 text-lg text-white hover:bg-gray-800"
+                  variant="outline"
+                  extra="action"
+                  className="text-foreground aspect-square h-16 text-lg"
                   disabled={isLeader || isCanceled || isPast}
-                  onClick={leaveRideAction.bind(null, ride.id)}
                 >
-                  Leave this ride
+                  Full
                 </Button>
-              ) : isFull ? (
-                <Modal
-                  title="Ride is full"
-                  description="Write a comment noting your interest and keep an eye on this page. If someone leaves you can snag a spot. Or maybe someone will duplicate this ride and lead a second group? Maybe you?"
-                >
-                  <Button
-                    className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
-                    disabled={isLeader || isCanceled || isPast}
-                  >
-                    Ride FULL: what should I do
-                  </Button>
-                </Modal>
-              ) : (
-                <Button
-                  className="w-full bg-white py-6 text-lg text-black hover:bg-pink-200"
-                  disabled={isLeader || isCanceled || isPast}
-                  onClick={joinRideAction.bind(null, ride.id)}
-                >
-                  Join this ride
-                </Button>
-              )}
-            </div>
+              </Modal>
+            ) : (
+              <Button
+                variant="outline"
+                extra="action"
+                className="text-foreground aspect-square h-16 text-lg"
+                disabled={isLeader || isCanceled || isPast}
+                onClick={joinRideAction.bind(null, ride.id)}
+              >
+                Join
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Time and date */}
       <div className="-mt-8 flex justify-center">
-        <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white p-1.5 shadow-lg">
+        <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white px-4 py-2 shadow-lg">
           <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
-            <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
-              <CalendarIcon className="h-5 w-5" />
-              <span>{format(ride.date, "EEE, dd MMM yyyy")}</span>
+            <div className="flex items-center gap-3">
+              <CalendarIcon className="size-4" />
+              <span>{format(ride.date, "EEE, d MMM yyyy")}</span>
             </div>
-            <div className="flex items-center gap-3 rounded-lg bg-white/20 px-4 py-2 backdrop-blur-sm">
-              <ClockIcon className="h-5 w-5" />
+            <div className="flex items-center gap-3">
+              <ClockIcon className="size-4" />
               <span>{ride.time.slice(0, 5)}</span>
             </div>
           </div>
