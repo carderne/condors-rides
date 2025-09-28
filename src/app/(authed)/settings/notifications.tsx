@@ -14,9 +14,6 @@ import {
 export function PushNotificationManager({ user }: { user: User }) {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
-  const [newRidesChecked, setNewRidesChecked] = useState(user.notifyNewRide);
-
-  // console.log("A", { subscription, nnr: user.notifyNewRide, defaultNewRidesChecked, newRidesChecked });
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -57,25 +54,6 @@ export function PushNotificationManager({ user }: { user: User }) {
 
   return (
     <div className="grid gap-2">
-      <div className="flex items-center gap-2">
-        <Checkbox checked={subscription !== null && true} disabled={true} />
-        <p>Get notified of comments and changes to joined rides</p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Checkbox
-          checked={subscription !== null && newRidesChecked}
-          disabled={subscription === null}
-          onCheckedChange={async (value) => {
-            if (value !== "indeterminate") {
-              setNewRidesChecked(value);
-              await setNewRideNotificationAction(value);
-            }
-          }}
-        />
-        <p>Get notified when new rides created</p>
-      </div>
-
       <Button
         variant="outline"
         extra="action"
@@ -84,6 +62,27 @@ export function PushNotificationManager({ user }: { user: User }) {
       >
         {subscription ? "Disable" : "Enable"}
       </Button>
+
+      {subscription && (
+        <>
+          <div className="flex items-center gap-2">
+            <Checkbox checked={true} disabled={true} />
+            <p>Get notified of comments and changes to joined rides</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={user.notifyNewRide}
+              onCheckedChange={async (value) => {
+                if (value !== "indeterminate") {
+                  await setNewRideNotificationAction(value);
+                }
+              }}
+            />
+            <p>Get notified when new rides created</p>
+          </div>
+        </>
+      )}
     </div>
   );
 }
