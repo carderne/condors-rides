@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { eq, relations } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -44,13 +44,16 @@ export const user = pgTable(
     image: text("image"),
 
     webpushSub: jsonb("webpush_sub").$type<PushSubscription>(),
+    notifyNewRide: boolean("notify_new_ride").notNull().default(false),
 
     verifiedAt: timestamp("verified_at"),
     deactivatedAt: timestamp("deactivated_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (_table) => [],
+  (table) => [
+    index("user__notify_new_ride_idx").on(table.notifyNewRide).where(eq(table.notifyNewRide, true)),
+  ],
 );
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),

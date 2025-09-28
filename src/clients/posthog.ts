@@ -22,13 +22,14 @@ export function posthogIdentify(user: User) {
 }
 
 export type PosthogEvent = "page_view" | "ride_view" | "notification";
+type UserOnlyId = { id: string };
 
 export function emitEvent({
   user,
   event,
   properties,
 }: {
-  user: User | null;
+  user: UserOnlyId | null;
   event: PosthogEvent;
   properties?: Record<string, string | string[]>;
 }) {
@@ -57,11 +58,11 @@ export type PosthogPage =
   | "routes_promoted"
   | "routes_liked";
 
-export function emitPageView({ user, page }: { user: User | null; page: PosthogPage }) {
+export function emitPageView({ user, page }: { user: UserOnlyId | null; page: PosthogPage }) {
   return emitEvent({ event: "page_view", user, properties: { page } });
 }
 
-export function emitRideView({ user, ride }: { user: User; ride: Ride }) {
+export function emitRideView({ user, ride }: { user: UserOnlyId; ride: Ride }) {
   return emitEvent({
     user,
     event: "ride_view",

@@ -19,7 +19,7 @@ export async function action(_: State, formData: FormData): Promise<State> {
   redirect("/settings");
 }
 
-export async function subscribeUser(sub: PushSubscription) {
+export async function subscribeUserAction(sub: PushSubscription) {
   const user = await getMembership();
 
   await db
@@ -32,13 +32,25 @@ export async function subscribeUser(sub: PushSubscription) {
   return { success: true };
 }
 
-export async function unsubscribeUser() {
+export async function unsubscribeUserAction() {
   const user = await getMembership();
 
   await db
     .update(schema.user)
     .set({
       webpushSub: null,
+    })
+    .where(eq(schema.user.id, user.id));
+  return { success: true };
+}
+
+export async function setNewRideNotificationAction(enabled: boolean) {
+  const user = await getMembership();
+
+  await db
+    .update(schema.user)
+    .set({
+      notifyNewRide: enabled,
     })
     .where(eq(schema.user.id, user.id));
   return { success: true };

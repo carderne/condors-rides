@@ -1,13 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { User } from "@/db/zod";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { subscribeUser, unsubscribeUser } from "./actions";
+import {
+  setNewRideNotificationAction,
+  subscribeUserAction,
+  unsubscribeUserAction,
+} from "./actions";
 
-export function PushNotificationManager() {
+export function PushNotificationManager({ user }: { user: User }) {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [newRidesChecked, setNewRidesChecked] = useState(user.notifyNewRide);
+
+  // console.log("A", { subscription, nnr: user.notifyNewRide, defaultNewRidesChecked, newRidesChecked });
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -33,40 +42,48 @@ export function PushNotificationManager() {
     });
     setSubscription(sub);
     const serializedSub = JSON.parse(JSON.stringify(sub));
-    await subscribeUser(serializedSub);
+    await subscribeUserAction(serializedSub);
   }
 
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
     setSubscription(null);
-    await unsubscribeUser();
+    await unsubscribeUserAction();
   }
 
   if (!isSupported) {
-    return "Install it as an app to get notifications!";
+    return "Install as an app to get notifications (see below).";
   }
 
   return (
-    <div>
-      {subscription ? (
-        <Button
-          variant="outline"
-          extra="action"
-          className="w-full md:w-fit"
-          onClick={unsubscribeFromPush}
-        >
-          Disable
-        </Button>
-      ) : (
-        <Button
-          variant="outline"
-          extra="action"
-          className="w-full md:w-fit"
-          onClick={subscribeToPush}
-        >
-          Enable
-        </Button>
-      )}
+    <div className="grid gap-2">
+      <div className="flex items-center gap-2">
+        <Checkbox checked={subscription !== null && true} disabled={true} />
+        <p>Get notified of comments and changes to joined rides</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          checked={subscription !== null && newRidesChecked}
+          disabled={subscription === null}
+          onCheckedChange={async (value) => {
+            if (value !== "indeterminate") {
+              setNewRidesChecked(value);
+              await setNewRideNotificationAction(value);
+            }
+          }}
+        />
+        <p>Get notified when new rides created</p>
+      </div>
+
+      <Button
+        variant="outline"
+        extra="action"
+        className="w-full md:w-fit"
+        onClick={subscription ? unsubscribeFromPush : subscribeToPush}
+      >
+        {subscription ? "Disable" : "Enable"}
+      </Button>
     </div>
   );
 }

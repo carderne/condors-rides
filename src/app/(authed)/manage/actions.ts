@@ -9,7 +9,7 @@ import { camelToSentence, formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import type { PushSubscription } from "web-push";
 import { type State, validator } from "./validate";
@@ -128,6 +128,34 @@ export async function action(
     notifications.forEach((r, i) => {
       if (r.status === "rejected") {
         console.warn("Push failed for:", activeWebPushSubs[i], r.reason);
+      }
+    });
+  }
+
+  if (!existingRide) {
+    // notify people who want notifications of new rides
+    const wantNewRideNotifications = (await db.query.user.findMany({
+      columns: { id: true, webpushSub: true },
+      where: and(isNotNull(schema.user.webpushSub), eq(schema.user.notifyNewRide, true)),
+    })) as { id: string; webpushSub: PushSubscription }[];
+    const event = "notification";
+    const properties = { rideSlug: ride.slug, type: "new" };
+
+    const notifications = await Promise.allSettled(
+      wantNewRideNotifications.map(async (user) => {
+        emitEvent({ user, event, properties });
+        await webpush.sendNotification(
+          user.webpushSub,
+          JSON.stringify({
+            title: "New ride posted",
+            body: ride.name,
+          }),
+        );
+      }),
+    );
+    notifications.forEach((r, i) => {
+      if (r.status === "rejected") {
+        console.warn("Push failed for:", wantNewRideNotifications[i], r.reason);
       }
     });
   }
