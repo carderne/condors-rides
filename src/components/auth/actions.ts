@@ -1,8 +1,11 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import type { ActionState } from "@/lib/forms";
 import { invariant } from "@/lib/invariant";
-import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { z } from "zod";
 
 export type Provider = "google" | "facebook";
 
@@ -22,4 +25,48 @@ export async function signUpSocialAction(
   });
   invariant(res.url, "No social sign in url");
   redirect(res.url);
+}
+
+const signUpSchema = z.object({
+  email: z.string().email().toLowerCase(),
+  password: z.string(),
+});
+export type SignUpState = ActionState<typeof signUpSchema>;
+
+export async function signUpEmailAction(
+  signInVariant: boolean,
+  redirectUrl: string,
+  formData: FormData,
+): Promise<never> {
+  if (process.env.NODE_ENV === "production") {
+    return notFound();
+  }
+
+  const rawFormData = Object.fromEntries(formData);
+  const data = signUpSchema.parse(rawFormData);
+
+  // This call can throw, but this is only used in DEV so
+  // no point trying to handle it
+  const [name] = data.email.split("@");
+  invariant(name);
+
+  if (signInVariant) {
+    await auth.api.signInEmail({
+      body: {
+        email: data.email,
+        password: data.password,
+      },
+      headers: await headers(),
+    });
+  } else {
+    await auth.api.signUpEmail({
+      body: {
+        email: data.email,
+        password: data.password,
+        name,
+      },
+      headers: await headers(),
+    });
+  }
+  redirect(redirectUrl);
 }

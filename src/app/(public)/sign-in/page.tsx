@@ -1,3 +1,4 @@
+import { SignUpEmailDevOnly } from "@/components/auth/email";
 import { SignInFacebook } from "@/components/auth/facebook";
 import { SignInGoogle } from "@/components/auth/google";
 import { H2, H3 } from "@/components/ui/typography";
@@ -46,6 +47,7 @@ export default async function SignIn({
           </Link>
         </p>
       </div>
+      <SignUpEmailDevOnly signInVariant={false} redirectUrl={redirectUrl} />
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
         <SignInGoogle redirectUrl={redirectUrl} />
         <SignInFacebook redirectUrl={redirectUrl} />

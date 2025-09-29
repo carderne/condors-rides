@@ -25,6 +25,7 @@ type Config = {
   baseUrl: string;
   dbUrl: string;
   encryptionKeys: [string, ...string[]];
+  emailAndPasswordEnabled: boolean;
 
   osKey: string;
 
@@ -92,18 +93,21 @@ function getDefaultConfig() {
 function getDevConfig(): Config {
   return {
     ...getDefaultConfig(),
+    emailAndPasswordEnabled: true,
   };
 }
 
 function getTestConfig(): Config {
   return {
     ...getDefaultConfig(),
+    emailAndPasswordEnabled: true,
   };
 }
 
 function getPrdConfig(): Config {
   return {
     ...getDefaultConfig(),
+    emailAndPasswordEnabled: false,
   };
 }
 

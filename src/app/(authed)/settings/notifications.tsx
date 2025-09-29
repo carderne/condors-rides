@@ -35,7 +35,7 @@ export function PushNotificationManager({ user }: { user: User }) {
   async function subscribeToPush() {
     const permission = await askPermission();
     if (permission !== "granted") {
-      toast.error("Permission not granted");
+      toast.error(`Permission not granted: ${permission}`);
       return;
     }
     try {
