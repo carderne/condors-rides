@@ -33,6 +33,11 @@ export function PushNotificationManager({ user }: { user: User }) {
   }
 
   async function subscribeToPush() {
+    const permission = await askPermission();
+    if (permission !== "granted") {
+      toast.error("Permission not granted");
+      return;
+    }
     try {
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.subscribe({
@@ -91,4 +96,20 @@ export function PushNotificationManager({ user }: { user: User }) {
       )}
     </div>
   );
+}
+
+async function askPermission(): Promise<"granted" | "denied" | "default"> {
+  const permissionResult = await new Promise<"granted" | "denied" | "default">(
+    (resolve, reject) => {
+      const maybePromise = Notification.requestPermission((result) => {
+        resolve(result);
+      });
+
+      if (maybePromise) {
+        maybePromise.then(resolve, reject);
+      }
+    },
+  );
+
+  return permissionResult;
 }
