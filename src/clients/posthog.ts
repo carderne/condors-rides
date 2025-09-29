@@ -22,7 +22,7 @@ export function posthogIdentify(user: User) {
 }
 
 export type PosthogEvent = "page_view" | "ride_view" | "notification";
-type UserOnlyId = { id: string };
+export type UserOnlyId = { id: string };
 
 export function emitEvent({
   user,

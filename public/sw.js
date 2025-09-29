@@ -7,8 +7,7 @@ self.addEventListener("push", function (event) {
       badge: "/apple-touch-icon.png",
       vibrate: [100, 50, 100],
       data: {
-        dateOfArrival: Date.now(),
-        primaryKey: "2",
+        slug: data.slug,
       },
     };
     event.waitUntil(self.registration.showNotification(data.title, options));
@@ -16,19 +15,22 @@ self.addEventListener("push", function (event) {
 });
 
 self.addEventListener("notificationclick", (event) => {
-  event.preventDefault();
   event.notification.close();
 
+  const slug = event.notification.data?.slug ?? "upcoming";
+  const urlToOpen = `/rides/${slug}`;
+
   event.waitUntil(
-    self.clients
-      .matchAll({
-        type: "window",
-      })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if (client.url === "/" && "focus" in client) return client.focus();
+    self.clients.matchAll({ type: "window" }).then((clientList) => {
+      for (const client of clientList) {
+        if ("navigate" in client) {
+          client.navigate(urlToOpen);
         }
-        if (clients.openWindow) return clients.openWindow("/");
-      }),
+        return client.focus();
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    }),
   );
 });

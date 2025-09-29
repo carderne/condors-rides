@@ -1,7 +1,6 @@
 "use server";
 
-import { emitEvent } from "@/clients/posthog";
-import { webpush } from "@/clients/webpush";
+import { sendNotifications } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { InsertRide, Ride, User } from "@/db/zod";
@@ -110,25 +109,16 @@ export async function action(
 
     const event = "notification";
     const properties = { rideSlug: ride.slug, type: "change" };
-
     const changeKey = getMainChange(changes as [RideKey, ...RideKey[]]);
     const message = camelToSentence(changeKey);
-    const notifications = await Promise.allSettled(
-      activeWebPushSubs.map(async (user) => {
-        emitEvent({ user, event, properties });
-        await webpush.sendNotification(
-          user.webpushSub,
-          JSON.stringify({
-            title: existingRide.name,
-            body: `Changed ${message}`,
-          }),
-        );
-      }),
-    );
-    notifications.forEach((r, i) => {
-      if (r.status === "rejected") {
-        console.warn("Push failed for:", activeWebPushSubs[i], r.reason);
-      }
+
+    sendNotifications({
+      users: activeWebPushSubs,
+      title: existingRide.name,
+      body: `Changed: ${message}`,
+      slug: existingRide.slug,
+      event,
+      properties,
     });
   }
 
@@ -141,22 +131,13 @@ export async function action(
     const event = "notification";
     const properties = { rideSlug: ride.slug, type: "new" };
 
-    const notifications = await Promise.allSettled(
-      wantNewRideNotifications.map(async (user) => {
-        emitEvent({ user, event, properties });
-        await webpush.sendNotification(
-          user.webpushSub,
-          JSON.stringify({
-            title: "New ride posted",
-            body: ride.name,
-          }),
-        );
-      }),
-    );
-    notifications.forEach((r, i) => {
-      if (r.status === "rejected") {
-        console.warn("Push failed for:", wantNewRideNotifications[i], r.reason);
-      }
+    sendNotifications({
+      users: wantNewRideNotifications,
+      title: "New ride posted",
+      body: ride.name,
+      slug: ride.slug,
+      event,
+      properties,
     });
   }
 

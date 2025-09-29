@@ -1,7 +1,6 @@
 "use server";
 
-import { emitEvent } from "@/clients/posthog";
-import { webpush } from "@/clients/webpush";
+import { sendNotifications } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -36,22 +35,13 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   const event = "notification";
   const properties = { rideSlug: ride.slug, type: "comment" };
 
-  const notifications = await Promise.allSettled(
-    activeWebPushSubs.map(async (notificationUser) => {
-      emitEvent({ user: notificationUser, event, properties });
-      await webpush.sendNotification(
-        notificationUser.webpushSub,
-        JSON.stringify({
-          title: ride.name,
-          body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
-        }),
-      );
-    }),
-  );
-  notifications.forEach((r, i) => {
-    if (r.status === "rejected") {
-      console.warn("Push failed for:", activeWebPushSubs[i], r.reason);
-    }
+  sendNotifications({
+    users: activeWebPushSubs,
+    title: ride.name,
+    body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
+    slug: ride.slug,
+    event,
+    properties,
   });
 
   return { errors: {} };
