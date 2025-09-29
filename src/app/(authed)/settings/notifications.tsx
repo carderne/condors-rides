@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { User } from "@/db/zod";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   setNewRideNotificationAction,
   subscribeUserAction,
@@ -32,14 +33,19 @@ export function PushNotificationManager({ user }: { user: User }) {
   }
 
   async function subscribeToPush() {
-    const registration = await navigator.serviceWorker.ready;
-    const sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
-    });
-    setSubscription(sub);
-    const serializedSub = JSON.parse(JSON.stringify(sub));
-    await subscribeUserAction(serializedSub);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
+      });
+      setSubscription(sub);
+      const serializedSub = JSON.parse(JSON.stringify(sub));
+      await subscribeUserAction(serializedSub);
+    } catch (err) {
+      const description = err instanceof Error ? err.message : "";
+      toast.error("Failed to subscribe", { description });
+    }
   }
 
   async function unsubscribeFromPush() {
@@ -72,7 +78,7 @@ export function PushNotificationManager({ user }: { user: User }) {
 
           <div className="flex items-center gap-2">
             <Checkbox
-              checked={user.notifyNewRide}
+              defaultChecked={user.notifyNewRide}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
                   await setNewRideNotificationAction(value);
