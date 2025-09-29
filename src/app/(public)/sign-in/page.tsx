@@ -2,19 +2,16 @@ import { SignInFacebook } from "@/components/auth/facebook";
 import { SignInGoogle } from "@/components/auth/google";
 import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
-import { getConfig } from "@/lib/config";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-const config = getConfig();
-
 export default async function SignIn({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; returnTo?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, returnTo } = await searchParams;
 
   // Don't use @/lib/session/getSession here
   // as it redirects to this page if no session...
@@ -22,11 +19,13 @@ export default async function SignIn({
     headers: await headers(),
   });
   if (session) {
+    if (returnTo) {
+      redirect(returnTo);
+    }
     redirect("/");
   }
 
-  const redirectSuffix = "/rides";
-  const redirectUrl = new URL(redirectSuffix, config.baseUrl).toString();
+  const redirectUrl = returnTo ? returnTo : "/rides/upcoming";
 
   return (
     <main className="mt-40 flex w-full flex-col justify-center gap-8 text-center">
