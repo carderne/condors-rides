@@ -15,7 +15,7 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   const { id: userId } = user;
   const ride = await db.query.ride.findFirst({
     where: eq(schema.ride.id, rideId),
-    with: { members: { with: { user: true } } },
+    with: { leader: true, members: { with: { user: true } } },
   });
   invariant(ride, "ride not found");
 
@@ -28,8 +28,7 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   revalidatePath("/rides");
 
   // notifications
-  const activeWebPushSubs = ride.members
-    .map((m) => m.user)
+  const activeWebPushSubs = [ride.leader, ...ride.members.map((m) => m.user)]
     .filter((u): u is User & { webpushSub: PushSubscription } => u.webpushSub !== null)
     .filter((u) => u.id !== userId);
   const properties = { rideSlug: ride.slug, type: "comment" };
@@ -60,6 +59,16 @@ export async function toggleUpvoteCommentAction(commentId: string) {
   const user = await getMembership();
   const { id: userId } = user;
 
+  const comment = await db.query.comment.findFirst({
+    columns: {},
+    where: eq(schema.comment.id, commentId),
+    with: {
+      ride: { columns: { slug: true } },
+      user: { columns: { id: true, webpushSub: true } },
+    },
+  });
+  invariant(comment, "no comment found");
+
   const where = and(
     eq(schema.commentReaction.userId, userId),
     eq(schema.commentReaction.commentId, commentId),
@@ -79,5 +88,18 @@ export async function toggleUpvoteCommentAction(commentId: string) {
         .onConflictDoNothing();
     }
   });
+
+  const { webpushSub } = comment.user;
+  if (webpushSub !== null) {
+    const properties = { rideSlug: comment.ride.slug, type: "upvote" };
+    sendNotifications({
+      users: [{ ...comment.user, webpushSub }],
+      title: "Comment upvoted",
+      body: `by ${user.name}`,
+      slug: comment.ride.slug,
+      properties,
+    });
+  }
+
   revalidatePath("/rides");
 }
