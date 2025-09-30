@@ -1,4 +1,4 @@
-import { eq, relations } from "drizzle-orm";
+import { eq, relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -52,7 +52,9 @@ export const user = pgTable(
     updatedAt: updatedAt(),
   },
   (table) => [
-    index("user__notify_new_ride_idx").on(table.notifyNewRide).where(eq(table.notifyNewRide, true)),
+    index("user__notify_new_ride_idx")
+      .on(table.notifyNewRide)
+      .where(eq(table.notifyNewRide, sql`TRUE`)),
   ],
 );
 export const userRelations = relations(user, ({ many }) => ({
