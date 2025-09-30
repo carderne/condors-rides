@@ -32,7 +32,6 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
     .map((m) => m.user)
     .filter((u): u is User & { webpushSub: PushSubscription } => u.webpushSub !== null)
     .filter((u) => u.id !== userId);
-  const event = "notification";
   const properties = { rideSlug: ride.slug, type: "comment" };
 
   sendNotifications({
@@ -40,7 +39,6 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
     title: ride.name,
     body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
     slug: ride.slug,
-    event,
     properties,
   });
 

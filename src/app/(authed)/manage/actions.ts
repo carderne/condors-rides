@@ -107,7 +107,6 @@ export async function action(
       .map((m) => m.user)
       .filter((x): x is User & { webpushSub: PushSubscription } => x.webpushSub !== null);
 
-    const event = "notification";
     const properties = { rideSlug: ride.slug, type: "change" };
     const changeKey = getMainChange(changes as [RideKey, ...RideKey[]]);
     const message = camelToSentence(changeKey);
@@ -117,7 +116,6 @@ export async function action(
       title: existingRide.name,
       body: `Changed: ${message}`,
       slug: existingRide.slug,
-      event,
       properties,
     });
   }
@@ -128,7 +126,6 @@ export async function action(
       columns: { id: true, webpushSub: true },
       where: and(isNotNull(schema.user.webpushSub), eq(schema.user.notifyNewRide, true)),
     })) as { id: string; webpushSub: PushSubscription }[];
-    const event = "notification";
     const properties = { rideSlug: ride.slug, type: "new" };
 
     sendNotifications({
@@ -136,7 +133,6 @@ export async function action(
       title: "New ride posted",
       body: ride.name,
       slug: ride.slug,
-      event,
       properties,
     });
   }
