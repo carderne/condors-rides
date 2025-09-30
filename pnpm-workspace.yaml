@@ -1,2 +1,6 @@
 ignoreDepScripts: true
-minimumReleaseAge: 4320 # minutes (set to 3 days)
+
+minimumReleaseAge: 4320
+
+overrides:
+  esbuild@<=0.24.2: '>=0.25.0'
