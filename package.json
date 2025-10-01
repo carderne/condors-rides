@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "db:dev": "npm run db:up && sleep 1 && npm run db:push && npm run db:seed:all",
+    "db:dev": "pnpm run db:up && sleep 1 && pnpm run db:push && pnpm run db:seed:all",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:push": "./dotenvx-safe.sh npx drizzle-kit push --config drizzle.config.ts",
-    "db:push:prd": "dotenvx run -- npx drizzle-kit push --config drizzle.config.ts",
-    "db:seed:all": "npm run db:seed:tokens && npm run db:seed:rides",
+    "db:push": "./dotenvx-safe.sh pnpm exec drizzle-kit push --config drizzle.config.ts",
+    "db:push:prd": "dotenvx run -- pnpm exec drizzle-kit push --config drizzle.config.ts",
+    "db:seed:all": "pnpm run db:seed:tokens && pnpm run db:seed:rides",
     "db:seed:rides": "dotenvx run -- tsx scripts/db-seed-rides.ts",
     "db:seed:tokens": "dotenvx run -- tsx scripts/db-seed-tokens.ts",
     "dev": "next dev --turbo --port 5210",
@@ -23,7 +23,7 @@
     "test:e2e": "dotenvx run -- vitest run --config vitest-e2e.config.js --no-file-parallelism",
     "ci:fmt": "prettier --check .",
     "ci:test": "NO_CHECK_ENV_VARS=1 vitest run",
-    "all": "npm run fmt && npm run lint && npm run check && npm run ci:test"
+    "all": "pnpm run fmt && pnpm run lint && pnpm run check && pnpm run ci:test"
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
