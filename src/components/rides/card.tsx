@@ -13,6 +13,7 @@ import {
   WindIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { H3 } from "../ui/typography";
 import { UserAvatar } from "../user";
 
 export type RideHydrated = Ride & { leader: User; members: RideMember[] };
@@ -52,16 +53,12 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
           <div className="flex flex-col gap-4">
             {/* Title and Leader */}
             <Link href={href} className="flex flex-col gap-2">
-              <h2 className="text-2xl font-bold text-gray-800 transition-colors group-hover:text-pink-600">
-                {isCanceled ? (
-                  <span className="mr-2">(CANCELLED)</span>
-                ) : isFull ? (
-                  <span className="mr-2">(FULL)</span>
-                ) : null}
-                <span className={cn("", ride.canceledAt ? "line-through" : "")}>
+              <span className="transition-colors group-hover:text-pink-600">
+                <H3 className={cn(ride.canceledAt ? "line-through" : "")}>
                   {formatRideName(ride.name)}
-                </span>
-              </h2>
+                </H3>
+                {isCanceled ? <span /> : isFull ? <span className="text-sm">(FULL)</span> : null}
+              </span>
               {showLeader && (
                 <div className="flex items-center gap-3">
                   <UserAvatar user={ride.unclaimed ? null : ride.leader} className="size-10" />

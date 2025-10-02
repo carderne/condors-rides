@@ -51,7 +51,8 @@ export function emitEvent({
 export type PosthogPage =
   | "settings"
   | "rides_upcoming"
-  | "rides_old"
+  | "rides_recent"
+  | "rides_archive"
   | "rides_future"
   | "rides_joined"
   | "routes_all"

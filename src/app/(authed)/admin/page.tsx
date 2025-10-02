@@ -1,3 +1,4 @@
+import { Container } from "@/components/container";
 import { getAdminUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { and, asc, eq, isNull } from "drizzle-orm";
@@ -20,10 +21,10 @@ export default async function AdminPage() {
   });
 
   return (
-    <div className="w-full rounded-md">
+    <Container>
       <div className="w-full caption-bottom text-sm">
         <AdminTable users={users} />
       </div>
-    </div>
+    </Container>
   );
 }

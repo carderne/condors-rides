@@ -1,4 +1,4 @@
-import { eq, relations, sql } from "drizzle-orm";
+import { eq, isNull, relations, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -165,7 +165,15 @@ export const ride = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (table) => [index("ride__user_id_idx").on(table.userId)],
+  (table) => [
+    index("ride__user_id_idx").on(table.userId),
+    index("ride__past_partial_idx")
+      .on(table.date.desc(), table.time.asc(), table.slug.asc())
+      .where(isNull(table.deletedAt)),
+    index("ride__upcoming_partial_idx")
+      .on(table.date.asc(), table.time.asc(), table.slug.asc())
+      .where(isNull(table.deletedAt)),
+  ],
 );
 export const rideRelations = relations(ride, ({ one, many }) => ({
   leader: one(user, {

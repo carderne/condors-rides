@@ -1,4 +1,5 @@
 import { emitPageView } from "@/clients/posthog";
+import { Container } from "@/components/container";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
@@ -34,7 +35,7 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <Container className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
       <Card>
         <CardHeader>
           <H2>Notifications</H2>
@@ -116,6 +117,6 @@ export default async function SettingsPage() {
           </Link>
         </CardContent>
       </Card>
-    </div>
+    </Container>
   );
 }

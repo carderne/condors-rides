@@ -1,3 +1,4 @@
+import { Container } from "@/components/container";
 import Link from "next/link";
 
 export default function AboutLayout({
@@ -6,8 +7,8 @@ export default function AboutLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-2">
-      <div className="flex flex-col gap-4 md:flex-row">
+    <Container>
+      <div className="mx-auto flex flex-col gap-4 md:flex-row">
         <Link className="text-primary" href="/about">
           About
         </Link>
@@ -22,6 +23,6 @@ export default function AboutLayout({
         </Link>
       </div>
       {children}
-    </div>
+    </Container>
   );
 }

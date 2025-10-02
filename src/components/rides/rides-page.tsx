@@ -1,21 +1,32 @@
 import { type DatedRide, RideList } from "@/components/rides/list";
-import { RidesTabSwitcher } from "@/components/rides/tabs";
+import { TabSwitcher, type TabVal } from "@/components/rides/tabs";
 import { SurveyForm } from "@/components/survey/form";
 import { H3 } from "@/components/ui/typography";
 import type { Survey, User } from "@/db/zod";
+import { Container } from "../container";
+import { ShowMoreButton } from "./show-more";
+
+const TABS: TabVal[] = [
+  { path: "recent", color: "pink" },
+  { path: "upcoming", color: "pink" },
+  { path: "future", color: "pink" },
+  { path: "joined", color: "green" },
+];
 
 export function GenericRidesPage({
   rides,
   user,
   surveys,
+  showArchive = false,
 }: {
   rides: DatedRide[];
   user: User | null;
   surveys?: Survey[];
+  showArchive?: boolean;
 }) {
   return (
-    <main className="flex min-h-full flex-col gap-4">
-      <RidesTabSwitcher />
+    <Container className="pt-0">
+      <TabSwitcher prefix="rides" tabs={TABS} />
       {surveys?.map((survey) => (
         <SurveyForm key={survey.id} survey={survey} />
       ))}
@@ -26,6 +37,11 @@ export function GenericRidesPage({
       ) : (
         <RideList datedRideArray={rides} user={user} />
       )}
-    </main>
+      {showArchive && (
+        <div className="flex justify-end">
+          <ShowMoreButton />
+        </div>
+      )}
+    </Container>
   );
 }

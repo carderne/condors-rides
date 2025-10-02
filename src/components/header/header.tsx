@@ -42,7 +42,7 @@ export function HeaderBar({ user }: { user: User | null }) {
   ];
 
   return (
-    <div className="w-screen">
+    <div className="w-full">
       {/* Mobile Menu Overlay */}
       <div className={cn("flex flex-col bg-gray-800", mobileMenuOpen ? "block" : "hidden")}>
         <div className="flex justify-end pt-4 pr-4">

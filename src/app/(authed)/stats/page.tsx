@@ -1,3 +1,4 @@
+import { Container } from "@/components/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
@@ -78,10 +79,8 @@ export default async function StatsPage() {
   const stats = await getDashboardStats();
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <H1>Stats</H1>
-      </div>
+    <Container className="mt-4">
+      <H1>Stats</H1>
 
       {/* Key Metrics */}
       <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -182,6 +181,6 @@ export default async function StatsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Container>
   );
 }

@@ -48,7 +48,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         required={true}
         name={names.name}
         placeholder="Chilterns 100"
-        label="Ride name"
+        label="Name"
         errors={state.errors?.name}
         defaultValue={(state.formData?.get(names.name) as string) ?? ride?.name ?? ""}
       />
