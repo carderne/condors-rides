@@ -1,4 +1,3 @@
-import { H2 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -21,10 +20,5 @@ export default async function NewRideFromRoutePage({
   const { name, url: routeUrl, distance, elevation, cafeStop } = route;
   const routeOnly = { name, routeUrl, distance, elevation, cafeStop };
 
-  return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4">
-      <H2>New ride</H2>
-      <UpsertForm ride={routeOnly} />
-    </main>
-  );
+  return <UpsertForm ride={routeOnly} />;
 }

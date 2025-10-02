@@ -1,4 +1,3 @@
-import { H2 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -45,10 +44,5 @@ export default async function NewRideFromRidePage({
     notes,
   };
 
-  return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4">
-      <H2>New ride</H2>
-      <UpsertForm ride={detailsOnly} />
-    </main>
-  );
+  return <UpsertForm ride={detailsOnly} />;
 }

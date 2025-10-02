@@ -13,6 +13,7 @@ import {
   WindIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "../ui/button";
 import { H3 } from "../ui/typography";
 import { UserAvatar } from "../user";
 
@@ -75,17 +76,19 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Link
-              href={href}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
-                ride.surface === "offroad" ? "bg-amber-800 hover:bg-amber-900" : "",
-                ride.surface === "virtual" ? "bg-purple-800 hover:bg-purple-900" : "",
-              )}
-            >
-              Details
-              <ArrowRightIcon className="h-4 w-4" />
-            </Link>
+            <Button asChild className="h-full">
+              <Link
+                href={href}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
+                  ride.surface === "offroad" ? "bg-amber-800 hover:bg-amber-900" : "",
+                  ride.surface === "virtual" ? "bg-purple-800 hover:bg-purple-900" : "",
+                )}
+              >
+                Details
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+            </Button>
 
             {ride.routeUrl && (
               <Link

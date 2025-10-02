@@ -7,8 +7,16 @@ import { useRouter } from "next/navigation";
 export function BackButton({ className }: { className?: string }) {
   const router = useRouter();
 
+  const handleClick = () => {
+    if (typeof document !== "undefined" && document.referrer.includes("/rides/")) {
+      router.back();
+    } else {
+      router.push("/rides/upcoming");
+    }
+  };
+
   return (
-    <Button onClick={() => router.back()} variant="ghost" className={className}>
+    <Button onClick={handleClick} variant="ghost" className={className}>
       <ArrowLeftIcon /> Back
     </Button>
   );

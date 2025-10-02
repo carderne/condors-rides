@@ -2,6 +2,7 @@ import { emitRideView } from "@/clients/posthog";
 import { Confirmation, Modal } from "@/components/confirmation";
 import { Container } from "@/components/container";
 import { Map } from "@/components/map";
+import { Md } from "@/components/markdown";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { H2, H3 } from "@/components/ui/typography";
@@ -36,7 +37,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Markdown from "react-markdown";
 import {
   cancelRideAction,
   claimRideAction,
@@ -197,7 +197,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
         {ride.notes && (
           <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 w-full text-center text-xl font-medium text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
-            <Markdown>{ride.notes}</Markdown>
+            <Md>{ride.notes}</Md>
           </div>
         )}
 
