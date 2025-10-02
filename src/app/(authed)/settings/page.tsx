@@ -1,15 +1,15 @@
 import { emitPageView } from "@/clients/posthog";
 import { Container } from "@/components/container";
+import { InstallPwaCard } from "@/components/pwa/install";
+import { PushNotificationManager } from "@/components/pwa/notifications";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
 import { and, eq, isNull } from "drizzle-orm";
-import { ShareIcon } from "lucide-react";
 import Link from "next/link";
 import { UserSettingsForm } from "./form";
-import { PushNotificationManager } from "./notifications";
 
 export default async function SettingsPage() {
   const user = await getMembership();
@@ -47,6 +47,15 @@ export default async function SettingsPage() {
 
       <Card>
         <CardHeader>
+          <H2>Install app</H2>
+        </CardHeader>
+        <CardContent>
+          <InstallPwaCard />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <H2>User settings</H2>
         </CardHeader>
         <CardContent>
@@ -70,36 +79,6 @@ export default async function SettingsPage() {
           <Link href="/stats" className="text-primary hover:underline">
             More here...
           </Link>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <H2>Install on your phone</H2>
-        </CardHeader>
-        <CardContent>
-          <ol className="space-y-3 text-sm">
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-medium">1</span>
-              <span className="text-foreground flex">
-                Tap <ShareIcon className="ml-2 inline h-4 w-4 align-text-bottom" />
-              </span>
-            </li>
-
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-medium">2</span>
-              <span className="text-foreground">
-                Scroll down and <span className="font-medium">Add to Home Screen</span>
-              </span>
-            </li>
-
-            <li className="flex items-start gap-3">
-              <span className="text-primary font-medium">3</span>
-              <span className="text-foreground">
-                Tap <span className="font-medium">Add</span> to confirm
-              </span>
-            </li>
-          </ol>
         </CardContent>
       </Card>
 

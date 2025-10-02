@@ -74,7 +74,7 @@ export function Modal({
         </DialogHeader>
         <DialogFooter>
           <DialogClose className="cursor-pointer" asChild>
-            <Button variant="secondary"> OK</Button>
+            <Button variant="secondary">OK</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

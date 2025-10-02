@@ -4,7 +4,7 @@ import { GenericRidesPage } from "@/components/rides/rides-page";
 import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { addDays } from "date-fns";
-import { and, eq, getTableColumns, gte, isNull, lt } from "drizzle-orm";
+import { and, gte, isNull, lt } from "drizzle-orm";
 
 export default async function UpcomingRidesPage() {
   const user = await maybeGetMembership();
@@ -23,19 +23,5 @@ export default async function UpcomingRidesPage() {
   });
   const datedRideArray = groupRidesByDate(rides);
 
-  const surveys = user
-    ? await db
-        .select({ ...getTableColumns(schema.survey) })
-        .from(schema.survey)
-        .leftJoin(
-          schema.surveyResponse,
-          and(
-            eq(schema.surveyResponse.surveyId, schema.survey.id),
-            eq(schema.surveyResponse.userId, user.id),
-          ),
-        )
-        .where(and(eq(schema.survey.active, true), isNull(schema.surveyResponse.id)))
-    : [];
-
-  return <GenericRidesPage rides={datedRideArray} user={user} surveys={surveys} />;
+  return <GenericRidesPage rides={datedRideArray} user={user} />;
 }
