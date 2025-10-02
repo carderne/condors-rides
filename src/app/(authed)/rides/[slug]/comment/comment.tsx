@@ -67,7 +67,7 @@ export function Comment({
           )}
         </div>
       </div>
-      <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 break-word text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
+      <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 break-word whitespace-pre-wrap text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
         <Md>{comment.text}</Md>
       </div>
     </div>
