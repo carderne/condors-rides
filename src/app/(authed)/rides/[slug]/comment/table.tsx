@@ -64,7 +64,7 @@ export function CommentsList({ userId, isAdmin }: { userId: string; isAdmin: boo
               )}
             </div>
           </div>
-          <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
+          <div className="[&_a]:decoration-primary/30 [&_a:hover]:bg-primary/30 break-all text-gray-700 [&_a]:underline [&_a]:transition-colors [&_a:hover]:no-underline">
             <Markdown>{comment.text}</Markdown>
           </div>
         </div>
