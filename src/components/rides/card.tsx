@@ -30,18 +30,18 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
         className={cn(
           "flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl",
           "border-primary",
-          ride.surface === "gravel" && "border-amber-800",
+          ride.surface === "offroad" && "border-amber-800",
           ride.surface === "virtual" && "border-purple-800",
         )}
       >
-        {/* Time and gravel */}
+        {/* Time and offroad */}
         <div className="flex justify-between">
           <div className="flex items-center gap-2 rounded-br-xl border-r-2 border-b-2 border-pink-200 bg-white p-2">
             <ClockIcon className="h-3 w-3 text-pink-500" />
             <span className="font-bold text-gray-700">{ride.time.slice(0, 5)}</span>
           </div>
-          {ride.surface === "gravel" && (
-            <div className="p-2 text-xl font-bold text-amber-800 italic">Gravel</div>
+          {ride.surface === "offroad" && (
+            <div className="p-2 text-xl font-bold text-amber-800 italic">Offroad</div>
           )}
           {ride.surface === "virtual" && (
             <div className="p-2 text-xl font-bold text-purple-800 italic">Virtual</div>
@@ -79,7 +79,7 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
               href={href}
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
-                ride.surface === "gravel" ? "bg-amber-800 hover:bg-amber-900" : "",
+                ride.surface === "offroad" ? "bg-amber-800 hover:bg-amber-900" : "",
                 ride.surface === "virtual" ? "bg-purple-800 hover:bg-purple-900" : "",
               )}
             >

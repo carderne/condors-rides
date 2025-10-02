@@ -131,7 +131,7 @@ export const verification = pgTable(
 // *****************************************
 // Ride table
 // *****************************************
-export const rideSurfaceArray = ["road", "gravel", "virtual"] as const;
+export const rideSurfaceArray = ["road", "gravel", "virtual", "offroad"] as const;
 export const rideSurface = pgEnum("ride_surface", rideSurfaceArray);
 export const ride = pgTable(
   "ride",

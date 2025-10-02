@@ -174,7 +174,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         </FormSelectTrigger>
         <SelectContent>
           <SelectItem value="road">Road</SelectItem>
-          <SelectItem value="gravel">Gravel</SelectItem>
+          <SelectItem value="offroad">Offroad</SelectItem>
           <SelectItem value="virtual">Virtual</SelectItem>
         </SelectContent>
       </Select>

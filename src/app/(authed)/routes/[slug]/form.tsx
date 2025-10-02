@@ -102,7 +102,7 @@ export function UpsertForm({ route }: { route: Route }) {
         </FormSelectTrigger>
         <SelectContent>
           <SelectItem value="road">Road</SelectItem>
-          <SelectItem value="gravel">Gravel</SelectItem>
+          <SelectItem value="offroad">Offroad</SelectItem>
           <SelectItem value="virtual">Virtual</SelectItem>
         </SelectContent>
       </Select>

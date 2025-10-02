@@ -102,7 +102,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       <div
         className={cn(
           "to-primary grow bg-gradient-to-r from-red-400 text-white",
-          ride.surface === "gravel" ? "from-amber-700 to-amber-800" : "",
+          ride.surface === "offroad" ? "from-amber-700 to-amber-800" : "",
           ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
         )}
       >
@@ -251,8 +251,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <div>
                       <div className="text-xs tracking-wide text-gray-500 uppercase">Surface</div>
                       <div className="font-semibold">
-                        {ride.surface === "gravel"
-                          ? "Gravel"
+                        {ride.surface === "offroad"
+                          ? "Offroad"
                           : ride.surface === "virtual"
                             ? "Virtual"
                             : "Road"}
