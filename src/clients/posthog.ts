@@ -21,7 +21,7 @@ export function posthogIdentify(user: User) {
   });
 }
 
-export type PosthogEvent = "page_view" | "ride_view" | "notification";
+export type PosthogEvent = "page_view" | "ride_view" | "notification" | "btn_click";
 export type UserOnlyId = { id: string };
 
 export function emitEvent({

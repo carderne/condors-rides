@@ -25,7 +25,7 @@ export function GenericRidesPage({
   return (
     <Container className="pt-0">
       <TabSwitcher prefix="rides" tabs={TABS} />
-      <InstallPwaButton showNotificationPrompt={!user?.webpushSub} />
+      <InstallPwaButton user={user} />
       {rides.length === 0 ? (
         <div className="mx-auto mt-20">
           <H3>No rides :(</H3>

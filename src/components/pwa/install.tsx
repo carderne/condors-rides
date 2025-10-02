@@ -10,10 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { User } from "@/db/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ShareIcon, SquarePlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { clickedInstallAction, clickedNotifyAction } from "./actions";
 
 export function useDeviceType() {
   const [isIOS, setIsIOS] = useState(false);
@@ -30,19 +32,25 @@ export function useDeviceType() {
   return deviceType;
 }
 
-export function InstallPwaButton({ showNotificationPrompt }: { showNotificationPrompt: boolean }) {
+export function InstallPwaButton({ user }: { user: User | null }) {
   const deviceType = useDeviceType();
+
+  if (!user) {
+    return null;
+  }
+
   // We're only doing this for iOS until I figure out Android notifications
   if (deviceType === "other") {
     return null;
   }
 
   if (deviceType === "ios-pwa") {
-    if (!showNotificationPrompt) {
+    // If the user already has notifications enabled
+    if (user.webpushSub) {
       return null;
     }
     return (
-      <Button variant="outline" extra="action" asChild>
+      <Button variant="outline" extra="action" asChild onClick={clickedNotifyAction}>
         <Link href="/settings">Enable notifications!</Link>
       </Button>
     );
@@ -51,7 +59,7 @@ export function InstallPwaButton({ showNotificationPrompt }: { showNotificationP
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" extra="action">
+        <Button variant="outline" extra="action" onClick={clickedInstallAction}>
           Install the Condors App!
         </Button>
       </DialogTrigger>
