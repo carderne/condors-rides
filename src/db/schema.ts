@@ -131,7 +131,7 @@ export const verification = pgTable(
 // *****************************************
 // Ride table
 // *****************************************
-export const rideSurfaceArray = ["road", "gravel", "virtual", "offroad"] as const;
+export const rideSurfaceArray = ["road", "virtual", "offroad"] as const;
 export const rideSurface = pgEnum("ride_surface", rideSurfaceArray);
 export const ride = pgTable(
   "ride",
@@ -151,7 +151,7 @@ export const ride = pgTable(
     speed: text("speed").notNull(),
     distance: integer("distance").notNull(),
     elevation: integer("elevation"),
-    surface: rideSurface("surface").notNull().default("road"),
+    surface: rideSurface("surface").notNull(),
     routeUrl: text("route_url"),
 
     maxGroupSize: integer("max_group_size"),
@@ -287,7 +287,7 @@ export const route = pgTable(
 
     distance: integer("distance").notNull(),
     elevation: integer("elevation"),
-    surface: rideSurface("surface").notNull().default("road"),
+    surface: rideSurface("surface").notNull(),
     cafeStop: text("cafe_stop"),
     direction: routeDirectionEnum("direction"),
 
