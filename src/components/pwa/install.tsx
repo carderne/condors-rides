@@ -11,26 +11,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { User } from "@/db/zod";
+import { useDeviceType } from "@/hooks/device-type";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ShareIcon, SquarePlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { clickedInstallAction, clickedNotifyAction } from "./actions";
-
-export function useDeviceType() {
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  const deviceType = isStandalone ? "ios-pwa" : isIOS ? "ios-safari" : "other";
-
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream);
-    setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
-  }, []);
-
-  return deviceType;
-}
 
 export function InstallPwaButton({ user }: { user: User | null }) {
   const deviceType = useDeviceType();
@@ -97,7 +82,7 @@ function InstallInstructions() {
 
 export function InstallPwaCard() {
   const deviceType = useDeviceType();
-  return deviceType === "ios-safari" ? (
+  return deviceType === "ios" ? (
     <InstallInstructions />
   ) : deviceType === "ios-pwa" ? (
     "Already installed"

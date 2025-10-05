@@ -1,5 +1,4 @@
 import { Container } from "@/components/container";
-import { InstallPwaButton } from "@/components/pwa/install";
 import { type DatedRide, RideList } from "@/components/rides/list";
 import { TabSwitcher, type TabVal } from "@/components/rides/tabs";
 import { H3 } from "@/components/ui/typography";
@@ -25,7 +24,6 @@ export function GenericRidesPage({
   return (
     <Container className="pt-0">
       <TabSwitcher prefix="rides" tabs={TABS} />
-      <InstallPwaButton user={user} />
       {rides.length === 0 ? (
         <div className="mx-auto mt-20">
           <H3>No rides :(</H3>

@@ -51,11 +51,7 @@ export const user = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (table) => [
-    index("user__notify_new_ride_idx")
-      .on(table.notifyNewRide)
-      .where(eq(table.notifyNewRide, sql`TRUE`)),
-  ],
+  (_table) => [],
 );
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
@@ -454,3 +450,54 @@ export const surveyResponse = pgTable(
     uniqueIndex("survey_response__survey_id_user_id_uniqidx").on(table.surveyId, table.userId),
   ],
 );
+
+// *****************************************
+// Notifications
+// *****************************************
+export const deviceTypeArray = [
+  "ios",
+  "ios-pwa",
+  "ios-app",
+  "android",
+  "android-app",
+  "chrome",
+  "other",
+] as const;
+export type DeviceType = (typeof deviceTypeArray)[number];
+export const deviceTypeEnum = pgEnum("device_type", deviceTypeArray);
+export const subTypeArray = ["vapid", "fcm"] as const;
+export const subTypeEnum = pgEnum("sub_type", subTypeArray);
+export const sub = pgTable(
+  "sub",
+  {
+    deviceId: text("device_id").unique(),
+    deviceType: deviceTypeEnum("device_type"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    type: subTypeEnum().notNull(),
+    data: jsonb("data").notNull().$type<PushSubscription | string>(),
+
+    rideUpdate: boolean("ride_update").notNull().default(true),
+    rideNew: boolean("ride_new").notNull().default(false),
+
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (table) => [
+    uniqueIndex("sub__user_id_device_id_uniqidx").on(table.userId, table.deviceId),
+    index("sub__ride_new_idx")
+      .on(table.rideNew)
+      .where(eq(table.rideNew, sql`TRUE`)),
+    index("sub__ride_update_idx")
+      .on(table.rideUpdate)
+      .where(eq(table.rideUpdate, sql`TRUE`)),
+  ],
+);
+export const subRelations = relations(sub, ({ one }) => ({
+  user: one(user, {
+    fields: [sub.userId],
+    references: [user.id],
+  }),
+}));

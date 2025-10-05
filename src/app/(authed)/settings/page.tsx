@@ -41,7 +41,7 @@ export default async function SettingsPage() {
           <H2>Notifications</H2>
         </CardHeader>
         <CardContent>
-          <PushNotificationManager user={user} />
+          <PushNotificationManager />
         </CardContent>
       </Card>
 

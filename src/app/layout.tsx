@@ -35,6 +35,16 @@ export default async function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            window.setAppPlatform = function(value) {
+              window.__appPlatform = value;
+            };
+          `,
+          }}
+        />
       </head>
       <body>
         <div className="min-h-screen font-sans antialiased">
