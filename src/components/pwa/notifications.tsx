@@ -2,23 +2,54 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { User } from "@/db/zod";
+import type { Sub } from "@/db/zod";
+import { getDeviceId } from "@/hooks/client-id";
+import { getDeviceType, useDeviceType } from "@/hooks/device-type";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  setNewRideNotificationAction,
+  getSub,
+  persistAppTokenAction,
+  setRideNewNotificationAction,
+  setRideUpdateNotificationAction,
   subscribeUserAction,
   unsubscribeUserAction,
 } from "./actions";
 
-export function PushNotificationManager({ user }: { user: User }) {
-  const [isSupported, setIsSupported] = useState(false);
+export async function setPushToken(token: string) {
+  const deviceType = getDeviceType();
+  const deviceId = getDeviceId();
+  await persistAppTokenAction(token, deviceType, deviceId);
+}
+
+export function PushNotificationManager() {
+  const deviceType = useDeviceType();
+  const [pwaNotificationSupported, setPwaNotificationIsSupported] = useState(false);
+  const [dbSub, setDbSub] = useState<Sub>();
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
 
   useEffect(() => {
+    // Get current settings
+    const getNotificationSettings = async () => {
+      const deviceId = getDeviceId();
+      const sub = await getSub(deviceId);
+      setDbSub(sub);
+    };
+    getNotificationSettings();
+
+    // Make the setPushToken "publicly" available so the iOS/Android app can use it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).setPushToken = setPushToken;
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).setPushToken;
+    };
+  }, []);
+
+  useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
-      setIsSupported(true);
+      setPwaNotificationIsSupported(true);
       registerServiceWorker();
     }
   }, []);
@@ -32,61 +63,93 @@ export function PushNotificationManager({ user }: { user: User }) {
     setSubscription(sub);
   }
 
-  async function subscribeToPush() {
-    const permission = await askPermission();
-    if (permission !== "granted") {
-      toast.error(`Permission not granted: ${permission}`);
-      return;
-    }
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const sub = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
-      });
-      setSubscription(sub);
-      const serializedSub = JSON.parse(JSON.stringify(sub));
-      await subscribeUserAction(serializedSub);
-    } catch (err) {
-      const description = err instanceof Error ? err.message : "";
-      toast.error("Failed to subscribe", { description });
-    }
-  }
-
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
     setSubscription(null);
     await unsubscribeUserAction();
   }
 
-  if (!isSupported) {
+  async function subscribeToPush() {
+    const permission = await askPermission();
+    if (permission !== "granted") {
+      toast.error(`Permission not granted: ${permission}`);
+      return;
+    }
+    const registration = await navigator.serviceWorker.ready;
+
+    if (registration.pushManager === undefined) {
+      // Presumably using a real app?
+      // Stop silently?!
+      return;
+    }
+    const sub = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
+    });
+    setSubscription(sub);
+    const deviceId = getDeviceId();
+    const serializedSub = JSON.parse(JSON.stringify(sub));
+    const res = await subscribeUserAction(serializedSub, deviceType, deviceId);
+    // Just doing this because the revalidatePath doesn't seem to work (on PWA?)
+    if (res.success) {
+      const deviceId = getDeviceId();
+      const sub = await getSub(deviceId);
+      setDbSub(sub);
+    }
+  }
+
+  if (!pwaNotificationSupported && !["android-app", "ios-app"].includes(deviceType)) {
     return "Install as an app to get notifications (see below).";
+  }
+
+  if (["chrome", "other"].includes(deviceType)) {
+    return "Notifications only enabled for mobile app.";
   }
 
   return (
     <div className="grid gap-2">
-      <Button
-        variant="outline"
-        extra="action"
-        className="w-full md:w-fit"
-        onClick={subscription ? unsubscribeFromPush : subscribeToPush}
-      >
-        {subscription ? "Disable" : "Enable"}
-      </Button>
+      {!dbSub && (
+        <Button
+          variant="outline"
+          extra="action"
+          className="w-full md:w-fit"
+          onClick={subscribeToPush}
+        >
+          Enable
+        </Button>
+      )}
 
       {subscription && (
+        <Button
+          variant="outline"
+          extra="action"
+          className="w-full md:w-fit"
+          onClick={unsubscribeFromPush}
+        >
+          Disable
+        </Button>
+      )}
+
+      {dbSub && (
         <>
           <div className="flex items-center gap-2">
-            <Checkbox checked={true} disabled={true} />
+            <Checkbox
+              defaultChecked={dbSub.rideUpdate}
+              onCheckedChange={async (value) => {
+                if (value !== "indeterminate") {
+                  await setRideUpdateNotificationAction(value);
+                }
+              }}
+            />
             <p>Get notified of comments and changes to joined rides</p>
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox
-              defaultChecked={user.notifyNewRide}
+              defaultChecked={dbSub.rideNew}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
-                  await setNewRideNotificationAction(value);
+                  await setRideNewNotificationAction(value);
                 }
               }}
             />
