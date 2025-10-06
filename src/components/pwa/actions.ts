@@ -1,7 +1,7 @@
 "use server";
 
 import { emitEvent } from "@/clients/posthog";
-import { getMembership } from "@/dal/membership";
+import { getMembership, maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { DeviceType } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -19,15 +19,17 @@ export async function getSub(deviceId: string) {
 }
 
 export async function updateDeviceDetailsAction(deviceType: DeviceType, deviceId: string) {
-  const user = await getMembership();
-
-  await db
-    .update(schema.sub)
-    .set({
-      deviceType,
-      deviceId,
-    })
-    .where(eq(schema.sub.userId, user.id));
+  // TODO delete action
+  const user = await maybeGetMembership();
+  if (user) {
+    await db
+      .update(schema.sub)
+      .set({
+        deviceType,
+        deviceId,
+      })
+      .where(eq(schema.sub.userId, user.id));
+  }
 }
 
 export async function subscribeUserAction(
