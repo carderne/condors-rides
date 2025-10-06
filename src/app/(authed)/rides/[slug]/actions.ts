@@ -1,6 +1,6 @@
 "use server";
 
-import { sendNotifications, type UserNotification } from "@/clients/webpush";
+import { sendNotifications } from "@/clients/webpush";
 import { getAdminUser, getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
@@ -16,22 +16,19 @@ export async function joinRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { leader: true },
+    with: { leader: { columns: {}, with: { subs: true } } },
   });
   invariant(ride, "no ride found");
 
   await db.insert(schema.rideMember).values({ rideId, userId });
 
-  const { webpushSub } = ride.leader;
-  if (webpushSub !== null) {
-    await sendNotifications({
-      users: [{ ...ride.leader, webpushSub }],
-      title: "New rider joined!",
-      body: ride.name,
-      slug: ride.slug,
-      properties: { type: "join", joinerUserId: userId },
-    });
-  }
+  await sendNotifications({
+    targets: ride.leader.subs,
+    title: "New rider joined!",
+    body: ride.name,
+    slug: ride.slug,
+    properties: { type: "join", joinerUserId: userId },
+  });
   revalidatePath("/rides");
 }
 
@@ -42,7 +39,7 @@ export async function leaveRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { leader: true },
+    with: { leader: { columns: {}, with: { subs: true } } },
   });
   invariant(ride, "no ride found");
 
@@ -50,16 +47,13 @@ export async function leaveRideAction(rideId: string) {
     .delete(schema.rideMember)
     .where(and(eq(schema.rideMember.rideId, rideId), eq(schema.rideMember.userId, userId)));
 
-  const { webpushSub } = ride.leader;
-  if (webpushSub !== null) {
-    await sendNotifications({
-      users: [{ ...ride.leader, webpushSub }],
-      title: "Rider left",
-      body: ride.name,
-      slug: ride.slug,
-      properties: { type: "leave", joinerUserId: userId },
-    });
-  }
+  await sendNotifications({
+    targets: ride.leader.subs,
+    title: "Rider left",
+    body: ride.name,
+    slug: ride.slug,
+    properties: { type: "leave", joinerUserId: userId },
+  });
 
   revalidatePath("/rides");
 }
@@ -70,7 +64,7 @@ export async function unclaimRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { members: { with: { user: { columns: { id: true, webpushSub: true } } } } },
+    with: { members: { with: { user: { columns: {}, with: { subs: true } } } } },
   });
   invariant(ride, "no ride found");
 
@@ -79,11 +73,8 @@ export async function unclaimRideAction(rideId: string) {
     : and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id));
   await db.update(schema.ride).set({ unclaimed: true }).where(where);
 
-  const membersWithSub = ride.members
-    .map((m) => m.user)
-    .filter((u): u is UserNotification => u.webpushSub !== null);
   await sendNotifications({
-    users: membersWithSub,
+    targets: ride.members.flatMap((m) => m.user.subs),
     title: "Ride has no leader",
     body: ride.name,
     slug: ride.slug,
@@ -99,7 +90,7 @@ export async function claimRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { members: { with: { user: { columns: { id: true, webpushSub: true } } } } },
+    with: { members: { with: { user: { columns: {}, with: { subs: true } } } } },
   });
   invariant(ride, "no ride found");
 
@@ -111,11 +102,8 @@ export async function claimRideAction(rideId: string) {
     .delete(schema.rideMember)
     .where(and(eq(schema.rideMember.rideId, rideId), eq(schema.rideMember.userId, user.id)));
 
-  const membersWithSub = ride.members
-    .map((m) => m.user)
-    .filter((u): u is UserNotification => u.webpushSub !== null);
   await sendNotifications({
-    users: membersWithSub,
+    targets: ride.members.flatMap((m) => m.user.subs),
     title: "Ride has new leader!",
     body: ride.name,
     slug: ride.slug,
@@ -130,7 +118,7 @@ export async function cancelRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { members: { with: { user: { columns: { id: true, webpushSub: true } } } } },
+    with: { members: { with: { user: { columns: {}, with: { subs: true } } } } },
   });
   invariant(ride, "no ride found");
 
@@ -139,11 +127,8 @@ export async function cancelRideAction(rideId: string) {
     : and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id));
   await db.update(schema.ride).set({ canceledAt: new Date() }).where(where);
 
-  const membersWithSub = ride.members
-    .map((m) => m.user)
-    .filter((u): u is UserNotification => u.webpushSub !== null);
   await sendNotifications({
-    users: membersWithSub,
+    targets: ride.members.flatMap((m) => m.user.subs),
     title: "Ride cancelled",
     body: ride.name,
     slug: ride.slug,
@@ -158,7 +143,7 @@ export async function unCancelRideAction(rideId: string) {
   const ride = await db.query.ride.findFirst({
     columns: { name: true, slug: true },
     where: eq(schema.ride.id, rideId),
-    with: { members: { with: { user: { columns: { id: true, webpushSub: true } } } } },
+    with: { members: { with: { user: { columns: {}, with: { subs: true } } } } },
   });
   invariant(ride, "no ride found");
 
@@ -167,11 +152,8 @@ export async function unCancelRideAction(rideId: string) {
     : and(eq(schema.ride.id, rideId), eq(schema.ride.userId, user.id));
   await db.update(schema.ride).set({ canceledAt: null }).where(where);
 
-  const membersWithSub = ride.members
-    .map((m) => m.user)
-    .filter((u): u is UserNotification => u.webpushSub !== null);
   await sendNotifications({
-    users: membersWithSub,
+    targets: ride.members.flatMap((m) => m.user.subs),
     title: "Ride is back on!",
     body: ride.name,
     slug: ride.slug,

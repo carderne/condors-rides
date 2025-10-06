@@ -43,9 +43,6 @@ export const user = pgTable(
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
 
-    webpushSub: jsonb("webpush_sub").$type<PushSubscription>(),
-    notifyNewRide: boolean("notify_new_ride").notNull().default(false),
-
     verifiedAt: timestamp("verified_at"),
     deactivatedAt: timestamp("deactivated_at"),
     createdAt: createdAt(),
@@ -58,6 +55,7 @@ export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   rides: many(ride),
   ridesJoined: many(rideMember),
+  subs: many(sub),
 }));
 
 export const session = pgTable(

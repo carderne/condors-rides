@@ -3,14 +3,13 @@
 import { sendNotifications } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
-import type { InsertRide, Ride, User } from "@/db/zod";
+import type { InsertRide, Ride } from "@/db/zod";
 import { camelToSentence, formatISODate } from "@/lib/fmt";
 import { getGeojson } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
-import type { PushSubscription } from "web-push";
 import { type State, validator } from "./validate";
 
 export async function action(
@@ -22,7 +21,19 @@ export async function action(
   const existingRide = existingRideId
     ? await db.query.ride.findFirst({
         where: eq(schema.ride.id, existingRideId),
-        with: { members: { with: { user: true } } },
+        with: {
+          members: {
+            with: {
+              user: {
+                with: {
+                  subs: {
+                    where: eq(schema.sub.rideUpdate, true),
+                  },
+                },
+              },
+            },
+          },
+        },
       })
     : undefined;
 
@@ -103,16 +114,14 @@ export async function action(
 
   if (changes.length > 0 && existingRide) {
     // notify people
-    const activeWebPushSubs = existingRide.members
-      .map((m) => m.user)
-      .filter((x): x is User & { webpushSub: PushSubscription } => x.webpushSub !== null);
+    const activeSubs = existingRide.members.flatMap((m) => m.user.subs);
 
     const properties = { rideSlug: ride.slug, type: "change" };
     const changeKey = getMainChange(changes as [RideKey, ...RideKey[]]);
     const message = camelToSentence(changeKey);
 
     sendNotifications({
-      users: activeWebPushSubs,
+      targets: activeSubs,
       title: existingRide.name,
       body: `Changed: ${message}`,
       slug: existingRide.slug,
@@ -122,14 +131,14 @@ export async function action(
 
   if (!existingRide) {
     // notify people who want notifications of new rides
-    const wantNewRideNotifications = (await db.query.user.findMany({
-      columns: { id: true, webpushSub: true },
-      where: and(isNotNull(schema.user.webpushSub), eq(schema.user.notifyNewRide, true)),
-    })) as { id: string; webpushSub: PushSubscription }[];
+    const wantNewRideNotifications = await db.query.sub.findMany({
+      columns: { userId: true, data: true },
+      where: and(eq(schema.sub.rideNew, true), eq(schema.sub.type, "vapid")),
+    });
     const properties = { rideSlug: ride.slug, type: "new" };
 
     sendNotifications({
-      users: wantNewRideNotifications,
+      targets: wantNewRideNotifications,
       title: "New ride posted",
       body: ride.name,
       slug: ride.slug,

@@ -1,3 +1,4 @@
+import type { Sub } from "@/db/zod";
 import { getConfig } from "@/lib/config";
 import type { PushSubscription } from "web-push";
 import webpush from "web-push";
@@ -7,19 +8,17 @@ const config = getConfig();
 
 webpush.setVapidDetails("mailto:condors@rdrn.me", config.vapid.public, config.vapid.private);
 
-export interface UserNotification {
-  id: string;
-  webpushSub: PushSubscription;
-}
+export type SubTarget = Pick<Sub, "userId" | "data">;
+export type SubVapid = SubTarget & { data: PushSubscription };
 
 export async function sendNotifications({
-  users,
+  targets,
   title,
   body,
   slug,
   properties: rawProperties,
 }: {
-  users: UserNotification[];
+  targets: SubTarget[];
   title: string;
   body: string;
   slug: string;
@@ -28,16 +27,20 @@ export async function sendNotifications({
   const properties = { ...rawProperties, slug };
   const event = "notification";
   const notifications = await Promise.allSettled(
-    users.map(async (user) => {
-      emitEvent({ user, event, properties });
-      await webpush.sendNotification(user.webpushSub, JSON.stringify({ title, body, slug }));
-    }),
+    targets
+      .filter((target): target is SubVapid => typeof target.data !== "string")
+      .map(async ({ userId, data }) => {
+        emitEvent({ user: { id: userId }, event, properties });
+        await webpush.sendNotification(data, JSON.stringify({ title, body, slug }));
+      }),
   );
   notifications.forEach((r, i) => {
     if (r.status === "rejected") {
-      console.warn("Push failed for:", users[i], r.reason);
+      console.warn("Push failed for:", targets[i], r.reason);
     }
   });
+
+  // TODO do FCM notifications
 }
 
 export { webpush };

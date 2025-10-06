@@ -4,7 +4,6 @@ import { sendNotifications } from "@/clients/webpush";
 import { getMembership } from "@/dal/membership";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
-import type { User } from "@/db/zod";
 import { invariant } from "@/lib/invariant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -15,7 +14,10 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   const { id: userId } = user;
   const ride = await db.query.ride.findFirst({
     where: eq(schema.ride.id, rideId),
-    with: { leader: true, members: { with: { user: true } } },
+    with: {
+      leader: { with: { subs: { where: eq(schema.sub.rideUpdate, true) } } },
+      members: { with: { user: { with: { subs: { where: eq(schema.sub.rideUpdate, true) } } } } },
+    },
   });
   invariant(ride, "ride not found");
 
@@ -28,13 +30,11 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   revalidatePath("/rides");
 
   // notifications
-  const activeWebPushSubs = [ride.leader, ...ride.members.map((m) => m.user)]
-    .filter((u): u is User & { webpushSub: PushSubscription } => u.webpushSub !== null)
-    .filter((u) => u.id !== userId);
+  const activeWebPushSubs = [...ride.leader.subs, ...ride.members.flatMap((m) => m.user.subs)];
   const properties = { rideSlug: ride.slug, type: "comment" };
 
   sendNotifications({
-    users: activeWebPushSubs,
+    targets: activeWebPushSubs,
     title: ride.name,
     body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
     slug: ride.slug,
@@ -64,7 +64,7 @@ export async function toggleUpvoteCommentAction(commentId: string) {
     where: eq(schema.comment.id, commentId),
     with: {
       ride: { columns: { slug: true } },
-      user: { columns: { id: true, webpushSub: true } },
+      user: { columns: {}, with: { subs: true } },
     },
   });
   invariant(comment, "no comment found");
@@ -89,17 +89,14 @@ export async function toggleUpvoteCommentAction(commentId: string) {
     }
   });
 
-  const { webpushSub } = comment.user;
-  if (webpushSub !== null) {
-    const properties = { rideSlug: comment.ride.slug, type: "upvote" };
-    sendNotifications({
-      users: [{ ...comment.user, webpushSub }],
-      title: "Comment upvoted",
-      body: `by ${user.name}`,
-      slug: comment.ride.slug,
-      properties,
-    });
-  }
+  const properties = { rideSlug: comment.ride.slug, type: "upvote" };
+  sendNotifications({
+    targets: comment.user.subs,
+    title: "Comment upvoted",
+    body: `by ${user.name}`,
+    slug: comment.ride.slug,
+    properties,
+  });
 
   revalidatePath("/rides");
 }
