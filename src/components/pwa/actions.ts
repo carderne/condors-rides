@@ -105,5 +105,6 @@ export async function persistAppTokenAction(
       set: { data: token },
     });
 
+  revalidatePath("/settings");
   return { success: true };
 }

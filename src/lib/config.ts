@@ -33,6 +33,10 @@ type Config = {
     public: string;
     private: string;
   };
+  firebase: {
+    projectId: string;
+    serviceAccountB64: string;
+  };
 
   posthog: {
     key: string;
@@ -66,6 +70,10 @@ function getDefaultConfig() {
     vapid: {
       public: get("NEXT_PUBLIC_VAPID_PUBLIC_KEY"),
       private: get("VAPID_PRIVATE_KEY"),
+    },
+    firebase: {
+      projectId: get("FIREBASE_PROJECT_ID"),
+      serviceAccountB64: get("FIREBASE_SERVICE_ACCOUNT_B64"),
     },
 
     posthog: {

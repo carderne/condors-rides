@@ -6,6 +6,7 @@ import type { Sub } from "@/db/zod";
 import { getDeviceId } from "@/hooks/client-id";
 import { getDeviceType, useDeviceType } from "@/hooks/device-type";
 import { urlBase64ToUint8Array } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -17,17 +18,24 @@ import {
   unsubscribeUserAction,
 } from "./actions";
 
-export async function setPushToken(token: string) {
-  const deviceType = getDeviceType();
-  const deviceId = getDeviceId();
-  await persistAppTokenAction(token, deviceType, deviceId);
-}
-
 export function PushNotificationManager() {
   const deviceType = useDeviceType();
   const [pwaNotificationSupported, setPwaNotificationIsSupported] = useState(false);
   const [dbSub, setDbSub] = useState<Sub>();
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const router = useRouter();
+
+  const setPushToken = async (token: string) => {
+    const deviceType = getDeviceType();
+    const deviceId = getDeviceId();
+    const res = await persistAppTokenAction(token, deviceType, deviceId);
+    if (res.success) {
+      toast("Notifications enabled!");
+      router.refresh();
+    } else {
+      toast.warning("Error: notifications not enabled");
+    }
+  };
 
   useEffect(() => {
     // Get current settings
@@ -70,18 +78,24 @@ export function PushNotificationManager() {
   }
 
   async function subscribeToPush() {
+    console.log("SUBSCRIBE TO PUSH AAAAAA");
     const permission = await askPermission();
+    console.log("SUBSCRIBE TO PUSH BBBBBB");
     if (permission !== "granted") {
+      console.log("SUBSCRIBE TO PUSH CCCCCC");
       toast.error(`Permission not granted: ${permission}`);
       return;
     }
+    console.log("SUBSCRIBE TO PUSH DDDDDD");
     const registration = await navigator.serviceWorker.ready;
 
     if (registration.pushManager === undefined) {
+      console.log("SUBSCRIBE TO PUSH EEEEEE");
       // Presumably using a real app?
       // Stop silently?!
       return;
     }
+    console.log("SUBSCRIBE TO PUSH FFFFFF");
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),

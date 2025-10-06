@@ -468,7 +468,7 @@ export const subTypeEnum = pgEnum("sub_type", subTypeArray);
 export const sub = pgTable(
   "sub",
   {
-    deviceId: text("device_id").unique(),
+    deviceId: text("device_id"),
     deviceType: deviceTypeEnum("device_type"),
     userId: text("user_id")
       .notNull()

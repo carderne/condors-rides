@@ -1,6 +1,6 @@
 "use server";
 
-import { sendNotifications } from "@/clients/webpush";
+import { sendNotifications } from "@/clients/notify";
 import { getMembership } from "@/dal/membership";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
