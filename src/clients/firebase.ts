@@ -87,12 +87,15 @@ export class Firebase {
               title,
               body,
             },
+            data: {
+              url: "TODO",
+            },
             android: {
-              priority: "high",
+              priority: "normal",
             },
             apns: {
               headers: {
-                "apns-priority": "10",
+                "apns-priority": "5",
               },
             },
           },
