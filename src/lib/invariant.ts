@@ -1,6 +1,6 @@
 const prefix: string = "Invariant failed";
 
-export function hasValue(value: unknown): boolean {
+function hasValue(value: unknown): boolean {
   if (typeof value === "undefined" || value === null) {
     return false;
   }

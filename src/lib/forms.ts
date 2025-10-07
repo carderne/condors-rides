@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 type InferFieldErrors<T extends z.ZodType> = {
   [K in keyof z.infer<T>]?: string[] | undefined;
@@ -18,9 +18,6 @@ type ActionStateSuccess<T extends z.ZodType> = {
 };
 
 export type ActionState<T extends z.ZodType> = ActionStateSuccess<T> | ActionStateError<T>;
-
-const _voidSchema = z.void();
-export type VoidActionState = ActionState<typeof _voidSchema>;
 
 export function createValidator<T extends z.ZodType>(schema: T) {
   return (formData: FormData): ActionState<T> => {

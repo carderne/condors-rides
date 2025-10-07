@@ -4,9 +4,9 @@ import { Firebase } from "./firebase";
 import { emitEvent } from "./posthog";
 import { webpush } from "./webpush";
 
-export type SubTarget = Pick<Sub, "userId" | "data">;
-export type SubVapid = { userId: string; data: PushSubscription };
-export type SubFcm = { userId: string; data: string };
+type SubTarget = Pick<Sub, "userId" | "data">;
+type SubVapid = { userId: string; data: PushSubscription };
+type SubFcm = { userId: string; data: string };
 
 export async function sendNotifications({
   targets,
@@ -48,5 +48,3 @@ export async function sendNotifications({
       }),
   ]);
 }
-
-export { webpush };

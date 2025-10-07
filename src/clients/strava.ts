@@ -12,15 +12,6 @@ const {
   strava: { clientId, clientSecret },
 } = getConfig();
 
-type Position = [number, number][];
-
-export interface LineString {
-  type: "LineString";
-  coordinates: Position[];
-}
-
-export type GeoJson = LineString;
-
 interface StravaRoute {
   map: { polyline: string };
 }

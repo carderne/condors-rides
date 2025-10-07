@@ -1,13 +1,12 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import type { ActionState } from "@/lib/forms";
 import { invariant } from "@/lib/invariant";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
-export type Provider = "google" | "facebook";
+type Provider = "google" | "facebook";
 
 export async function signUpSocialAction(
   redirectUrl: string,
@@ -31,7 +30,6 @@ const signUpSchema = z.object({
   email: z.string().email().toLowerCase(),
   password: z.string(),
 });
-export type SignUpState = ActionState<typeof signUpSchema>;
 
 export async function signUpEmailAction(
   signInVariant: boolean,

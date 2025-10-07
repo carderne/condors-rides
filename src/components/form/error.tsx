@@ -1,10 +1,6 @@
-export interface FormErrorProps {
-  errors?: string[];
-}
-
 export const errorInputStyle = "border-red-500 focus-visible:ring-red-500";
 
-export function FormError({ errors }: FormErrorProps) {
+export function FormError({ errors }: { errors?: string[] }) {
   if (!errors?.length) {
     return null;
   }

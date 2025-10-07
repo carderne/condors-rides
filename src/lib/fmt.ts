@@ -1,5 +1,4 @@
-import { format, formatISO, formatRelative } from "date-fns";
-import { enGB } from "date-fns/locale";
+import { format, formatISO } from "date-fns";
 
 export function formatShortDate(date: Date) {
   return format(date, "EEE, d MMM");
@@ -34,31 +33,6 @@ export function formatTime(time: string | null): string {
     return "";
   }
   return time.slice(0, 5);
-}
-
-const numberFormatter = new Intl.NumberFormat("en-UK", {});
-export function formatNumber(number: number): string {
-  return numberFormatter.format(number);
-}
-
-export function relativeDate(date: Date): string {
-  const formatRelativeLocale = {
-    ...enGB,
-    lastWeek: "'Last' eeee",
-    yesterday: "'Yesterday'",
-    today: "'Today'",
-    tomorrow: "'Tomorrow'",
-    nextWeek: "'Next' eeee",
-    other: "EEE, d MMM",
-  };
-  const res = formatRelative(date, new Date(), {
-    locale: {
-      formatLong: enGB.formatLong,
-      localize: enGB.localize,
-      formatRelative: (token) => formatRelativeLocale[token],
-    },
-  });
-  return res;
 }
 
 export function capitalize(text: string): string {
@@ -100,18 +74,4 @@ export function isHref(text: string): boolean {
     return true;
   }
   return false;
-}
-
-export function formatUrl(url: string): string {
-  const trimmedUrl = url.trim();
-  if (trimmedUrl.includes("mailto:")) {
-    return trimmedUrl;
-  }
-  if (/^https?:\/\//i.test(trimmedUrl)) {
-    return trimmedUrl;
-  }
-  if (url.startsWith("/")) {
-    return trimmedUrl;
-  }
-  return `https://${trimmedUrl}`;
 }

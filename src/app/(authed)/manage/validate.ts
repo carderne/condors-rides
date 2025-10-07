@@ -22,7 +22,7 @@ const schema = zfd.formData({
   surface: z.enum(rideSurfaceArray),
 });
 
-export type Schema = typeof schema;
+type Schema = typeof schema;
 
 export type State = ActionState<Schema>;
 export const validator = createValidator<Schema>(schema);

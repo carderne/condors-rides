@@ -14,7 +14,7 @@ const schema = zfd.formData({
   notes: zfd.text(z.string().optional()),
 });
 
-export type Schema = typeof schema;
+type Schema = typeof schema;
 
 export type State = ActionState<Schema>;
 export const validator = createValidator<Schema>(schema);

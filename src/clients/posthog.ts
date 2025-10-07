@@ -6,7 +6,7 @@ const config = getConfig();
 
 const ENV = process.env.NODE_ENV;
 
-export const posthog = new PostHog(config.posthog.key, {
+const posthog = new PostHog(config.posthog.key, {
   host: "https://eu.i.posthog.com",
 });
 
@@ -21,8 +21,8 @@ export function posthogIdentify(user: User) {
   });
 }
 
-export type PosthogEvent = "page_view" | "ride_view" | "notification" | "btn_click";
-export type UserOnlyId = { id: string };
+type PosthogEvent = "page_view" | "ride_view" | "notification" | "btn_click";
+type UserOnlyId = { id: string };
 
 export function emitEvent({
   user,
@@ -48,7 +48,7 @@ export function emitEvent({
   }
 }
 
-export type PosthogPage =
+type PosthogPage =
   | "settings"
   | "rides_upcoming"
   | "rides_recent"
