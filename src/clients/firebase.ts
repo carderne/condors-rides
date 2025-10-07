@@ -2,6 +2,7 @@ import { getConfig } from "@/lib/config";
 import crypto from "crypto";
 
 const {
+  baseUrl,
   firebase: { projectId, serviceAccountB64 },
 } = getConfig();
 
@@ -68,10 +69,23 @@ export class Firebase {
     this.accessToken = await getAccessToken();
   }
 
-  async sendNotification(fcmToken: string, title: string, body: string) {
+  async sendNotification({
+    token,
+    title,
+    body,
+    slug,
+  }: {
+    token: string;
+    title: string;
+    body: string;
+    slug: string;
+  }) {
     if (this.accessToken === undefined) {
       this.auth();
     }
+
+    const url = new URL(`/rides/${slug}`, baseUrl).toString();
+
     const response = await fetch(
       `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
       {
@@ -82,13 +96,13 @@ export class Firebase {
         },
         body: JSON.stringify({
           message: {
-            token: fcmToken,
+            token,
             notification: {
               title,
               body,
             },
             data: {
-              url: "TODO",
+              url,
             },
             android: {
               priority: "normal",
