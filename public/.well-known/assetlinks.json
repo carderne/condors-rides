@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cc.cowleyroadcondors.ride",
+      "sha256_cert_fingerprints": [
+        "93:A0:36:54:AF:5D:AF:6E:21:DF:81:0C:80:50:16:2F:52:F0:0F:BC:15:58:FB:D4:5F:DF:62:13:AE:9F:FC:D0",
+        "B5:60:0B:40:84:5E:E1:CC:E4:B4:E7:E6:D4:B3:8D:4F:AC:A4:30:1B:48:5A:D0:7E:E6:C5:9E:20:CA:A5:AD:54"
+      ]
+    }
+  }
+]
