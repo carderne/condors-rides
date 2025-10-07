@@ -1,7 +1,6 @@
 "use server";
 
-import { emitEvent } from "@/clients/posthog";
-import { getMembership, maybeGetMembership } from "@/dal/membership";
+import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { DeviceType } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -16,20 +15,6 @@ export async function getSub(deviceId: string) {
   });
 
   return sub;
-}
-
-export async function updateDeviceDetailsAction(deviceType: DeviceType, deviceId: string) {
-  // TODO delete action
-  const user = await maybeGetMembership();
-  if (user) {
-    await db
-      .update(schema.sub)
-      .set({
-        deviceType,
-        deviceId,
-      })
-      .where(eq(schema.sub.userId, user.id));
-  }
 }
 
 export async function subscribeUserAction(
@@ -57,34 +42,32 @@ export async function subscribeUserAction(
   return { success: true };
 }
 
-export async function unsubscribeUserAction() {
+export async function unsubscribeUserAction(deviceId: string) {
   const user = await getMembership();
-  await db.delete(schema.sub).where(eq(schema.sub.userId, user.id));
+  await db
+    .delete(schema.sub)
+    .where(and(eq(schema.sub.userId, user.id), eq(schema.sub.deviceId, deviceId)));
   return { success: true };
 }
 
-export async function setRideUpdateNotificationAction(enabled: boolean) {
+export async function setRideUpdateNotificationAction(enabled: boolean, deviceId: string) {
   const user = await getMembership();
-  await db.update(schema.sub).set({ rideUpdate: enabled }).where(eq(schema.sub.userId, user.id));
+  await db
+    .update(schema.sub)
+    .set({ rideUpdate: enabled })
+    .where(and(eq(schema.sub.userId, user.id), eq(schema.sub.deviceId, deviceId)));
   revalidatePath("/settings");
   return { success: true };
 }
 
-export async function setRideNewNotificationAction(enabled: boolean) {
+export async function setRideNewNotificationAction(enabled: boolean, deviceId: string) {
   const user = await getMembership();
-  await db.update(schema.sub).set({ rideNew: enabled }).where(eq(schema.sub.userId, user.id));
+  await db
+    .update(schema.sub)
+    .set({ rideNew: enabled })
+    .where(and(eq(schema.sub.userId, user.id), eq(schema.sub.deviceId, deviceId)));
   revalidatePath("/settings");
   return { success: true };
-}
-
-export async function clickedInstallAction() {
-  const user = await getMembership();
-  emitEvent({ user, event: "btn_click", properties: { button: "install_pwa" } });
-}
-
-export async function clickedNotifyAction() {
-  const user = await getMembership();
-  emitEvent({ user, event: "btn_click", properties: { button: "notifications" } });
 }
 
 export async function persistAppTokenAction(

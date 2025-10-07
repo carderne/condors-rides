@@ -74,28 +74,23 @@ export function PushNotificationManager() {
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
     setSubscription(null);
-    await unsubscribeUserAction();
+    const deviceId = getDeviceId();
+    await unsubscribeUserAction(deviceId);
   }
 
   async function subscribeToPush() {
-    console.log("SUBSCRIBE TO PUSH AAAAAA");
     const permission = await askPermission();
-    console.log("SUBSCRIBE TO PUSH BBBBBB");
     if (permission !== "granted") {
-      console.log("SUBSCRIBE TO PUSH CCCCCC");
       toast.error(`Permission not granted: ${permission}`);
       return;
     }
-    console.log("SUBSCRIBE TO PUSH DDDDDD");
     const registration = await navigator.serviceWorker.ready;
 
     if (registration.pushManager === undefined) {
-      console.log("SUBSCRIBE TO PUSH EEEEEE");
       // Presumably using a real app?
       // Stop silently?!
       return;
     }
-    console.log("SUBSCRIBE TO PUSH FFFFFF");
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
@@ -151,7 +146,8 @@ export function PushNotificationManager() {
               defaultChecked={dbSub.rideUpdate}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
-                  await setRideUpdateNotificationAction(value);
+                  const deviceId = getDeviceId();
+                  await setRideUpdateNotificationAction(value, deviceId);
                 }
               }}
             />
@@ -163,7 +159,8 @@ export function PushNotificationManager() {
               defaultChecked={dbSub.rideNew}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
-                  await setRideNewNotificationAction(value);
+                  const deviceId = getDeviceId();
+                  await setRideNewNotificationAction(value, deviceId);
                 }
               }}
             />

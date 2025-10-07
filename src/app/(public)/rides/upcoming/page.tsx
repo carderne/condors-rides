@@ -5,7 +5,6 @@ import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { addDays } from "date-fns";
 import { and, gte, isNull, lt } from "drizzle-orm";
-import { UpdateDeviceDetails } from "./update-device";
 
 export default async function UpcomingRidesPage() {
   const user = await maybeGetMembership();
@@ -24,10 +23,5 @@ export default async function UpcomingRidesPage() {
   });
   const datedRideArray = groupRidesByDate(rides);
 
-  return (
-    <>
-      <UpdateDeviceDetails />
-      <GenericRidesPage rides={datedRideArray} user={user} />
-    </>
-  );
+  return <GenericRidesPage rides={datedRideArray} user={user} />;
 }

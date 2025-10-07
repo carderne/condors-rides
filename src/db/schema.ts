@@ -468,8 +468,8 @@ export const subTypeEnum = pgEnum("sub_type", subTypeArray);
 export const sub = pgTable(
   "sub",
   {
-    deviceId: text("device_id"),
-    deviceType: deviceTypeEnum("device_type"),
+    deviceId: text("device_id").notNull(),
+    deviceType: deviceTypeEnum("device_type").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
