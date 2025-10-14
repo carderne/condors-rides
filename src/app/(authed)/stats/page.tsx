@@ -2,17 +2,22 @@ import { Container } from "@/components/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
-import { count, countDistinct, sql } from "drizzle-orm";
+import { and, count, countDistinct, eq, isNull, sql } from "drizzle-orm";
 
 async function getDashboardStats() {
   // Total rides and by surface
-  const totalRides = await db.select({ count: count() }).from(schema.ride);
+  const totalRides = await db
+    .select({ count: count() })
+    .from(schema.ride)
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
+
   const ridesBySurface = await db
     .select({
       surface: schema.ride.surface,
       count: count(),
     })
     .from(schema.ride)
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
     .groupBy(schema.ride.surface);
 
   // Most popular days for rides
@@ -23,6 +28,7 @@ async function getDashboardStats() {
       count: count(),
     })
     .from(schema.ride)
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
     .groupBy(sql`EXTRACT(DOW FROM ${schema.ride.date})`, sql`TO_CHAR(${schema.ride.date}, 'Day')`)
     .orderBy(sql`count(*) DESC`)
     .limit(3);
@@ -39,6 +45,8 @@ async function getDashboardStats() {
           memberCount: sql<number>`COUNT(*)`.as("member_count"),
         })
         .from(schema.rideMember)
+        .leftJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
+        .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
         .groupBy(schema.rideMember.rideId)
         .as("ride_counts"),
     );
@@ -46,12 +54,15 @@ async function getDashboardStats() {
   // Unique ride leaders
   const uniqueLeaders = await db
     .select({ count: countDistinct(schema.ride.userId) })
-    .from(schema.ride);
+    .from(schema.ride)
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
 
   // Unique ride members
   const uniqueMembers = await db
     .select({ count: countDistinct(schema.rideMember.userId) })
-    .from(schema.rideMember);
+    .from(schema.rideMember)
+    .leftJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
 
   // Total routes and by surface
   const totalRoutes = await db.select({ count: count() }).from(schema.route);
