@@ -1,6 +1,5 @@
+import { AllSignInButtons } from "@/components/auth/button";
 import { SignUpEmailDevOnly } from "@/components/auth/email";
-import { SignInFacebook } from "@/components/auth/facebook";
-import { SignInGoogle } from "@/components/auth/google";
 import { H2, H3 } from "@/components/ui/typography";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -49,8 +48,7 @@ export default async function SignIn({
       </div>
       <SignUpEmailDevOnly signInVariant={false} redirectUrl={redirectUrl} />
       <div className="z-10 mx-auto flex flex-col gap-4 md:w-72">
-        <SignInGoogle redirectUrl={redirectUrl} />
-        <SignInFacebook redirectUrl={redirectUrl} />
+        <AllSignInButtons redirectUrl={redirectUrl} errorCallbackUrl="/sign-in" />
       </div>
       <div className="text-muted-foreground text-sm md:hidden">
         <p>
