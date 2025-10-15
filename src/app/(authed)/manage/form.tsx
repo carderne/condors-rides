@@ -101,7 +101,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
           defaultValue={
             (state.formData?.get(names.startPoint) as string) ??
             ride?.startPoint ??
-            "Manzil Way Gardens"
+            "Cowley Road Condors"
           }
         />
         <FormInput
