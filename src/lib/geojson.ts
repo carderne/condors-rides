@@ -58,3 +58,16 @@ function getRouteSiteId(url: string): SiteWithId | null {
   }
   return null;
 }
+
+export function getAverageCoords(geojson: GeoJSON.LineString): { lat: number; lon: number } {
+  const { coordinates } = geojson;
+  const sum = coordinates.reduce(
+    (acc, pos) => ({ lat: acc.lat + pos[0]!, lon: acc.lon + pos[1]! }),
+    { lat: 0, lon: 0 },
+  );
+
+  return {
+    lat: sum.lat / coordinates.length,
+    lon: sum.lon / coordinates.length,
+  };
+}

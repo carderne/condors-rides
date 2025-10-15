@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { H2, H3 } from "@/components/ui/typography";
 import { UserAvatar } from "@/components/user";
+import { WeatherCard } from "@/components/weather/weather";
 import { getMembership } from "@/dal/membership";
 import { viewedRide } from "@/dal/rideView";
 import { db, schema } from "@/db";
@@ -185,7 +186,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="size-4" />
-                <span>{format(ride.date, "EEE, d MMM yyyy")}</span>
+                <span>{format(ride.date, "EEE, d MMM")}</span>
               </div>
               <div className="flex items-center gap-3">
                 <ClockIcon className="size-4" />
@@ -200,6 +201,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <Md>{ride.notes}</Md>
           </div>
         )}
+
+        <WeatherCard ride={ride} />
 
         <div className="flex w-full flex-col gap-8 md:flex-row">
           {/* Left column - Ride details and actions */}

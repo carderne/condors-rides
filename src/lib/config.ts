@@ -57,6 +57,9 @@ type Config = {
     clientId: string;
     clientSecret: string;
   };
+  pirateWeather: {
+    apiKey: string;
+  };
 };
 
 function getDefaultConfig() {
@@ -94,6 +97,10 @@ function getDefaultConfig() {
     facebook: {
       clientId: get("FACEBOOK_CLIENT_ID"),
       clientSecret: get("FACEBOOK_CLIENT_SECRET"),
+    },
+
+    pirateWeather: {
+      apiKey: get("PIRATEWEATHER_API_KEY"),
     },
   };
 }
