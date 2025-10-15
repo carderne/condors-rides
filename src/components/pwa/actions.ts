@@ -3,11 +3,12 @@
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { DeviceType } from "@/db/schema";
+import { invariant } from "@/lib/invariant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { PushSubscription } from "web-push";
 
-export async function getSub(deviceId: string) {
+export async function getSubAction(deviceId: string) {
   const user = await getMembership();
 
   const sub = await db.query.sub.findFirst({
@@ -76,7 +77,7 @@ export async function persistAppTokenAction(
   deviceId: string,
 ) {
   const user = await getMembership();
-  await db
+  const [sub] = await db
     .insert(schema.sub)
     .values({
       userId: user.id,
@@ -88,8 +89,10 @@ export async function persistAppTokenAction(
     .onConflictDoUpdate({
       target: [schema.sub.userId, schema.sub.deviceId],
       set: { data: token },
-    });
+    })
+    .returning();
+  invariant(sub, "no sub created");
 
   revalidatePath("/settings");
-  return { success: true };
+  return sub;
 }

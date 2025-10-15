@@ -7,6 +7,7 @@ export default async function AuthedLayout({
   children: React.ReactNode;
 }>) {
   const user = await getMembership();
+
   return (
     <>
       <HeaderBar user={user} />

@@ -5,12 +5,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { Sub } from "@/db/zod";
 import { getDeviceId } from "@/hooks/client-id";
 import { getDeviceType, useDeviceType } from "@/hooks/device-type";
+import { askPermission } from "@/lib/notifications";
 import { urlBase64ToUint8Array } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  getSub,
+  getSubAction,
   persistAppTokenAction,
   setRideNewNotificationAction,
   setRideUpdateNotificationAction,
@@ -23,25 +23,20 @@ export function PushNotificationManager() {
   const [pwaNotificationSupported, setPwaNotificationIsSupported] = useState(false);
   const [dbSub, setDbSub] = useState<Sub>();
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
-  const router = useRouter();
 
   const setPushToken = async (token: string) => {
     const deviceType = getDeviceType();
     const deviceId = getDeviceId();
-    const res = await persistAppTokenAction(token, deviceType, deviceId);
-    if (res.success) {
-      toast("Notifications enabled!");
-      router.refresh();
-    } else {
-      toast.warning("Error: notifications not enabled");
-    }
+    const newSub = await persistAppTokenAction(token, deviceType, deviceId);
+    toast("Notifications enabled!");
+    setDbSub(newSub);
   };
 
   useEffect(() => {
     // Get current settings
     const getNotificationSettings = async () => {
       const deviceId = getDeviceId();
-      const sub = await getSub(deviceId);
+      const sub = await getSubAction(deviceId);
       setDbSub(sub);
     };
     getNotificationSettings();
@@ -102,7 +97,7 @@ export function PushNotificationManager() {
     // Just doing this because the revalidatePath doesn't seem to work (on PWA?)
     if (res.success) {
       const deviceId = getDeviceId();
-      const sub = await getSub(deviceId);
+      const sub = await getSubAction(deviceId);
       setDbSub(sub);
     }
   }
@@ -170,20 +165,4 @@ export function PushNotificationManager() {
       )}
     </div>
   );
-}
-
-async function askPermission(): Promise<"granted" | "denied" | "default"> {
-  const permissionResult = await new Promise<"granted" | "denied" | "default">(
-    (resolve, reject) => {
-      const maybePromise = Notification.requestPermission((result) => {
-        resolve(result);
-      });
-
-      if (maybePromise) {
-        maybePromise.then(resolve, reject);
-      }
-    },
-  );
-
-  return permissionResult;
 }
