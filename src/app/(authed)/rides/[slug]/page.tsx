@@ -102,7 +102,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       {/* Ride Header */}
       <div
         className={cn(
-          "to-primary grow bg-gradient-to-r from-red-400 text-white",
+          "to-primary grow bg-gradient-to-b md:bg-gradient-to-r from-red-400 text-white",
           ride.surface === "offroad" ? "from-amber-700 to-amber-800" : "",
           ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
         )}
