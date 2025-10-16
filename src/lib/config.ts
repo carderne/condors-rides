@@ -49,6 +49,7 @@ type Config = {
     apiKey: string;
     authToken: string;
   };
+
   google: {
     clientId: string;
     clientSecret: string;
@@ -57,6 +58,11 @@ type Config = {
     clientId: string;
     clientSecret: string;
   };
+  apple: {
+    clientId: string;
+    clientSecret: string;
+  };
+
   pirateWeather: {
     apiKey: string;
   };
@@ -90,6 +96,7 @@ function getDefaultConfig() {
       apiKey: get("RIDEWITHGPS_API_KEY"),
       authToken: get("RIDEWITHGPS_AUTH_TOKEN"),
     },
+
     google: {
       clientId: get("GOOGLE_CLIENT_ID"),
       clientSecret: get("GOOGLE_CLIENT_SECRET"),
@@ -97,6 +104,10 @@ function getDefaultConfig() {
     facebook: {
       clientId: get("FACEBOOK_CLIENT_ID"),
       clientSecret: get("FACEBOOK_CLIENT_SECRET"),
+    },
+    apple: {
+      clientId: get("APPLE_CLIENT_ID"),
+      clientSecret: get("APPLE_CLIENT_SECRET"),
     },
 
     pirateWeather: {

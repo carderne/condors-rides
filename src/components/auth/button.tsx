@@ -1,6 +1,6 @@
 "use client";
 
-import { GoogleLogo } from "@/components/svg/oauth";
+import { AppleLogo, GoogleLogo } from "@/components/svg/oauth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -9,15 +9,17 @@ import { signUpSocialAction } from "./actions";
 
 const localStorageKey = "techleap-last-auth-method";
 
-const integrations = ["google", "facebook"] as const;
+const integrations = ["google", "facebook", "apple"] as const;
 type Integration = (typeof integrations)[number];
 const logos: Record<Integration, React.ComponentType> = {
   google: GoogleLogo,
   facebook: FacebookLogo,
+  apple: AppleLogo,
 };
 const titles: Record<Integration, string> = {
   google: "Google",
   facebook: "Facebook",
+  apple: "Apple",
 };
 
 function SignInButton({
@@ -40,9 +42,15 @@ function SignInButton({
 
   return (
     <div className={cn(lastUsed ? "bg-primary/40 -mr-2 -ml-2 rounded-lg px-2 pt-2" : "")}>
-      <Button variant="default" className="h-12 w-full gap-4 font-bold" onClick={handleClick}>
-        <Logo />
-        <span>Continue with {titles[integration]}</span>
+      <Button
+        variant="default"
+        className="flex h-12 w-full items-center pl-12 font-bold"
+        onClick={handleClick}
+      >
+        <div className="mr-4">
+          <Logo />
+        </div>
+        <span className="flex-1 text-left">Continue with {titles[integration]}</span>
       </Button>
       {lastUsed && <div className="py-1 text-xs font-medium">Last used</div>}
     </div>

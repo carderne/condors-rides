@@ -9,7 +9,7 @@ import { invariant } from "./invariant";
 const config = getConfig();
 
 export const auth = betterAuth({
-  trustedOrigins: [config.baseUrl],
+  trustedOrigins: [config.baseUrl, "https://appleid.apple.com"],
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
@@ -22,6 +22,7 @@ export const auth = betterAuth({
   socialProviders: {
     google: config.google,
     facebook: config.facebook,
+    apple: config.apple,
   },
   account: {
     accountLinking: {

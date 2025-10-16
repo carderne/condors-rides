@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
-type Provider = "google" | "facebook";
+type Provider = "google" | "facebook" | "apple";
 
 export async function signUpSocialAction(
   redirectUrl: string,
