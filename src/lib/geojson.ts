@@ -15,7 +15,7 @@ export async function getGeojson(route: string | undefined): Promise<GeoJSON.Lin
 
   if (site === "strava") {
     const stravaResponse = await getStravaRoute(id);
-    if (!stravaResponse.success) {
+    if (!stravaResponse.ok) {
       return null;
     }
     const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
@@ -29,7 +29,7 @@ export async function getGeojson(route: string | undefined): Promise<GeoJSON.Lin
 
   if (site === "rwg") {
     const response = await getRideWithGpsRoute(id);
-    if (!response.success) {
+    if (!response.ok) {
       return null;
     }
     const geojson = convertRouteToLineString(response.data);
@@ -59,15 +59,15 @@ function getRouteSiteId(url: string): SiteWithId | null {
   return null;
 }
 
-export function getAverageCoords(geojson: GeoJSON.LineString): { lat: number; lon: number } {
+export function getAverageCoords(geojson: GeoJSON.LineString): { lon: number; lat: number } {
   const { coordinates } = geojson;
   const sum = coordinates.reduce(
-    (acc, pos) => ({ lat: acc.lat + pos[0]!, lon: acc.lon + pos[1]! }),
-    { lat: 0, lon: 0 },
+    (acc, pos) => ({ lon: acc.lon + pos[0]!, lat: acc.lat + pos[1]! }),
+    { lon: 0, lat: 0 },
   );
 
   return {
-    lat: sum.lat / coordinates.length,
     lon: sum.lon / coordinates.length,
+    lat: sum.lat / coordinates.length,
   };
 }

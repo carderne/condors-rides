@@ -1,4 +1,5 @@
 import { getConfig } from "@/lib/config";
+import type { Result } from "@/types/result";
 
 const {
   ridewithgps: { apiKey, authToken },
@@ -12,7 +13,7 @@ interface RideWithGpsRoute {
   };
 }
 
-type RideWithGpsResponse<T> = { success: true; data: T } | { success: false; error: string };
+type RideWithGpsResponse<T> = Result<T, string>;
 
 export async function getRideWithGpsRoute(
   routeId: string,
@@ -28,10 +29,10 @@ export async function getRideWithGpsRoute(
 
   if (!response.ok) {
     console.error("RideWithGps get route failed", data);
-    return { success: false, error: "RideWithGps get route failed" };
+    return { ok: false, error: "RideWithGps get route failed" };
   }
 
-  return { success: true, data };
+  return { ok: true, data };
 }
 
 export function convertRouteToLineString(route: RideWithGpsRoute): GeoJSON.LineString {

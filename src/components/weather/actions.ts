@@ -1,12 +1,13 @@
 "use server";
 
-import { getForecaseForTime as getForecastForTime } from "@/clients/weather";
+import { getForecaseForTime as getForecastForTime, type WeatherData } from "@/clients/weather";
 import { db, schema } from "@/db";
 import { getAverageCoords } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
+import type { Result } from "@/types/result";
 import { eq } from "drizzle-orm";
 
-export async function getWeatherAction(rideId: string) {
+export async function getWeatherAction(rideId: string): Promise<Result<WeatherData, string>> {
   const ride = await db.query.ride.findFirst({
     where: eq(schema.ride.id, rideId),
     columns: { date: true, time: true },
@@ -16,18 +17,17 @@ export async function getWeatherAction(rideId: string) {
 
   const { date, time, route } = ride;
   if (!route || !route.geojson) {
-    return { success: false };
+    return { ok: false, error: "No route" };
   }
 
   const datetime = combineDateAndTime(date, time);
 
-  const { lat, lon } = getAverageCoords(route.geojson);
-  const weather = await getForecastForTime({ lat, lon, datetime });
-  return { success: true, weather };
+  const { lon, lat } = getAverageCoords(route.geojson);
+  const weather = await getForecastForTime({ lon, lat, datetime });
+  return weather;
 }
 
 function combineDateAndTime(date: Date, time: string): Date {
-  console.log({ time });
   const [hours, minutes, seconds] = time.split(":").map(Number);
   if (hours === undefined || minutes === undefined || seconds === undefined) {
     throw new Error("ride time malformed");

@@ -2,6 +2,7 @@ import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { invariant } from "@/lib/invariant";
+import type { Result } from "@/types/result";
 import { addMinutes, isAfter } from "date-fns";
 import { eq } from "drizzle-orm";
 import type { IncomingMessage } from "http";
@@ -16,11 +17,11 @@ interface StravaRoute {
   map: { polyline: string };
 }
 
-type StravaResponse<T> = { success: true; data: T } | { success: false; error: string };
+type StravaResponse<T> = Result<T, string>;
 
 export async function getStravaRoute(routeId: string): Promise<StravaResponse<StravaRoute>> {
   const accessToken = await getAccessToken();
-  if (!accessToken.success) {
+  if (!accessToken.ok) {
     return accessToken;
   }
 
@@ -35,10 +36,10 @@ export async function getStravaRoute(routeId: string): Promise<StravaResponse<St
 
   if (!response.ok) {
     console.error("Strava get route failed", data);
-    return { success: false, error: "Strava request failed" };
+    return { ok: false, error: "Strava request failed" };
   }
 
-  return { success: true, data: data as StravaRoute };
+  return { ok: true, data: data as StravaRoute };
 }
 
 interface StravaAccessToken {
@@ -57,7 +58,7 @@ async function getAccessToken(): Promise<StravaResponse<string>> {
 
     // Token is still valid, return it
     if (isAfter(auth.expiresAt, addMinutes(new Date(), 5))) {
-      return { success: true, data: accessToken };
+      return { ok: true, data: accessToken };
     }
 
     // We need to use the refresh token to get a new access token
@@ -77,7 +78,7 @@ async function getAccessToken(): Promise<StravaResponse<string>> {
     const data = await response.json();
     if (!response.ok) {
       console.error("Strava get access token failed", data);
-      return { success: false, error: "Get new access token failed" };
+      return { ok: false, error: "Get new access token failed" };
     }
     const res = data as StravaAccessToken;
     const newAccessToken = encrypt(res.access_token);
@@ -91,7 +92,7 @@ async function getAccessToken(): Promise<StravaResponse<string>> {
         refreshToken: newRefreshToken,
       })
       .where(eq(schema.token.site, "strava"));
-    return { success: true, data: res.access_token };
+    return { ok: true, data: res.access_token };
   });
   return result;
 }

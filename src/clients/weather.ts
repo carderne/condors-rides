@@ -1,4 +1,5 @@
 import { getConfig } from "@/lib/config";
+import type { Result } from "@/types/result";
 import { closestIndexTo, isBefore } from "date-fns";
 
 interface CurrentlyDataPoint {
@@ -147,13 +148,19 @@ const {
 
 const BASE_URL = "https://api.pirateweather.net";
 
-export async function getForecast({ lat, lon }: { lat: number; lon: number }) {
+async function getForecast({
+  lon,
+  lat,
+}: {
+  lon: number;
+  lat: number;
+}): Promise<Result<{ daily: WeatherData[]; hourly: WeatherData[] }, string>> {
   const path = `/forecast/${apiKey}/${lat},${lon}?units=ca&exclude=currently,minutely,alerts,summary`;
   const url = new URL(path, BASE_URL).toString();
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`PirateWeather request failed: ${response.status}`);
+    return { ok: false, error: response.status.toString() };
   }
 
   const data = (await response.json()) as PirateWeatherResponse;
@@ -179,7 +186,7 @@ export async function getForecast({ lat, lon }: { lat: number; lon: number }) {
         precipProbability,
       }),
     ) ?? [];
-  return { daily, hourly };
+  return { ok: true, data: { daily, hourly } };
 }
 
 export interface WeatherData {
@@ -198,9 +205,16 @@ export async function getForecaseForTime({
   lat: number;
   lon: number;
   datetime: Date;
-}): Promise<WeatherData> {
-  const { daily, hourly } = await getForecast({ lat, lon });
+}): Promise<Result<WeatherData, string>> {
+  const forecast = await getForecast({ lat, lon });
+  if (!forecast.ok) {
+    return forecast;
+  }
+  const {
+    data: { hourly, daily },
+  } = forecast;
 
+  // If our date is before the last hourly forecast
   const lastHourly = hourly.at(-1);
   if (lastHourly && isBefore(datetime, lastHourly.time)) {
     const closestHourlyIndex = closestIndexTo(
@@ -209,18 +223,22 @@ export async function getForecaseForTime({
     );
     if (closestHourlyIndex !== undefined) {
       const result = hourly[closestHourlyIndex]!;
-      return result;
+      return { ok: true, data: result };
     }
   }
 
-  const closestDailyIndex = closestIndexTo(
-    datetime,
-    daily.map(({ time }) => time),
-  );
-  if (closestDailyIndex !== undefined) {
-    const result = daily[closestDailyIndex]!;
-    return result;
+  // If our date is before the last daily forecast
+  const lastDaily = daily.at(-1);
+  if (lastDaily && isBefore(datetime, lastDaily.time)) {
+    const closestDailyIndex = closestIndexTo(
+      datetime,
+      daily.map(({ time }) => time),
+    );
+    if (closestDailyIndex !== undefined) {
+      const result = daily[closestDailyIndex]!;
+      return { ok: true, data: result };
+    }
   }
 
-  throw new Error("No weather found for given time");
+  return { ok: false, error: "No forecast available" };
 }
