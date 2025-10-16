@@ -6,7 +6,6 @@ import type { DeviceType } from "@/db/schema";
 import { invariant } from "@/lib/invariant";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import type { PushSubscription } from "web-push";
 
 export async function getSubAction(deviceId: string) {
   const user = await getMembership();
@@ -16,31 +15,6 @@ export async function getSubAction(deviceId: string) {
   });
 
   return sub;
-}
-
-export async function subscribeUserAction(
-  sub: PushSubscription,
-  deviceType: DeviceType,
-  deviceId: string,
-) {
-  const user = await getMembership();
-
-  await db
-    .insert(schema.sub)
-    .values({
-      userId: user.id,
-      deviceId,
-      deviceType,
-      type: "vapid",
-      data: sub,
-    })
-    .onConflictDoUpdate({
-      target: [schema.sub.userId, schema.sub.deviceId],
-      set: { data: sub },
-    });
-
-  revalidatePath("/settings");
-  return { success: true };
 }
 
 export async function unsubscribeUserAction(deviceId: string) {

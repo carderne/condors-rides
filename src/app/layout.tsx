@@ -1,4 +1,4 @@
-import { UsePullToRefresh } from "@/components/pwa/pull-refresh";
+import { UsePullToRefresh } from "@/components/pull-refresh";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";

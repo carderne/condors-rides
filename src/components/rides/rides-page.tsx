@@ -1,5 +1,5 @@
 import { Container } from "@/components/container";
-import { NotificationPrompt } from "@/components/pwa/notification-prompt";
+import { NotificationPrompt } from "@/components/notifications/notifications";
 import { type DatedRide, RideList } from "@/components/rides/list";
 import { TabSwitcher, type TabVal } from "@/components/rides/tabs";
 import { H3 } from "@/components/ui/typography";

@@ -1,12 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { H3 } from "@/components/ui/typography";
 import type { Sub } from "@/db/zod";
 import { getDeviceId } from "@/hooks/client-id";
-import { getDeviceType, useDeviceType } from "@/hooks/device-type";
+import { useDeviceType } from "@/hooks/device-type";
 import { askPermission } from "@/lib/notifications";
-import { urlBase64ToUint8Array } from "@/lib/utils";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -14,18 +16,15 @@ import {
   persistAppTokenAction,
   setRideNewNotificationAction,
   setRideUpdateNotificationAction,
-  subscribeUserAction,
-  unsubscribeUserAction,
 } from "./actions";
+
+export const NOTIFICATION_DEVICES = ["android-app", "ios-app"];
 
 export function PushNotificationManager() {
   const deviceType = useDeviceType();
-  const [pwaNotificationSupported, setPwaNotificationIsSupported] = useState(false);
   const [dbSub, setDbSub] = useState<Sub>();
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
 
   const setPushToken = async (token: string) => {
-    const deviceType = getDeviceType();
     const deviceId = getDeviceId();
     const newSub = await persistAppTokenAction(token, deviceType, deviceId);
     toast("Notifications enabled!");
@@ -50,64 +49,29 @@ export function PushNotificationManager() {
     };
   }, []);
 
-  useEffect(() => {
-    if ("serviceWorker" in navigator && "PushManager" in window) {
-      setPwaNotificationIsSupported(true);
-      registerServiceWorker();
-    }
-  }, []);
-
-  async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register("/sw.js", {
-      scope: "/",
-      updateViaCache: "none",
-    });
-    const sub = await registration.pushManager.getSubscription();
-    setSubscription(sub);
-  }
-
-  async function unsubscribeFromPush() {
-    await subscription?.unsubscribe();
-    setSubscription(null);
-    const deviceId = getDeviceId();
-    await unsubscribeUserAction(deviceId);
-  }
-
   async function subscribeToPush() {
     const permission = await askPermission();
     if (permission !== "granted") {
       toast.error(`Permission not granted: ${permission}`);
       return;
     }
-    const registration = await navigator.serviceWorker.ready;
-
-    if (registration.pushManager === undefined) {
-      // Presumably using a real app?
-      // Stop silently?!
-      return;
-    }
-    const sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
-    });
-    setSubscription(sub);
-    const deviceId = getDeviceId();
-    const serializedSub = JSON.parse(JSON.stringify(sub));
-    const res = await subscribeUserAction(serializedSub, deviceType, deviceId);
-    // Just doing this because the revalidatePath doesn't seem to work (on PWA?)
-    if (res.success) {
-      const deviceId = getDeviceId();
-      const sub = await getSubAction(deviceId);
-      setDbSub(sub);
-    }
   }
 
-  if (!pwaNotificationSupported && !["android-app", "ios-app"].includes(deviceType)) {
-    return "Install as an app to get notifications (see below).";
-  }
-
-  if (["chrome", "other"].includes(deviceType)) {
-    return "Notifications only enabled for mobile app.";
+  if (!NOTIFICATION_DEVICES.includes(deviceType)) {
+    return (
+      <div>
+        <p>Install as an app to get notifications</p>
+        <p>
+          <Link
+            href="https://play.google.com/store/apps/details?id=cc.cowleyroadcondors.ride&hl=en_GB"
+            className="text-primary hover:underline"
+          >
+            Android
+          </Link>
+        </p>
+        <p>iPhone version coming soon</p>
+      </div>
+    );
   }
 
   return (
@@ -120,17 +84,6 @@ export function PushNotificationManager() {
           onClick={subscribeToPush}
         >
           Enable
-        </Button>
-      )}
-
-      {subscription && (
-        <Button
-          variant="outline"
-          extra="action"
-          className="w-full md:w-fit"
-          onClick={unsubscribeFromPush}
-        >
-          Disable
         </Button>
       )}
 
@@ -164,5 +117,65 @@ export function PushNotificationManager() {
         </>
       )}
     </div>
+  );
+}
+
+export function NotificationPrompt() {
+  const deviceType = useDeviceType();
+  const [showPrompt, setShowPrompt] = useState<boolean>(false);
+
+  const setPushToken = async (token: string) => {
+    const deviceId = getDeviceId();
+    await persistAppTokenAction(token, deviceType, deviceId);
+    toast("Notifications enabled!");
+    setShowPrompt(false);
+  };
+
+  useEffect(() => {
+    // Get current settings
+    const getNotificationSettings = async () => {
+      const deviceId = getDeviceId();
+      const sub = await getSubAction(deviceId);
+      setShowPrompt(sub === undefined);
+    };
+    if (NOTIFICATION_DEVICES.includes(deviceType)) {
+      getNotificationSettings();
+    }
+
+    // Make the setPushToken "publicly" available so the iOS/Android app can use it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).setPushToken = setPushToken;
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).setPushToken;
+    };
+  }, []);
+
+  const onClick = async () => {
+    await askPermission();
+  };
+
+  if (!showPrompt) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <H3>Get notified!</H3>
+        <p className="text-muted-foreground">You got the app, now enable notifications</p>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <Button variant="outline" extra="action" className="w-full md:w-fit" onClick={onClick}>
+          Enable ride notifications
+        </Button>
+        <p className="text-soft">
+          You can always manage your{" "}
+          <Link href="/settings" className="text-primary">
+            settings
+          </Link>
+        </p>
+      </CardContent>
+    </Card>
   );
 }

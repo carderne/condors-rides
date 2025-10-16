@@ -1,7 +1,6 @@
 import { emitPageView } from "@/clients/posthog";
 import { Container } from "@/components/container";
-import { InstallPwaCard } from "@/components/pwa/install";
-import { PushNotificationManager } from "@/components/pwa/notifications";
+import { PushNotificationManager } from "@/components/notifications/notifications";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
@@ -42,15 +41,6 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <PushNotificationManager />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <H2>Install app</H2>
-        </CardHeader>
-        <CardContent>
-          <InstallPwaCard />
         </CardContent>
       </Card>
 
