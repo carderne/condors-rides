@@ -36,7 +36,7 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   sendNotifications({
     targets: activeWebPushSubs,
     title: ride.name,
-    body: `${user.name.slice(0, 8)}: ${text.slice(0, 20)}`,
+    body: `${user.name}: ${text.slice(0, 100)}`,
     slug: ride.slug,
     properties,
   });
