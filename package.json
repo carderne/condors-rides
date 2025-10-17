@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "env-dev": "dotenv-dev DATABASE_URL -i localhost",
     "db:dev": "pnpm run db:up && sleep 1 && pnpm run db:push && pnpm run db:seed:all",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:push": "./dotenvx-safe.sh pnpm exec drizzle-kit push --config drizzle.config.ts",
+    "db:push": "pnpm run env-dev -- pnpm exec drizzle-kit push --config drizzle.config.ts",
     "db:push:prd": "dotenvx run -- pnpm exec drizzle-kit push --config drizzle.config.ts",
     "db:seed:all": "pnpm run db:seed:tokens && pnpm run db:seed:rides",
     "db:seed:rides": "dotenvx run -- tsx scripts/db-seed-rides.ts",
@@ -42,6 +43,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv-dev": "^0.1.1",
     "drizzle-orm": "^0.40.0",
     "lucide-react": "^0.479.0",
     "maplibre-gl": "^5.3.1",
@@ -98,8 +100,5 @@
   "engines": {
     "node": ">=24.0.0 <25.0.0",
     "pnpm": ">=10.13.0 <11.0.0"
-  },
-  "overrides": {
-    "esbuild": "^0.25.10"
   }
 }
