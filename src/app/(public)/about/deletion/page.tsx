@@ -5,10 +5,13 @@ export default function DataDeletionPage() {
   return (
     <div>
       <H2>Data deletion</H2>
-      <p className="">To delete all your data, please contact the club:</p>
-      <Link className="text-primary text-xl" href="https://cowleyroadcondors.cc/contact-us/">
-        Contact us
-      </Link>
+      <p>
+        Your account and data can be deleted by visiting your{" "}
+        <Link className="text-primary hover:underline" href="/settings">
+          Settings
+        </Link>{" "}
+        page.
+      </p>
     </div>
   );
 }

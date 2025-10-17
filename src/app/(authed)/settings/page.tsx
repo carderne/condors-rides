@@ -1,13 +1,17 @@
 import { emitPageView } from "@/clients/posthog";
+import { Confirmation } from "@/components/confirmation";
 import { Container } from "@/components/container";
 import { PushNotificationManager } from "@/components/notifications/notifications";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
 import { and, eq, isNull } from "drizzle-orm";
+import { SunsetIcon } from "lucide-react";
 import Link from "next/link";
+import { deleteAccountAction } from "./actions";
 import { UserSettingsForm } from "./form";
 
 export default async function SettingsPage() {
@@ -76,14 +80,21 @@ export default async function SettingsPage() {
         <CardHeader>
           <H2>Data management</H2>
         </CardHeader>
-        <CardContent>
-          <p className="">To delete all your data, please contact the club:</p>
-          <Link
-            className="text-primary hover:underline"
-            href="https://cowleyroadcondors.cc/contact-us/"
+        <CardContent className="space-y-2">
+          <p>To delete your account, click below:</p>
+          <Confirmation
+            title="Confirm account deletion"
+            description="This will take up to a week to be finalised, but you will lose access immediately."
+            action={deleteAccountAction}
           >
-            Contact us
-          </Link>
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-red-600"
+            >
+              <SunsetIcon className="size-4" />
+              Delete
+            </Button>
+          </Confirmation>
         </CardContent>
       </Card>
     </Container>
