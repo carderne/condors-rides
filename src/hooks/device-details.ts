@@ -1,20 +1,23 @@
-"use client";
-
 import type { DeviceType } from "@/db/schema";
-import { useEffect, useState } from "react";
 
-export function useDeviceType() {
-  const [platform, setPlatform] = useState<DeviceType>("other");
+const DEVICE_ID_KEY = "condors-device-id";
 
-  useEffect(() => {
-    const data = getDeviceType();
-    setPlatform(data);
-  }, []);
-
-  return platform;
+export function getDeviceDetails(): { deviceType: DeviceType; deviceId: string } {
+  const deviceId = getDeviceId();
+  const deviceType = getDeviceType();
+  return { deviceType, deviceId };
 }
 
-export function getDeviceType(): DeviceType {
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
+
+function getDeviceType(): DeviceType {
   if (typeof navigator === "undefined") {
     return "other"; // SSR-safe
   }
@@ -23,11 +26,11 @@ export function getDeviceType(): DeviceType {
   const appPlatformValue = (window as any).__appPlatform;
 
   if (appPlatformValue === "android-app") {
-    return "android-app";
+    return appPlatformValue;
   }
 
   if (appPlatformValue === "ios-app") {
-    return "ios-app";
+    return appPlatformValue;
   }
 
   const ua = navigator.userAgent.toLowerCase();

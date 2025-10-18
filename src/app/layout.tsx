@@ -48,7 +48,7 @@ export default async function RootLayout({
       </head>
       <body>
         <div className="min-h-screen font-sans antialiased">
-          <Toaster position="top-right" />
+          <Toaster position="bottom-right" />
           <UsePullToRefresh />
           {children}
         </div>

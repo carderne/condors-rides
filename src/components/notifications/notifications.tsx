@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { H3 } from "@/components/ui/typography";
 import type { Sub } from "@/db/zod";
-import { getDeviceId } from "@/hooks/client-id";
-import { useDeviceType } from "@/hooks/device-type";
+import { getDeviceDetails } from "@/hooks/device-details";
 import { askPermission } from "@/lib/notifications";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -21,24 +20,28 @@ import {
 export const NOTIFICATION_DEVICES = ["android-app", "ios-app"];
 
 export function PushNotificationManager() {
-  const deviceType = useDeviceType();
+  const [supported, setSupported] = useState<boolean>(false);
   const [dbSub, setDbSub] = useState<Sub>();
 
   const setPushToken = async (token: string) => {
-    const deviceId = getDeviceId();
+    const { deviceType, deviceId } = getDeviceDetails();
     const newSub = await persistAppTokenAction(token, deviceType, deviceId);
     toast("Notifications enabled!");
     setDbSub(newSub);
   };
 
   useEffect(() => {
+    const { deviceType, deviceId } = getDeviceDetails();
     // Get current settings
     const getNotificationSettings = async () => {
-      const deviceId = getDeviceId();
       const sub = await getSubAction(deviceId);
       setDbSub(sub);
     };
     getNotificationSettings();
+
+    if (NOTIFICATION_DEVICES.includes(deviceType)) {
+      setSupported(true);
+    }
 
     // Make the setPushToken "publicly" available so the iOS/Android app can use it
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,7 +60,7 @@ export function PushNotificationManager() {
     }
   }
 
-  if (!NOTIFICATION_DEVICES.includes(deviceType)) {
+  if (!supported) {
     return (
       <div>
         <p>Install as an app to get notifications</p>
@@ -94,7 +97,7 @@ export function PushNotificationManager() {
               defaultChecked={dbSub.rideUpdate}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
-                  const deviceId = getDeviceId();
+                  const { deviceId } = getDeviceDetails();
                   await setRideUpdateNotificationAction(value, deviceId);
                 }
               }}
@@ -107,7 +110,7 @@ export function PushNotificationManager() {
               defaultChecked={dbSub.rideNew}
               onCheckedChange={async (value) => {
                 if (value !== "indeterminate") {
-                  const deviceId = getDeviceId();
+                  const { deviceId } = getDeviceDetails();
                   await setRideNewNotificationAction(value, deviceId);
                 }
               }}
@@ -121,20 +124,19 @@ export function PushNotificationManager() {
 }
 
 export function NotificationPrompt() {
-  const deviceType = useDeviceType();
   const [showPrompt, setShowPrompt] = useState<boolean>(false);
 
   const setPushToken = async (token: string) => {
-    const deviceId = getDeviceId();
+    const { deviceType, deviceId } = getDeviceDetails();
     await persistAppTokenAction(token, deviceType, deviceId);
     toast("Notifications enabled!");
     setShowPrompt(false);
   };
 
   useEffect(() => {
+    const { deviceType, deviceId } = getDeviceDetails();
     // Get current settings
     const getNotificationSettings = async () => {
-      const deviceId = getDeviceId();
       const sub = await getSubAction(deviceId);
       setShowPrompt(sub === undefined);
     };
@@ -151,10 +153,6 @@ export function NotificationPrompt() {
     };
   }, []);
 
-  const onClick = async () => {
-    await askPermission();
-  };
-
   if (!showPrompt) {
     return null;
   }
@@ -166,7 +164,12 @@ export function NotificationPrompt() {
         <p className="text-muted-foreground">You got the app, now enable notifications</p>
       </CardHeader>
       <CardContent className="space-y-2">
-        <Button variant="outline" extra="action" className="w-full md:w-fit" onClick={onClick}>
+        <Button
+          variant="outline"
+          extra="action"
+          className="w-full md:w-fit"
+          onClick={askPermission}
+        >
           Enable ride notifications
         </Button>
         <p className="text-soft">
