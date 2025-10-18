@@ -1,5 +1,5 @@
-import { FormInput } from "@/components/form/input";
 import { FormSubmit } from "@/components/form/submit";
+import { Input } from "@/components/ui/input";
 import Form from "next/form";
 import { signUpEmailAction } from "./actions";
 
@@ -14,20 +14,20 @@ export function SignUpEmailDevOnly({
     return null;
   }
   return (
-    <div className="absolute bottom-10 left-10 w-60 md:block">
+    <div className="top-10 left-10 block w-60 border-2 border-red-500 md:absolute">
       <Form
         className="flex flex-col gap-2"
         action={signUpEmailAction.bind(null, signInVariant, redirectUrl)}
       >
         <div className="text-status-warning font-bold">DEV ONLY</div>
-        <FormInput
+        <Input
           name="email"
           type="email"
           required={true}
           placeholder="you@yours.com"
           className="!h-8"
         />
-        <FormInput
+        <Input
           name="password"
           type="password"
           required={true}

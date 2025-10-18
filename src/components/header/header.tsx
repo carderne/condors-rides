@@ -2,21 +2,28 @@
 
 import CondorsLogo from "@/components/images/condors.png";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import type { User } from "@/db/zod";
 import { checkIsAdmin } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { MenuIcon, PlusCircleIcon, XIcon } from "lucide-react";
+import { MenuIcon, PlusCircleIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export function HeaderBar({ user }: { user: User | null }) {
   const isAdmin = user ? checkIsAdmin(user) : false;
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const refresh = searchParams.get("refresh");
 
@@ -26,10 +33,6 @@ export function HeaderBar({ user }: { user: User | null }) {
       router.refresh();
     }
   });
-
-  const toggleMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
 
   const navItems = [
     { name: "Main site", href: "https://cowleyroadcondors.cc" },
@@ -44,37 +47,6 @@ export function HeaderBar({ user }: { user: User | null }) {
   return (
     <div className="w-full">
       {/* Mobile Menu Overlay */}
-      <div className={cn("flex flex-col bg-gray-800", mobileMenuOpen ? "block" : "hidden")}>
-        <div className="flex justify-end pt-4 pr-4">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={toggleMenu}
-            aria-label="Close menu"
-            className="p-1 text-white"
-          >
-            <XIcon size={28} />
-          </Button>
-        </div>
-        <nav className="px-8 py-4">
-          <ul className="space-y-6">
-            {navItems.map((item) => (
-              <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className="block text-xl font-medium text-white hover:underline"
-                  onClick={toggleMenu}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <SignInOrOut user={user} className="block text-xl font-medium text-white" />
-            </li>
-          </ul>
-        </nav>
-      </div>
       {/* Header */}
       <header className="to-primary bg-gradient-to-t from-red-400 pt-8 text-white md:bg-gradient-to-r md:pt-0">
         {/* Desktop Navigation */}
@@ -112,19 +84,57 @@ export function HeaderBar({ user }: { user: User | null }) {
               <span>New ride</span>
             </Link>
             <SignInOrOut user={user} />
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={toggleMenu}
-              aria-label="Menu"
-              className="p-1 text-white hover:bg-white/20 hover:text-white md:hidden"
-            >
-              <MenuIcon size={28} className="size-12" />
-            </Button>
+            <MobileSheet navItems={navItems} user={user} />
           </div>
         </div>
       </header>
     </div>
+  );
+}
+
+function MobileSheet({
+  navItems,
+  user,
+}: {
+  navItems: { name: string; href: string }[];
+  user: User | null;
+}) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Menu"
+          className="p-1 text-white hover:bg-white/20 hover:text-white md:hidden"
+        >
+          <MenuIcon className="size-6" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="bg-gray-800 pt-40">
+        <SheetHeader>
+          <SheetTitle className="hidden">Navigation</SheetTitle>
+          <SheetDescription className="hidden">No description</SheetDescription>
+        </SheetHeader>
+        <nav className="basis-1/2 px-8">
+          <ul className="space-y-6">
+            {navItems.map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className="block text-xl font-medium text-white hover:underline"
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <SignInOrOut user={user} className="block text-xl font-medium text-white" />
+            </li>
+          </ul>
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }
 
