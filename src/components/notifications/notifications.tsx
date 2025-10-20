@@ -66,13 +66,20 @@ export function PushNotificationManager() {
         <p>Install as an app to get notifications</p>
         <p>
           <Link
-            href="https://play.google.com/store/apps/details?id=cc.cowleyroadcondors.ride&hl=en_GB"
+            href="https://play.google.com/store/apps/details?id=cc.cowleyroadcondors.ride"
             className="text-primary hover:underline"
           >
             Android
           </Link>
         </p>
-        <p>iPhone version coming soon</p>
+        <p>
+          <Link
+            href="https://apps.apple.com/gb/app/condors/id6754068218"
+            className="text-primary hover:underline"
+          >
+            iPhone
+          </Link>
+        </p>
       </div>
     );
   }

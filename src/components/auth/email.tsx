@@ -14,7 +14,7 @@ export function SignUpEmailDevOnly({
     return null;
   }
   return (
-    <div className="top-10 left-10 block w-60 border-2 border-red-500 md:absolute">
+    <div className="top-30 left-10 block w-60 md:absolute">
       <Form
         className="flex flex-col gap-2"
         action={signUpEmailAction.bind(null, signInVariant, redirectUrl)}
