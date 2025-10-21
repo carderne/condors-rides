@@ -1,4 +1,5 @@
 import { emitRideView } from "@/clients/posthog";
+import { AccessMessage } from "@/components/access-message";
 import { Confirmation, Modal } from "@/components/confirmation";
 import { Container } from "@/components/container";
 import { Map } from "@/components/map";
@@ -13,9 +14,9 @@ import { viewedRide } from "@/dal/rideView";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { formatShortDateTime, formatStartPoint, isHref } from "@/lib/fmt";
-import { checkIsAdmin, rideIsFull } from "@/lib/permissions";
+import { checkIsAdmin, isVerified, rideIsFull } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { addDays, format } from "date-fns";
+import { addDays, format, isBefore } from "date-fns";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import {
   BikeIcon,
@@ -82,6 +83,16 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   if (!ride) {
     notFound();
   }
+  const verified = isVerified(user);
+
+  if (isBefore(ride.date, new Date()) && !verified) {
+    return (
+      <div className="mx-auto mt-20">
+        <AccessMessage />
+      </div>
+    );
+  }
+
   await viewedRide(ride.id);
   emitRideView({ user, ride });
 

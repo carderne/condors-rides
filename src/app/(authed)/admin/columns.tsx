@@ -21,7 +21,6 @@ import {
 import type { Ride, User } from "@/db/zod";
 import { formatShortDateYear } from "@/lib/fmt";
 import { cn } from "@/lib/utils";
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { differenceInMonths } from "date-fns";
 import { MoreHorizontalIcon } from "lucide-react";
@@ -106,6 +105,9 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
 
   return (
     <div className="flex items-center gap-2">
+      <Button variant="outline" size="sm" onClick={verifyUserAction.bind(null, userId)}>
+        Verify
+      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -116,12 +118,6 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none"
-            onClick={verifyUserAction.bind(null, userId)}
-          >
-            Verify User
-          </DropdownMenuItem>
           {user.type !== "admin" &&
             (user.deactivatedAt ? (
               <AlertDialog>
