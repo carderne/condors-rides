@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactElement } from "react";
+import { Children, cloneElement, isValidElement } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -46,20 +47,31 @@ function shortenUrls(markdown: string): string {
 }
 
 function MentionRenderer({ children }: ComponentProps<"p">) {
-  const text = String(children);
-  const parts = text.split(/(@\w+)/g);
+  return <p>{Children.map(children, processChild)}</p>;
+}
 
-  return (
-    <p>
-      {parts.map((part, i) =>
-        part.startsWith("@") ? (
-          <span key={i} className="text-primary font-medium">
-            {part}
-          </span>
-        ) : (
-          part
-        ),
-      )}
-    </p>
-  );
+function processChild(child: React.ReactNode): React.ReactNode {
+  if (typeof child === "string") {
+    const parts = child.split(/(@\w+)/g);
+    return parts.map((part, i) =>
+      part.startsWith("@") ? (
+        <span key={i} className="text-primary font-medium">
+          {part}
+        </span>
+      ) : (
+        part
+      ),
+    );
+  }
+
+  if (isValidElement(child)) {
+    const element = child as ReactElement<{ children?: React.ReactNode }>;
+    if (element.props.children) {
+      return cloneElement(element, {
+        children: Children.map(element.props.children, processChild),
+      });
+    }
+  }
+
+  return child;
 }
