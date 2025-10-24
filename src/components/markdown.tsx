@@ -6,7 +6,13 @@ import remarkGfm from "remark-gfm";
 export function Md({ children }: { children: string }) {
   const transformed = shortenUrls(children);
   return (
-    <Markdown remarkPlugins={[remarkGfm]} components={{ a: LinkRenderer }}>
+    <Markdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        a: LinkRenderer,
+        p: MentionRenderer,
+      }}
+    >
       {transformed}
     </Markdown>
   );
@@ -36,5 +42,24 @@ function shortenUrls(markdown: string): string {
         return fullUrl;
       }
     },
+  );
+}
+
+function MentionRenderer({ children }: ComponentProps<"p">) {
+  const text = String(children);
+  const parts = text.split(/(@\w+)/g);
+
+  return (
+    <p>
+      {parts.map((part, i) =>
+        part.startsWith("@") ? (
+          <span key={i} className="text-primary font-medium">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </p>
   );
 }
