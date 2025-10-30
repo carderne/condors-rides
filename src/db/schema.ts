@@ -439,7 +439,7 @@ export const sub = pgTable(
     data: jsonb("data").notNull().$type<PushSubscription | string>(),
 
     rideUpdate: boolean("ride_update").notNull().default(true),
-    rideNew: boolean("ride_new").notNull().default(false),
+    rideNew: boolean("ride_new").notNull().default(true),
 
     createdAt: createdAt(),
     updatedAt: updatedAt(),
