@@ -21,7 +21,7 @@ export function posthogIdentify(user: User) {
   });
 }
 
-type PosthogEvent = "page_view" | "ride_view" | "notification" | "btn_click";
+type PosthogEvent = "page_view" | "ride_view" | "notification" | "btn_click" | "notification_perf";
 type UserOnlyId = { id: string };
 
 export function emitEvent({
@@ -31,7 +31,7 @@ export function emitEvent({
 }: {
   user: UserOnlyId | null;
   event: PosthogEvent;
-  properties?: Record<string, string | string[]>;
+  properties?: Record<string, string | string[] | number>;
 }) {
   if (user) {
     posthog.capture({
