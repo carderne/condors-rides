@@ -30,11 +30,11 @@ export async function action(rideId: string, _: State, formData: FormData): Prom
   revalidatePath("/rides");
 
   // notifications
-  const activeWebPushSubs = [...ride.leader.subs, ...ride.members.flatMap((m) => m.user.subs)];
+  const activeSubs = [...ride.leader.subs, ...ride.members.flatMap((m) => m.user.subs)];
   const properties = { rideSlug: ride.slug, type: "comment" };
 
   sendNotifications({
-    targets: activeWebPushSubs,
+    targets: activeSubs,
     title: ride.name,
     body: `${user.name}: ${text.slice(0, 100)}`,
     slug: ride.slug,

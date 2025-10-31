@@ -435,8 +435,9 @@ export const sub = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
-    type: subTypeEnum().notNull(),
-    data: jsonb("data").notNull().$type<PushSubscription | string>(),
+    type: subTypeEnum(), // TODO delete
+    data: jsonb("data").$type<PushSubscription | string>(), // TODO delete
+    token: text("token").notNull(),
 
     rideUpdate: boolean("ride_update").notNull().default(true),
     rideNew: boolean("ride_new").notNull().default(true),

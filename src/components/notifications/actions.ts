@@ -57,12 +57,11 @@ export async function persistAppTokenAction(
       userId: user.id,
       deviceId,
       deviceType,
-      type: "fcm",
-      data: token,
+      token,
     })
     .onConflictDoUpdate({
       target: [schema.sub.userId, schema.sub.deviceId],
-      set: { data: token },
+      set: { token },
     })
     .returning();
   invariant(sub, "no sub created");

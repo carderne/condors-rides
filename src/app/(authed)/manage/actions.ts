@@ -132,7 +132,7 @@ export async function action(
   if (!existingRide) {
     // notify people who want notifications of new rides
     const wantNewRideNotifications = await db.query.sub.findMany({
-      columns: { userId: true, deviceId: true, data: true },
+      columns: { userId: true, deviceId: true, token: true },
       where: and(eq(schema.sub.rideNew, true)),
     });
     const properties = { rideSlug: ride.slug, type: "new" };
