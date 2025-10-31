@@ -16,6 +16,13 @@
       "purpose": "maskable"
     }
   ],
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "cc.cowleyroadcondors.ride"
+    }
+  ],
   "theme_color": "#e1429a",
   "background_color": "#e1429a",
   "display": "standalone"
