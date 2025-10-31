@@ -13,7 +13,6 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
-import type { PushSubscription } from "web-push";
 
 // Note: we're using `timestamp` throughout, rather than `timestamptz`
 // Node dates are always UTC and we avoid the (unlikely) case
@@ -424,8 +423,6 @@ export const deviceTypeArray = [
 ] as const;
 export type DeviceType = (typeof deviceTypeArray)[number];
 export const deviceTypeEnum = pgEnum("device_type", deviceTypeArray);
-export const subTypeArray = ["vapid", "fcm"] as const;
-export const subTypeEnum = pgEnum("sub_type", subTypeArray);
 export const sub = pgTable(
   "sub",
   {
@@ -435,8 +432,6 @@ export const sub = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
-    type: subTypeEnum(), // TODO delete
-    data: jsonb("data").$type<PushSubscription | string>(), // TODO delete
     token: text("token").notNull(),
 
     rideUpdate: boolean("ride_update").notNull().default(true),
