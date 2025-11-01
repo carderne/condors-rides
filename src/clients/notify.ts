@@ -16,6 +16,10 @@ export async function sendNotifications({
   slug: string;
   properties: Record<string, string>;
 }) {
+  if (targets.length === 0) {
+    return;
+  }
+
   const properties = { ...rawProperties, slug };
   const event = "notification";
   const firebase = new Firebase();
