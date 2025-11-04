@@ -279,9 +279,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                       <LandPlotIcon className="h-5 w-5 text-pink-500" />
                     </div>
                     <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">
-                        Start point
-                      </div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Start</div>
                       <div className="text-primary font-semibold">
                         <Link
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ride.startPoint)}`}
