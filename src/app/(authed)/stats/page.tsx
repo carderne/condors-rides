@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { and, count, countDistinct, eq, isNull, sql } from "drizzle-orm";
+import { RidesPerWeekChart } from "./rides-per-week-chart";
 
 async function getDashboardStats() {
   // Total rides and by surface
@@ -64,6 +65,26 @@ async function getDashboardStats() {
     .leftJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
     .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
 
+  // Rides per week for the last 12 months, grouped by surface
+  const ridesPerWeekBySurface = await db
+    .select({
+      week: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'YYYY-MM-DD')`,
+      weekLabel: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'Mon DD')`,
+      surface: schema.ride.surface,
+      count: count(),
+    })
+    .from(schema.ride)
+    .where(
+      and(
+        isNull(schema.ride.canceledAt),
+        isNull(schema.ride.deletedAt),
+        sql`${schema.ride.date} >= CURRENT_DATE - INTERVAL '12 months'`,
+        sql`${schema.ride.date} <= CURRENT_DATE`,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('week', ${schema.ride.date})`, schema.ride.surface)
+    .orderBy(sql`DATE_TRUNC('week', ${schema.ride.date})`);
+
   // Total routes and by surface
   const totalRoutes = await db.select({ count: count() }).from(schema.route);
   const routesBySurface = await db
@@ -83,6 +104,7 @@ async function getDashboardStats() {
     uniqueMembers: uniqueMembers[0]?.count || 0,
     totalRoutes: totalRoutes[0]?.count || 0,
     routesBySurface,
+    ridesPerWeekBySurface,
   };
 }
 
@@ -128,6 +150,18 @@ export default async function StatsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-primary text-3xl font-bold">{stats.avgRidersPerRide}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Rides per Week Chart */}
+      <div className="mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Rides per Week</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RidesPerWeekChart data={stats.ridesPerWeekBySurface} />
           </CardContent>
         </Card>
       </div>
