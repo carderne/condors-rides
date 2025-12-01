@@ -2,7 +2,7 @@ import { Container } from "@/components/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
-import { and, count, countDistinct, eq, isNull, sql } from "drizzle-orm";
+import { and, count, countDistinct, eq, inArray, isNull, sql } from "drizzle-orm";
 import { RidesPerWeekChart } from "./rides-per-week-chart";
 
 async function getDashboardStats() {
@@ -70,7 +70,7 @@ async function getDashboardStats() {
     .select({
       week: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'YYYY-MM-DD')`,
       weekLabel: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'Mon DD')`,
-      surface: schema.ride.surface,
+      surface: sql<"road" | "offroad" | "virtual">`${schema.ride.surface}`,
       count: count(),
     })
     .from(schema.ride)
@@ -80,6 +80,7 @@ async function getDashboardStats() {
         isNull(schema.ride.deletedAt),
         sql`${schema.ride.date} >= CURRENT_DATE - INTERVAL '12 months'`,
         sql`${schema.ride.date} <= CURRENT_DATE`,
+        inArray(schema.ride.surface, ["road", "offroad", "virtual"]),
       ),
     )
     .groupBy(sql`DATE_TRUNC('week', ${schema.ride.date})`, schema.ride.surface)
