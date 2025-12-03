@@ -5,7 +5,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Found this very specific incantation here:
   // https://github.com/vercel/next.js/issues/50659#issuecomment-2408602781
   // Following the standard advice from the link at the top broke the return value
