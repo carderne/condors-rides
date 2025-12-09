@@ -5,6 +5,7 @@ import { TabSwitcher, type TabVal } from "@/components/rides/tabs";
 import { H3 } from "@/components/ui/typography";
 import type { User } from "@/db/zod";
 import { AccessMessage } from "../access-message";
+import { PrivacyDialog } from "../agreement/agreement";
 import { ShowMoreButton } from "./show-more";
 
 const TABS: TabVal[] = [
@@ -19,14 +20,17 @@ export function GenericRidesPage({
   user,
   blockAccess = false,
   showArchive = false,
+  showPrivacy = false,
 }: {
   rides: DatedRide[];
   user: User | null;
   blockAccess?: boolean;
   showArchive?: boolean;
+  showPrivacy?: boolean;
 }) {
   return (
     <Container className="pt-0">
+      {showPrivacy && <PrivacyDialog />}
       <TabSwitcher prefix="rides" tabs={TABS} />
       <NotificationPrompt />
       {blockAccess ? (

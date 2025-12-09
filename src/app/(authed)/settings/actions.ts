@@ -33,5 +33,5 @@ export async function deleteAccountAction() {
     await tx.delete(schema.session).where(eq(schema.session.userId, user.id));
   });
 
-  revalidatePath("/admin");
+  revalidatePath("/settings");
 }

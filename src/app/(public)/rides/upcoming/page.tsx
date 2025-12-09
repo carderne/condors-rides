@@ -11,6 +11,9 @@ export default async function UpcomingRidesPage() {
   if (user) {
     posthogIdentify(user);
   }
+
+  const showPrivacy = user !== null && user.agreedAt === null;
+
   emitPageView({ user, page: "rides_upcoming" });
   const rides = await db.query.ride.findMany({
     where: and(
@@ -23,5 +26,5 @@ export default async function UpcomingRidesPage() {
   });
   const datedRideArray = groupRidesByDate(rides);
 
-  return <GenericRidesPage rides={datedRideArray} user={user} />;
+  return <GenericRidesPage rides={datedRideArray} user={user} showPrivacy={showPrivacy} />;
 }

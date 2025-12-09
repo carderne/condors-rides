@@ -42,6 +42,7 @@ export const user = pgTable(
     emailVerified: boolean("email_verified").notNull(),
     image: text("image"),
 
+    agreedAt: timestamp("agreed_at"),
     verifiedAt: timestamp("verified_at"),
     deactivatedAt: timestamp("deactivated_at"),
     createdAt: createdAt(),
