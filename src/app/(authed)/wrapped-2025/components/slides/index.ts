@@ -1,0 +1,12 @@
+export { BiggestGroupSlide } from "./biggest-group-slide";
+export { DistanceSlide } from "./distance-slide";
+export { FavouriteLeaderSlide } from "./favourite-leader-slide";
+export { FavouritesSlide } from "./favourites-slide";
+export { IntroSlide } from "./intro-slide";
+export { LongestRideSlide } from "./longest-ride-slide";
+export { MostActiveMonthSlide } from "./most-active-month-slide";
+export { RankSlide } from "./rank-slide";
+export { RidesOverviewSlide } from "./rides-overview-slide";
+export { RidingBuddiesSlide } from "./riding-buddies-slide";
+export { SummarySlide } from "./summary-slide";
+export { SurfaceBreakdownSlide } from "./surface-breakdown-slide";

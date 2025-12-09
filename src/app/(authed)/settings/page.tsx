@@ -8,7 +8,7 @@ import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { SunsetIcon } from "lucide-react";
 import Link from "next/link";
 import { deleteAccountAction } from "./actions";
@@ -20,7 +20,10 @@ export default async function SettingsPage() {
   const userHydrated = await db.query.user.findFirst({
     where: eq(schema.user.id, user.id),
     with: {
-      ridesJoined: true,
+      ridesJoined: {
+        columns: {},
+        with: { ride: true },
+      },
       rides: {
         where: and(
           isNull(schema.ride.canceledAt),
@@ -32,9 +35,32 @@ export default async function SettingsPage() {
   });
   invariant(userHydrated);
 
+  const validRideConditions = and(
+    isNull(schema.ride.canceledAt),
+    isNull(schema.ride.deletedAt),
+    inArray(schema.ride.surface, ["road", "offroad", "virtual"]),
+  );
+
+  // Get all rides the user joined (as member) in 2025
+  const ridesJoinedData = await db
+    .select({
+      id: schema.ride.id,
+    })
+    .from(schema.rideMember)
+    .innerJoin(schema.ride, eq(schema.rideMember.rideId, schema.ride.id))
+    .where(and(eq(schema.rideMember.userId, user.id), validRideConditions));
+
+  // Get all rides the user led in 2025 (excluding unclaimed rides)
+  const ridesLedData = await db
+    .select({ id: schema.ride.id })
+    .from(schema.ride)
+    .where(
+      and(eq(schema.ride.userId, user.id), eq(schema.ride.unclaimed, false), validRideConditions),
+    );
+
   const stats = [
-    { label: "Rides led", value: userHydrated.rides.length },
-    { label: "Rides joined", value: userHydrated.ridesJoined.length },
+    { label: "Rides led", value: ridesLedData.length },
+    { label: "Rides joined", value: ridesJoinedData.length },
   ];
 
   return (
