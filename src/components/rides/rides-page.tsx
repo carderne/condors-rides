@@ -33,7 +33,7 @@ export function GenericRidesPage({
     <Container className="pt-0">
       {showPrivacy && <PrivacyDialog />}
       <TabSwitcher prefix="rides" tabs={TABS} />
-      <WrappedBanner />
+      {user !== null && <WrappedBanner />}
       <NotificationPrompt />
       {blockAccess ? (
         <div className="mx-auto mt-20">
