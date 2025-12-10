@@ -1,3 +1,4 @@
+import { WrappedBanner } from "@/app/(authed)/wrapped-2025/components/wrapped-banner";
 import { Container } from "@/components/container";
 import { NotificationPrompt } from "@/components/notifications/notifications";
 import { type DatedRide, RideList } from "@/components/rides/list";
@@ -32,6 +33,7 @@ export function GenericRidesPage({
     <Container className="pt-0">
       {showPrivacy && <PrivacyDialog />}
       <TabSwitcher prefix="rides" tabs={TABS} />
+      <WrappedBanner />
       <NotificationPrompt />
       {blockAccess ? (
         <div className="mx-auto mt-20">
