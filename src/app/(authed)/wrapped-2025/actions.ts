@@ -1,5 +1,6 @@
 "use server";
 
+import { emitPageView } from "@/clients/posthog";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { and, count, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
@@ -11,6 +12,7 @@ const VALID_SURFACES: Surface[] = ["road", "offroad", "virtual"];
 
 export async function getWrappedDataAction(): Promise<WrappedData> {
   const user = await getMembership();
+  emitPageView({ user, page: "wrapped" });
   const userId = user.id;
 
   const startOf2025 = new Date("2025-01-01");

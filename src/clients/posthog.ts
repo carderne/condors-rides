@@ -57,7 +57,8 @@ type PosthogPage =
   | "rides_joined"
   | "routes_all"
   | "routes_promoted"
-  | "routes_liked";
+  | "routes_liked"
+  | "wrapped";
 
 export function emitPageView({ user, page }: { user: UserOnlyId | null; page: PosthogPage }) {
   return emitEvent({ event: "page_view", user, properties: { page } });
