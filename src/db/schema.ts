@@ -45,6 +45,7 @@ export const user = pgTable(
     agreedAt: timestamp("agreed_at"),
     verifiedAt: timestamp("verified_at"),
     deletedAt: timestamp("deleted_at"),
+    bannedAt: timestamp("banned_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

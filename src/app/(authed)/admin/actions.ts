@@ -22,16 +22,6 @@ export async function banUserAction(userId: string) {
   revalidatePath("/admin");
 }
 
-export async function unbanUserAction(userId: string) {
-  await getAdminUser();
-  const userToUnban = await db.query.user.findFirst({ where: eq(schema.user.id, userId) });
-  invariant(userToUnban);
-  const [name] = userToUnban.name.split(" [");
-  invariant(name);
-  await db.update(schema.user).set({ name, deletedAt: null }).where(eq(schema.user.id, userId));
-  revalidatePath("/admin");
-}
-
 export async function verifyUserAction(userId: string) {
   await getAdminUser();
   await db.update(schema.user).set({ verifiedAt: new Date() }).where(eq(schema.user.id, userId));

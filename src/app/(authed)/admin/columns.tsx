@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { differenceInMonths } from "date-fns";
 import { MoreHorizontalIcon } from "lucide-react";
-import { banUserAction, unbanUserAction, verifyUserAction } from "./actions";
+import { banUserAction, verifyUserAction } from "./actions";
 
 export type UserHydrated = User & { rides: Array<Ride>; ridesJoined: Array<unknown> };
 
@@ -118,48 +118,27 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {user.type !== "admin" &&
-            (user.deletedAt ? (
-              <AlertDialog>
-                <AlertDialogTrigger className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none">
-                  Unban user
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Unban user</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This user will be able to log in again
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={unbanUserAction.bind(null, userId)}>
-                      Confirm
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <AlertDialog>
-                <AlertDialogTrigger className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none">
-                  Ban user
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Ban user</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This user will no longer be able to log in
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={banUserAction.bind(null, userId)}>
-                      Confirm
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ))}
+          {user.type !== "admin" && !user.deletedAt && (
+            <AlertDialog>
+              <AlertDialogTrigger className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none">
+                Ban user
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Ban user</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This user will no longer be able to log in
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={banUserAction.bind(null, userId)}>
+                    Confirm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
