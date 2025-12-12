@@ -29,7 +29,7 @@ export async function deleteAccountAction() {
   const name = `${accountToDelete.name} [DELETED]`;
 
   await db.transaction(async (tx) => {
-    await tx.update(schema.user).set({ name, deactivatedAt: new Date() }).where(where);
+    await tx.update(schema.user).set({ name, deletedAt: new Date() }).where(where);
     await tx.delete(schema.session).where(eq(schema.session.userId, user.id));
   });
 

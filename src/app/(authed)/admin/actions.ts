@@ -15,7 +15,7 @@ export async function banUserAction(userId: string) {
   const name = `${userToBan.name} [BANNED]`;
 
   await db.transaction(async (tx) => {
-    await tx.update(schema.user).set({ name, deactivatedAt: new Date() }).where(where);
+    await tx.update(schema.user).set({ name, deletedAt: new Date() }).where(where);
     await tx.delete(schema.session).where(eq(schema.session.userId, userId));
   });
 
@@ -28,7 +28,7 @@ export async function unbanUserAction(userId: string) {
   invariant(userToUnban);
   const [name] = userToUnban.name.split(" [");
   invariant(name);
-  await db.update(schema.user).set({ name, deactivatedAt: null }).where(eq(schema.user.id, userId));
+  await db.update(schema.user).set({ name, deletedAt: null }).where(eq(schema.user.id, userId));
   revalidatePath("/admin");
 }
 

@@ -93,7 +93,7 @@ export const columns: ColumnDef<UserHydrated>[] = [
   },
   {
     id: "status",
-    accessorFn: (row) => (row.deactivatedAt === null ? "Active" : "Banned"),
+    accessorFn: (row) => (row.deletedAt === null ? "Active" : "Deleted"),
     header: ({ column }) => <SortableColumn column={column}>Status</SortableColumn>,
     size: 200,
   },
@@ -119,7 +119,7 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {user.type !== "admin" &&
-            (user.deactivatedAt ? (
+            (user.deletedAt ? (
               <AlertDialog>
                 <AlertDialogTrigger className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none">
                   Unban user

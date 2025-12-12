@@ -44,7 +44,7 @@ export const user = pgTable(
 
     agreedAt: timestamp("agreed_at"),
     verifiedAt: timestamp("verified_at"),
-    deactivatedAt: timestamp("deactivated_at"),
+    deletedAt: timestamp("deleted_at"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

@@ -37,7 +37,7 @@ export const auth = betterAuth({
             where: eq(schema.user.id, session.userId),
           });
           invariant(user, "session with no user");
-          if (user.deactivatedAt) {
+          if (user.deletedAt) {
             return false;
           }
 
