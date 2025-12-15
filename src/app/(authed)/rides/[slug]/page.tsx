@@ -1,12 +1,5 @@
 import { emitRideView } from "@/clients/posthog";
 import { AccessMessage } from "@/components/access-message";
-import {
-  ChristmasGarland,
-  ChristmasTree,
-  FallingSnowflakes,
-  Snowflake,
-  TwinklingLights,
-} from "@/components/christmas";
 import { Confirmation, Modal } from "@/components/confirmation";
 import { Container } from "@/components/container";
 import { Map } from "@/components/map";
@@ -114,60 +107,30 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const isPast = ride.date < addDays(new Date(), -1);
 
   const riders = [...(unclaimed ? [] : [ride.leader]), ...ride.members.map((m) => m.user)];
-  const isChristmasEvent = ride.surface === "event";
 
   return (
     <div className="flex flex-col gap-8">
       {/* Ride Header */}
       <div
         className={cn(
-          "to-primary relative grow bg-gradient-to-b from-red-400 text-white md:bg-gradient-to-r",
+          "to-primary grow bg-gradient-to-b from-red-400 text-white md:bg-gradient-to-r",
           ride.surface === "offroad" ? "from-amber-700 to-amber-800" : "",
           ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
-          isChristmasEvent ? "from-green-500 to-red-500" : "",
         )}
       >
-        {/* Christmas decorations for event */}
-        {isChristmasEvent && (
-          <>
-            <TwinklingLights />
-            <FallingSnowflakes count={20} />
-            <div className="pointer-events-none absolute top-12 left-4 z-10">
-              <ChristmasTree className="h-12 w-12 text-green-400 drop-shadow-lg" />
-            </div>
-            <div className="pointer-events-none absolute top-12 right-4 z-10">
-              <ChristmasTree className="h-12 w-12 text-green-400 drop-shadow-lg" />
-            </div>
-            <div className="pointer-events-none absolute bottom-4 left-8 z-10">
-              <Snowflake className="h-8 w-8 text-white/50" />
-            </div>
-            <div className="pointer-events-none absolute right-8 bottom-4 z-10">
-              <Snowflake className="h-8 w-8 text-white/50" />
-            </div>
-            <ChristmasGarland />
-          </>
-        )}
-        <div
-          className={cn(
-            "relative flex h-10 items-center justify-end p-2 md:justify-center",
-            isChristmasEvent ? "pt-6" : "",
-          )}
-        >
+        <div className="relative flex h-10 items-center justify-end p-2 md:justify-center">
           <BackButton className="absolute left-1" />
           {hasChanged && (
             <div className="animate-bounce px-4 py-2 text-sm">Details have changed!</div>
           )}
         </div>
-        <div className="relative z-20 flex items-center justify-between gap-4 px-8 pb-4">
+        <div className="flex items-center justify-between gap-4 px-8 pb-4">
           <div className="flex">
             {hasJoined ? (
               <Button
                 variant="outline"
                 extra="action"
-                className={cn(
-                  "text-foreground aspect-square h-16 text-lg",
-                  isChristmasEvent ? "border-yellow-400/50 bg-white/90" : "",
-                )}
+                className="text-foreground aspect-square h-16 text-lg"
                 disabled={isLeader || isCanceled || isPast}
                 onClick={leaveRideAction.bind(null, ride.id)}
               >
@@ -230,14 +193,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       <Container className="pt-0">
         {/* Time and date */}
         <div className="-mt-8 flex justify-center">
-          <div
-            className={cn(
-              "flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 px-4 py-2 shadow-lg",
-              isChristmasEvent
-                ? "border-red-400/50 bg-gradient-to-r from-red-50 to-green-50"
-                : "border-pink-200 bg-white",
-            )}
-          >
+          <div className="flex gap-2 overflow-hidden rounded-b-xl border-x-2 border-b-2 border-pink-200 bg-white px-4 py-2 shadow-lg">
             <div className="flex flex-col items-start gap-3 md:flex-row md:items-center">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="size-4" />
@@ -309,13 +265,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <div>
                       <div className="text-xs tracking-wide text-gray-500 uppercase">Surface</div>
                       <div className="font-semibold">
-                        {ride.surface === "event"
-                          ? "Event"
-                          : ride.surface === "offroad"
-                            ? "Offroad"
-                            : ride.surface === "virtual"
-                              ? "Virtual"
-                              : "Road"}
+                        {ride.surface === "offroad"
+                          ? "Offroad"
+                          : ride.surface === "virtual"
+                            ? "Virtual"
+                            : "Road"}
                       </div>
                     </div>
                   </div>
@@ -415,14 +369,13 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             ) : (
               <div className="flex flex-col">
                 <H3>
-                  {isChristmasEvent && <span className="mr-2">🎅</span>}
                   Riders {riders.length}
                   {ride.maxGroupSize !== null && `/${ride.maxGroupSize}`}
                 </H3>
 
                 <div className="grid grid-cols-2 gap-4">
                   {riders.map((rider) => (
-                    <div key={rider.id} className="flex items-center gap-3 rounded-lg p-3">
+                    <div key={rider.id} className="flex items-center gap-3 p-3">
                       <UserAvatar user={rider} />
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-800">{rider.name}</span>

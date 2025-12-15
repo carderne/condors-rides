@@ -180,7 +180,6 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
             <SelectItem value="road">Road</SelectItem>
             <SelectItem value="offroad">Offroad</SelectItem>
             <SelectItem value="virtual">Virtual</SelectItem>
-            <SelectItem value="event">Event</SelectItem>
           </SelectContent>
         </Select>
         <div className="text-xl text-red-600 md:ml-auto">{formErrorMsg}</div>
