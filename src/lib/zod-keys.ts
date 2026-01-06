@@ -3,20 +3,21 @@
 // MIT License
 // Copyright (c) 2023 Rafly Maulana
 //
+// Updated to work with zod v4
 // All Prisma-related stuff deleted.
 
-import type { AnyZodObject, TypeOf, ZodTypeAny } from "zod";
+import type { TypeOf, ZodTypeAny } from "zod";
 import {
   ZodArray,
   ZodDefault,
-  ZodEffects,
-  ZodFirstPartyTypeKind,
   ZodIntersection,
   ZodNullable,
   ZodObject,
   ZodOptional,
+  ZodPipe,
   ZodPromise,
   ZodReadonly,
+  ZodTransform,
   ZodUnion,
 } from "zod";
 
@@ -35,71 +36,65 @@ type CreateKeyWithPrevKey<PrevKey extends string, Key> = PrevKey extends ""
   : `${PrevKey}${Key extends string ? `.${Key}` : ""}`;
 type IsObject<T> = T extends object ? (T extends Date | File ? false : true) : false;
 
-const isZodObject = (model: ZodTypeAny): model is AnyZodObject => {
-  return model instanceof ZodObject || model._def.typeName === ZodFirstPartyTypeKind.ZodObject;
+const isZodObject = (model: ZodTypeAny): model is ZodObject => {
+  return model instanceof ZodObject;
 };
 
-const isZodUnion = (model: ZodTypeAny): model is ZodUnion<[AnyZodObject]> => {
-  return model instanceof ZodUnion || model._def.typeName === ZodFirstPartyTypeKind.ZodUnion;
+const isZodUnion = (
+  model: ZodTypeAny,
+): model is ZodUnion<readonly [ZodTypeAny, ...ZodTypeAny[]]> => {
+  return model instanceof ZodUnion;
 };
 
 const isZodIntersection = (model: ZodTypeAny): model is ZodIntersection<ZodTypeAny, ZodTypeAny> => {
-  return (
-    model instanceof ZodIntersection ||
-    model._def.typeName === ZodFirstPartyTypeKind.ZodIntersection
-  );
+  return model instanceof ZodIntersection;
 };
 
 const isZodArray = (model: ZodTypeAny): model is ZodArray<ZodTypeAny> => {
-  return model instanceof ZodArray || model._def.typeName === ZodFirstPartyTypeKind.ZodArray;
+  return model instanceof ZodArray;
 };
 
 const isZodOptional = (model: ZodTypeAny): model is ZodOptional<ZodTypeAny> => {
-  return model instanceof ZodOptional || model._def.typeName === ZodFirstPartyTypeKind.ZodOptional;
+  return model instanceof ZodOptional;
 };
 
 const isZodDefault = (model: ZodTypeAny): model is ZodDefault<ZodTypeAny> => {
-  return model instanceof ZodDefault || model._def.typeName === ZodFirstPartyTypeKind.ZodDefault;
+  return model instanceof ZodDefault;
 };
 
 const isZodNullable = (model: ZodTypeAny): model is ZodNullable<ZodTypeAny> => {
-  return model instanceof ZodNullable || model._def.typeName === ZodFirstPartyTypeKind.ZodNullable;
+  return model instanceof ZodNullable;
 };
 
 const isZodPromise = (model: ZodTypeAny): model is ZodPromise<ZodTypeAny> => {
-  return model instanceof ZodPromise || model._def.typeName === ZodFirstPartyTypeKind.ZodPromise;
+  return model instanceof ZodPromise;
 };
 
 const isZodReadonly = (model: ZodTypeAny): model is ZodReadonly<ZodTypeAny> => {
-  return model instanceof ZodReadonly || model._def.typeName === ZodFirstPartyTypeKind.ZodReadonly;
+  return model instanceof ZodReadonly;
 };
 
-const isZodEffects = (model: ZodTypeAny): model is ZodEffects<ZodTypeAny> => {
-  return model instanceof ZodEffects || model._def.typeName === ZodFirstPartyTypeKind.ZodEffects;
+const isZodTransformOrPipe = (
+  model: ZodTypeAny,
+): model is ZodTransform<unknown, unknown> | ZodPipe<ZodTypeAny, ZodTypeAny> => {
+  return model instanceof ZodTransform || model instanceof ZodPipe;
 };
 
 const isZodPrimitives = (model: ZodTypeAny): boolean => {
-  const type = model._def.typeName as ZodFirstPartyTypeKind;
-
-  switch (type) {
-    case ZodFirstPartyTypeKind.ZodString:
-    case ZodFirstPartyTypeKind.ZodNumber:
-    case ZodFirstPartyTypeKind.ZodBigInt:
-    case ZodFirstPartyTypeKind.ZodBoolean:
-    case ZodFirstPartyTypeKind.ZodDate:
-    case ZodFirstPartyTypeKind.ZodSymbol:
-    case ZodFirstPartyTypeKind.ZodUndefined:
-    case ZodFirstPartyTypeKind.ZodNull:
-    case ZodFirstPartyTypeKind.ZodVoid:
-    case ZodFirstPartyTypeKind.ZodAny:
-    case ZodFirstPartyTypeKind.ZodUnknown:
-    case ZodFirstPartyTypeKind.ZodNever:
-    case ZodFirstPartyTypeKind.ZodNaN:
-      return true;
-
-    default:
-      return false;
-  }
+  // In Zod v4, we check if it's a primitive type by excluding compound types
+  // A schema is primitive if it's not an object, array, union, intersection, or wrapper type
+  return !(
+    isZodObject(model) ||
+    isZodArray(model) ||
+    isZodUnion(model) ||
+    isZodIntersection(model) ||
+    isZodOptional(model) ||
+    isZodNullable(model) ||
+    isZodDefault(model) ||
+    isZodPromise(model) ||
+    isZodReadonly(model) ||
+    isZodTransformOrPipe(model)
+  );
 };
 
 type ParsedFormKeys<Type, PrevKey extends string = ""> = Required<{
@@ -159,8 +154,8 @@ const getKeysFromZodSchema = (model: ZodTypeAny, parentKey?: string): ZodSchemaK
       return result;
     }
   } else if (isZodIntersection(model)) {
-    const left = getKeysFromZodSchema(model._def.left, parentKey);
-    const right = getKeysFromZodSchema(model._def.right, parentKey);
+    const left = getKeysFromZodSchema(model.def.left, parentKey);
+    const right = getKeysFromZodSchema(model.def.right, parentKey);
 
     return {
       ...(typeof left === "object" ? left : {}),
@@ -181,9 +176,16 @@ const getKeysFromZodSchema = (model: ZodTypeAny, parentKey?: string): ZodSchemaK
   } else if (isZodOptional(model) || isZodNullable(model) || isZodPromise(model)) {
     return getKeysFromZodSchema(model.unwrap(), parentKey);
   } else if (isZodDefault(model) || isZodReadonly(model)) {
-    return getKeysFromZodSchema(model._def.innerType, parentKey);
-  } else if (isZodEffects(model)) {
-    return getKeysFromZodSchema(model._def.schema, parentKey);
+    return getKeysFromZodSchema(model.def.innerType, parentKey);
+  } else if (isZodTransformOrPipe(model)) {
+    // TODO figure out a way to do this
+    // for now just can't use this function with zfd.formData or similar
+    // For ZodTransform and ZodPipe, we can't reliably extract the schema structure
+    // so we treat them as primitives
+    if (parentKey !== undefined) {
+      return parentKey;
+    }
+    throw new Error("zod-keys.ts cannot handle transforms or pipes at the root");
   }
 
   if (parentKey) {

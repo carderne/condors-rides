@@ -1,4 +1,3 @@
-/* eslint-env node */
 /** @type {import("prettier").Config} */
 const config = {
   plugins: ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
