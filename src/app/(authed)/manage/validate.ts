@@ -5,7 +5,7 @@ import { addDays } from "date-fns";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
-const schema = zfd.formData({
+const schema = z.object({
   name: zfd.text(),
   date: zfd.text(
     z.coerce.date().min(addDays(new Date(), -1), { message: "Don't create rides in the past!" }),

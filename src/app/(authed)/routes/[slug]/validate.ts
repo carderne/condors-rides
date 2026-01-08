@@ -4,7 +4,7 @@ import { zodToNames } from "@/lib/zod-keys";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
-const schema = zfd.formData({
+const schema = z.object({
   name: zfd.text(),
   distance: zfd.numeric(z.number().int()),
   direction: zfd.text(z.enum(routeDirectionArray)),

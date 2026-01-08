@@ -2,7 +2,7 @@ import { createValidator, type ActionState } from "@/lib/forms";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
-const schema = zfd.formData({
+const schema = z.object({
   name: zfd.text(z.string().min(5)),
 });
 type Schema = typeof schema;
