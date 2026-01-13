@@ -1,6 +1,7 @@
 import type { Ride, RideMember, User } from "@/db/zod";
 import { formatRideName, formatStartPoint } from "@/lib/fmt";
 import { rideIsFull } from "@/lib/permissions";
+import { surfaceStyle } from "@/lib/surface";
 import { cn } from "@/lib/utils";
 import {
   ArrowRightIcon,
@@ -25,14 +26,15 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
   const isCanceled = !!ride.canceledAt;
   const isFull = rideIsFull(ride);
 
+  const style = surfaceStyle(ride.surface);
+  console.log(style);
+
   return (
     <div className="group h-full">
       <div
         className={cn(
           "flex h-full flex-col gap-2 overflow-hidden rounded-xl border-2 bg-stone-50 shadow-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl",
-          "border-primary",
-          ride.surface === "offroad" && "border-amber-800",
-          ride.surface === "virtual" && "border-purple-800",
+          style.border,
         )}
       >
         {/* Time and offroad */}
@@ -41,12 +43,7 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
             <ClockIcon className="h-3 w-3 text-pink-500" />
             <span className="font-bold text-gray-700">{ride.time.slice(0, 5)}</span>
           </div>
-          {ride.surface === "offroad" && (
-            <div className="p-2 text-xl font-bold text-amber-800 italic">Offroad</div>
-          )}
-          {ride.surface === "virtual" && (
-            <div className="p-2 text-xl font-bold text-purple-800 italic">Virtual</div>
-          )}
+          <div className={cn("p-2 text-xl font-bold italic", style.text)}>{style.label}</div>
         </div>
 
         {/* Everything else */}
@@ -80,9 +77,8 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
               <Link
                 href={href}
                 className={cn(
-                  "flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-4 py-3 font-medium text-white shadow-md transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-lg",
-                  ride.surface === "offroad" ? "bg-amber-800 hover:bg-amber-900" : "",
-                  ride.surface === "virtual" ? "bg-purple-800 hover:bg-purple-900" : "",
+                  "flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 font-medium text-white shadow-md transition-all hover:shadow-lg",
+                  style.button,
                 )}
               >
                 Details
@@ -116,7 +112,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="flex items-center gap-3 rounded-xl bg-gray-50">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
           <WindIcon className="h-5 w-5 text-pink-500" />
         </div>
         <div>
@@ -126,7 +122,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
       </div>
 
       <div className="flex items-center gap-3 rounded-xl bg-gray-50">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
           <MapPinIcon className="h-5 w-5 text-pink-500" />
         </div>
         <div>
@@ -136,7 +132,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
       </div>
 
       <div className="flex items-center gap-3 rounded-xl bg-gray-50">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
           <UsersIcon className="h-5 w-5 text-pink-500" />
         </div>
         <div>
@@ -146,7 +142,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
       </div>
 
       <div className="flex items-center gap-3 rounded-xl bg-gray-50">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
           <LandPlotIcon className="h-5 w-5 text-pink-500" />
         </div>
         <div>
@@ -165,7 +161,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
 
       {ride.elevation !== null && (
         <div className="flex items-center gap-3 rounded-xl bg-gray-50">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
             <MountainIcon className="h-5 w-5 text-pink-500" />
           </div>
           <div>

@@ -15,6 +15,7 @@ import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { formatShortDateTime, formatStartPoint, isHref } from "@/lib/fmt";
 import { checkIsAdmin, isVerified, rideIsFull } from "@/lib/permissions";
+import { surfaceStyle } from "@/lib/surface";
 import { cn } from "@/lib/utils";
 import { addDays, format, isBefore } from "date-fns";
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
@@ -105,6 +106,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   const isCanceled = !!ride.canceledAt;
   const isFull = rideIsFull(ride);
   const isPast = ride.date < addDays(new Date(), -1);
+  const isNormalGroupRide = ["road", "offroad"].includes(ride.surface);
 
   const riders = [...(unclaimed ? [] : [ride.leader]), ...ride.members.map((m) => m.user)];
 
@@ -113,9 +115,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
       {/* Ride Header */}
       <div
         className={cn(
-          "to-primary grow bg-gradient-to-b from-red-400 text-white md:bg-gradient-to-r",
-          ride.surface === "offroad" ? "from-amber-700 to-amber-800" : "",
-          ride.surface === "virtual" ? "from-purple-700 to-purple-800" : "",
+          "grow bg-linear-to-b text-white md:bg-linear-to-r",
+          surfaceStyle(ride.surface).banner,
         )}
       >
         <div className="relative flex h-10 items-center justify-end p-2 md:justify-center">
@@ -179,7 +180,9 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   </>
                 ) : (
                   <>
-                    <span className="text-sm opacity-90">Led by</span>
+                    <span className="text-sm opacity-90">
+                      {isNormalGroupRide ? "Led by" : "Added by"}
+                    </span>
                     <span className="font-medium">{ride.leader.name}</span>
                   </>
                 )}
@@ -222,31 +225,37 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             <Card className="overflow-hidden">
               <div className="p-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                      <WindIcon className="h-5 w-5 text-pink-500" />
-                    </div>
-                    <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">
-                        Speed on the flat
+                  {ride.speed !== null && (
+                    <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
+                        <WindIcon className="h-5 w-5 text-pink-500" />
                       </div>
-                      <div className="font-semibold">{ride.speed} kph</div>
+                      <div>
+                        <div className="text-xs tracking-wide text-gray-500 uppercase">
+                          Speed on the flat
+                        </div>
+                        <div className="font-semibold">{ride.speed} kph</div>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
-                      <MapPinIcon className="h-5 w-5 text-pink-500" />
+                  {ride.distance !== null && (
+                    <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
+                        <MapPinIcon className="h-5 w-5 text-pink-500" />
+                      </div>
+                      <div>
+                        <div className="text-xs tracking-wide text-gray-500 uppercase">
+                          Distance
+                        </div>
+                        <div className="font-semibold">{ride.distance} km</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">Distance</div>
-                      <div className="font-semibold">{ride.distance} km</div>
-                    </div>
-                  </div>
+                  )}
 
                   {ride.elevation !== null && (
                     <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
                         <MountainIcon className="h-5 w-5 text-pink-500" />
                       </div>
                       <div>
@@ -259,23 +268,17 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   )}
 
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
                       <RouteIcon className="h-5 w-5 text-pink-500" />
                     </div>
                     <div>
-                      <div className="text-xs tracking-wide text-gray-500 uppercase">Surface</div>
-                      <div className="font-semibold">
-                        {ride.surface === "offroad"
-                          ? "Offroad"
-                          : ride.surface === "virtual"
-                            ? "Virtual"
-                            : "Road"}
-                      </div>
+                      <div className="text-xs tracking-wide text-gray-500 uppercase">Type</div>
+                      <div className="font-semibold">{surfaceStyle(ride.surface).label}</div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
                       <LandPlotIcon className="h-5 w-5 text-pink-500" />
                     </div>
                     <div>
@@ -294,7 +297,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
                   {ride.cafeStop !== null && (
                     <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
                         <CoffeeIcon className="h-5 w-5 text-pink-500" />
                       </div>
                       <div>
@@ -316,7 +319,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
                   {ride.maxGroupSize !== null && (
                     <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-pink-100">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink-100">
                         <UsersIcon className="h-5 w-5 text-pink-500" />
                       </div>
                       <div>
@@ -334,7 +337,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
 
           {/* Right column - Map */}
           <div className="basis-1/2">
-            <Card className="relative flex h-[300px] w-full items-center justify-center bg-gray-50 md:h-full">
+            <Card className="relative flex h-75 w-full items-center justify-center bg-gray-50 md:h-full">
               {ride.routeUrl && isHref(ride.routeUrl) && (
                 <Link
                   href={ride.routeUrl}
@@ -369,8 +372,8 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
             ) : (
               <div className="flex flex-col">
                 <H3>
-                  Riders {riders.length}
-                  {ride.maxGroupSize !== null && `/${ride.maxGroupSize}`}
+                  Riders [{riders.length}
+                  {ride.maxGroupSize !== null && `/${ride.maxGroupSize}`}]
                 </H3>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -379,7 +382,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                       <UserAvatar user={rider} />
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-800">{rider.name}</span>
-                        {rider.id === ride.leader.id && (
+                        {isNormalGroupRide && rider.id === ride.leader.id && (
                           <span className="flex items-center text-xs text-pink-500">
                             <BikeIcon className="mr-1 h-3 w-3" />
                             Leader

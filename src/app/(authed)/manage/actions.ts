@@ -86,28 +86,30 @@ export async function action(
       );
     }
 
-    const { routeUrl: url } = data;
-    if (!url || !geojson) {
-      return { ride, changes };
-    }
-    const existingRoute = await tx.query.route.findFirst({
-      where: eq(schema.route.url, url),
-    });
+    if (["road", "offroad"].includes(ride.surface) && data.distance !== undefined) {
+      const { routeUrl: url } = data;
+      if (!url || !geojson) {
+        return { ride, changes };
+      }
+      const existingRoute = await tx.query.route.findFirst({
+        where: eq(schema.route.url, url),
+      });
 
-    if (existingRoute) {
-      return { ride, changes };
-    }
+      if (existingRoute) {
+        return { ride, changes };
+      }
 
-    await tx.insert(schema.route).values({
-      url: url,
-      name: data.name,
-      distance: data.distance,
-      elevation: data.elevation,
-      surface: data.surface,
-      cafeStop: data.cafeStop,
-      notes: data.notes,
-      geojson: geojson,
-    });
+      await tx.insert(schema.route).values({
+        url: url,
+        name: data.name,
+        distance: data.distance,
+        elevation: data.elevation,
+        surface: data.surface,
+        cafeStop: data.cafeStop,
+        notes: data.notes,
+        geojson: geojson,
+      });
+    }
 
     return { ride, changes };
   });

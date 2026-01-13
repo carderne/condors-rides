@@ -2,14 +2,14 @@
 
 import { Container } from "@/components/container";
 import { FormInput } from "@/components/form/input";
-import { FormSelectTrigger } from "@/components/form/select";
 import { FormSubmit } from "@/components/form/submit";
 import { FormTextarea } from "@/components/form/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { H2 } from "@/components/ui/typography";
+import { rideSurfaceArray, type Surface } from "@/db/schema";
 import type { Ride } from "@/db/zod";
 import { formatISODate } from "@/lib/fmt";
+import { surfaceStyle } from "@/lib/surface";
 import { cn } from "@/lib/utils";
 import { addDays, format, getDate } from "date-fns";
 import Form from "next/form";
@@ -18,10 +18,15 @@ import { action } from "./actions";
 import { names, type State, validator } from "./validate";
 
 export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
+  const [surface, setSurface] = useState<Surface>("road");
+
   const [state, formAction] = useActionState<State, FormData>(
     async (prev, formData) => {
       const validated = validator(formData);
-      if (validated.errors) return validated;
+      if (validated.errors) {
+        console.log("form errors", validated.errors);
+        return validated;
+      }
       const res = await action(ride?.id, prev, formData);
       return res;
     },
@@ -45,9 +50,21 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
     <Container className="md:max-w-3xl">
       <H2>{ride === undefined ? "New ride" : "Edit ride"}</H2>
       <Form className="flex flex-col gap-4" action={formAction}>
-        <div>
-          <span className="text-red-500">*</span> denotes required fields
+        <div className="grid grid-cols-3 items-center justify-around gap-2 px-2 md:ml-32">
+          {rideSurfaceArray.map((s) => (
+            <Button
+              type="button"
+              onClick={() => setSurface(s)}
+              key={s}
+              className={cn("h-20", s === surface && surfaceStyle(s).button)}
+              variant="outline"
+            >
+              {surfaceStyle(s).label}
+            </Button>
+          ))}
         </div>
+        <input name={names.surface} hidden={true} readOnly={true} value={surface} />
+
         <FormInput
           required={true}
           name={names.name}
@@ -63,7 +80,7 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
               type="button"
               onClick={() => onClickAutoDate(d)}
               key={d.toISOString()}
-              className={cn("text-xs", formatISODate(d) === date ? "!bg-primary/40" : "")}
+              className={cn("text-xs", formatISODate(d) === date ? "bg-primary/40" : "")}
               variant="outline"
             >
               {formatDay(d)}
@@ -104,86 +121,85 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
             "Manzil Way Gardens"
           }
         />
-        <FormInput
-          required={true}
-          type="text"
-          name={names.speed}
-          label="Speed"
-          labelSuffix="kph on the flat"
-          placeholder="28"
-          errors={state.errors?.speed}
-          defaultValue={(state.formData?.get(names.speed) as string) ?? ride?.speed ?? ""}
-        />
-        <FormInput
-          required={true}
-          type="number"
-          name={names.distance}
-          label="Distance"
-          labelSuffix="km"
-          placeholder="90"
-          errors={state.errors?.distance}
-          defaultValue={(state.formData?.get(names.distance) as string) ?? ride?.distance ?? ""}
-        />
-        <FormInput
-          required={false}
-          type="number"
-          name={names.elevation}
-          label="Elevation"
-          labelSuffix="m"
-          placeholder="450"
-          errors={state.errors?.elevation}
-          defaultValue={(state.formData?.get(names.elevation) as string) ?? ride?.elevation ?? ""}
-        />
-        <FormInput
-          required={false}
-          name={names.routeUrl}
-          placeholder="https://www.strava.com/routes/..."
-          label="Route"
-          errors={state.errors?.routeUrl}
-          defaultValue={(state.formData?.get(names.routeUrl) as string) ?? ride?.routeUrl ?? ""}
-        />
-        <FormInput
-          required={false}
-          type="number"
-          name={names.maxGroupSize}
-          label="Max riders"
-          labelSuffix="app will enforce!"
-          placeholder="8"
-          errors={state.errors?.maxGroupSize}
-          defaultValue={(state.formData?.get(names.maxGroupSize) as string) ?? ride?.maxGroupSize}
-        />
-        <FormInput
-          required={false}
-          name={names.cafeStop}
-          placeholder="Waterperry Gardens Tea Stop"
-          label="Cafe stop"
-          errors={state.errors?.cafeStop}
-          defaultValue={(state.formData?.get(names.cafeStop) as string) ?? ride?.cafeStop ?? ""}
-        />
+        {["road", "offroad"].includes(surface) && (
+          <FormInput
+            required={["road", "offroad"].includes(surface)}
+            type="text"
+            name={names.speed}
+            label="Speed"
+            labelSuffix={surface === "road" ? "kph on the flat" : "road equivalent"}
+            placeholder="28"
+            errors={state.errors?.speed}
+            defaultValue={(state.formData?.get(names.speed) as string) ?? ride?.speed ?? ""}
+          />
+        )}
+        {["road", "offroad", "virtual", "external"].includes(surface) && (
+          <FormInput
+            required={["road", "offroad", "virtual", "external"].includes(surface)}
+            type="number"
+            name={names.distance}
+            label="Distance"
+            labelSuffix="km"
+            placeholder="90"
+            errors={state.errors?.distance}
+            defaultValue={(state.formData?.get(names.distance) as string) ?? ride?.distance ?? ""}
+          />
+        )}
+        {["road", "offroad", "virtual", "external"].includes(surface) && (
+          <FormInput
+            required={false}
+            type="number"
+            name={names.elevation}
+            label="Elevation"
+            labelSuffix="m"
+            placeholder="450"
+            errors={state.errors?.elevation}
+            defaultValue={(state.formData?.get(names.elevation) as string) ?? ride?.elevation ?? ""}
+          />
+        )}
+        {["road", "offroad", "virtual", "external"].includes(surface) && (
+          <FormInput
+            required={false}
+            name={names.routeUrl}
+            placeholder="https://www.strava.com/routes/..."
+            label="Route"
+            errors={state.errors?.routeUrl}
+            defaultValue={(state.formData?.get(names.routeUrl) as string) ?? ride?.routeUrl ?? ""}
+          />
+        )}
+        {["road", "offroad"].includes(surface) && (
+          <FormInput
+            required={false}
+            type="number"
+            name={names.maxGroupSize}
+            label="Max riders"
+            labelSuffix="app will enforce!"
+            placeholder="8"
+            errors={state.errors?.maxGroupSize}
+            defaultValue={(state.formData?.get(names.maxGroupSize) as string) ?? ride?.maxGroupSize}
+          />
+        )}
+        {["road", "offroad"].includes(surface) && (
+          <FormInput
+            required={false}
+            name={names.cafeStop}
+            placeholder="Waterperry Gardens Tea Stop"
+            label="Cafe stop"
+            errors={state.errors?.cafeStop}
+            defaultValue={(state.formData?.get(names.cafeStop) as string) ?? ride?.cafeStop ?? ""}
+          />
+        )}
         <FormTextarea
           required={false}
           name={names.notes}
-          placeholder="Not too hily but we will regroup at the top."
+          placeholder="Not too hilly but we will regroup at the top."
           label="Notes"
           errors={state.errors?.notes}
           defaultValue={(state.formData?.get(names.notes) as string) ?? ride?.notes ?? ""}
         />
 
-        <Select
-          name={names.surface}
-          defaultValue={(state.formData?.get(names.surface) as string) ?? ride?.surface ?? "road"}
-        >
-          <FormSelectTrigger label="Surface" errors={state.errors?.surface}>
-            <SelectValue />
-          </FormSelectTrigger>
-          <SelectContent>
-            <SelectItem value="road">Road</SelectItem>
-            <SelectItem value="offroad">Offroad</SelectItem>
-            <SelectItem value="virtual">Virtual</SelectItem>
-          </SelectContent>
-        </Select>
         <div className="text-xl text-red-600 md:ml-auto">{formErrorMsg}</div>
-        <FormSubmit className="!h-20 w-full text-xl">{ride ? "Save" : "Add ride"}</FormSubmit>
+        <FormSubmit className="h-20! w-full text-xl">{ride ? "Save" : "Add ride"}</FormSubmit>
       </Form>
     </Container>
   );
