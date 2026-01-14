@@ -18,7 +18,7 @@ import { action } from "./actions";
 import { names, type State, validator } from "./validate";
 
 export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
-  const [surface, setSurface] = useState<Surface>("road");
+  const [surface, setSurface] = useState<Surface>(ride?.surface ?? "road");
 
   const [state, formAction] = useActionState<State, FormData>(
     async (prev, formData) => {
