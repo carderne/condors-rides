@@ -7,7 +7,8 @@ const {
 
 interface RideWithGpsRoute {
   route: {
-    // https://github.com/ridewithgps/developers/blob/master/reference/track_points.md
+    // https://ridewithgps.com/api/v1/doc/endpoints/routes
+    name: string;
     course_points: { x: number; y: number }[];
     track_points: { x: number; y: number }[];
   };

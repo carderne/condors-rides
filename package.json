@@ -25,6 +25,7 @@
     "ci:fmt": "prettier --check .",
     "ci:test": "NO_CHECK_ENV_VARS=1 vitest run",
     "all": "pnpm run fmt && pnpm run lint && pnpm run check && pnpm run ci:test",
+    "backfill": "dotenvx run -- tsx scripts/backfill-route-names.ts",
     "knip": "knip"
   },
   "dependencies": {

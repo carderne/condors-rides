@@ -5,7 +5,7 @@ import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { InsertRide, Ride } from "@/db/zod";
 import { camelToSentence, formatISODate } from "@/lib/fmt";
-import { getGeojson } from "@/lib/geojson";
+import { getRouteInfo } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
 import { and, eq } from "drizzle-orm";
@@ -50,17 +50,17 @@ export async function action(
 
   const slug = existingRideId ? undefined : await createSlug(data.date, data.name);
 
-  const geojson = await getGeojson(data.routeUrl);
+  const routeInfo = await getRouteInfo(data.routeUrl);
   const insertable = {
     ...data,
     // convert undefined to null
     // so they clear the db column if not set
     notes: data.notes ?? null,
     elevation: data.elevation ?? null,
-    routeUrl: data.routeUrl ?? null,
+    routeUrl: routeInfo?.url ?? data.routeUrl ?? null,
     maxGroupSize: data.maxGroupSize ?? null,
     cafeStop: data.cafeStop ?? null,
-    geojson,
+    geojson: routeInfo?.geojson ?? null,
   };
 
   const { ride, changes } = await db.transaction(async (tx) => {
@@ -87,12 +87,11 @@ export async function action(
     }
 
     if (["road", "offroad"].includes(ride.surface) && data.distance !== undefined) {
-      const { routeUrl: url } = data;
-      if (!url || !geojson) {
+      if (!data.routeUrl || !routeInfo) {
         return { ride, changes };
       }
       const existingRoute = await tx.query.route.findFirst({
-        where: eq(schema.route.url, url),
+        where: eq(schema.route.url, routeInfo.url),
       });
 
       if (existingRoute) {
@@ -100,14 +99,14 @@ export async function action(
       }
 
       await tx.insert(schema.route).values({
-        url: url,
-        name: data.name,
+        url: routeInfo.url,
+        name: routeInfo.name ?? data.name,
         distance: data.distance,
         elevation: data.elevation,
         surface: data.surface,
         cafeStop: data.cafeStop,
         notes: data.notes,
-        geojson: geojson,
+        geojson: routeInfo.geojson,
       });
     }
 

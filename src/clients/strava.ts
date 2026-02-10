@@ -14,7 +14,9 @@ const {
 } = getConfig();
 
 interface StravaRoute {
-  map: { polyline: string };
+  // https://developers.strava.com/docs/reference/#api-Routes-getRouteById
+  name: string;
+  map: { summary_polyline: string; polyline: string };
 }
 
 type StravaResponse<T> = Result<T, string>;
