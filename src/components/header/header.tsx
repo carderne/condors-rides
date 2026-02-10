@@ -37,7 +37,7 @@ export function HeaderBar({ user }: { user: User | null }) {
   const navItems = [
     { name: "Main site", href: "https://cowleyroadcondors.cc" },
     { name: "Rides", href: "/rides" },
-    { name: "Routes", href: "/routes" },
+    { name: "Map", href: "/map" },
     { name: "Settings", href: "/settings" },
     { name: "Stats", href: "/stats" },
     { name: "About", href: "/about" },

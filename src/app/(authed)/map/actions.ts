@@ -3,21 +3,37 @@
 import { getMembership, getSuperUser } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
 
-export async function getGeojsonAction(routeId: string) {
-  const route = await db.query.route.findFirst({
-    columns: { geojson: true },
-    where: eq(schema.route.id, routeId),
+export async function getRemainingRoutes() {
+  console.log("BACKEND");
+  return db
+    .select({
+      id: schema.route.id,
+      url: schema.route.url,
+      name: schema.route.name,
+      distance: schema.route.distance,
+      elevation: schema.route.elevation,
+      surface: schema.route.surface,
+      cafeStop: schema.route.cafeStop,
+      direction: schema.route.direction,
+      notes: schema.route.notes,
+      promoted: schema.route.promoted,
+      geojson: schema.route.geojson,
+      numVotes: sql<number>`0`,
+    })
+    .from(schema.route)
+    .where(eq(schema.route.promoted, false))
+    .orderBy(schema.route.name);
+}
+
+export async function getRouteVoteStatus(routeId: string) {
+  const user = await getMembership();
+  const vote = await db.query.routeVote.findFirst({
+    where: and(eq(schema.routeVote.routeId, routeId), eq(schema.routeVote.userId, user.id)),
   });
-
-  if (!route) {
-    return notFound();
-  }
-
-  return route.geojson;
+  return { userVoted: !!vote };
 }
 
 export async function togglePromoteRouteAction(routeId: string) {
@@ -27,7 +43,7 @@ export async function togglePromoteRouteAction(routeId: string) {
   invariant(route);
   const promoted = !route.promoted;
   await db.update(schema.route).set({ promoted }).where(where);
-  revalidatePath("/routes");
+  revalidatePath("/map");
 }
 
 export async function toggleUpvoteRouteAction(routeId: string) {
@@ -50,5 +66,5 @@ export async function toggleUpvoteRouteAction(routeId: string) {
         .onConflictDoNothing();
     }
   });
-  revalidatePath("/rides");
+  revalidatePath("/map");
 }

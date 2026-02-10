@@ -290,7 +290,7 @@ export const route = pgTable(
     notes: text("notes"),
     geojson: jsonb("geojson").$type<GeoJSON.LineString>(),
 
-    promoted: boolean("promoted"),
+    promoted: boolean("promoted").notNull().default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

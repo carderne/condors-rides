@@ -27,7 +27,6 @@ export function RideCard({ ride, user }: { ride: RideHydrated; user: User | null
   const isFull = rideIsFull(ride);
 
   const style = surfaceStyle(ride.surface);
-  console.log(style);
 
   return (
     <div className="group h-full">
