@@ -38,6 +38,7 @@ export function HeaderBar({ user }: { user: User | null }) {
     { name: "Main site", href: "https://cowleyroadcondors.cc" },
     { name: "Rides", href: "/rides" },
     { name: "Map", href: "/map" },
+    { name: "Routes", href: "/routes" },
     { name: "Settings", href: "/settings" },
     { name: "Stats", href: "/stats" },
     { name: "About", href: "/about" },
@@ -48,7 +49,7 @@ export function HeaderBar({ user }: { user: User | null }) {
     <div className="w-full">
       {/* Mobile Menu Overlay */}
       {/* Header */}
-      <header className="to-primary bg-gradient-to-t from-red-400 pt-8 text-white md:bg-gradient-to-r md:pt-0">
+      <header className="to-primary bg-linear-to-t from-red-400 pt-8 text-white md:bg-linear-to-r md:pt-0">
         {/* Desktop Navigation */}
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
