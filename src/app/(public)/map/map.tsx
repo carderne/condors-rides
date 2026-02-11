@@ -1,8 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { RouteDirection, Surface } from "@/db/schema";
 import type { User } from "@/db/zod";
+import { LoaderCircleIcon } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
@@ -21,7 +29,7 @@ export function RouteMap({
 }: {
   osKey: string;
   initialRoutes: RouteHydrated[];
-  user: User;
+  user: User | null;
 }) {
   const mapContainer: RefObject<HTMLDivElement | null> = useRef(null);
   const map: RefObject<maplibregl.Map | null> = useRef(null);
@@ -30,6 +38,8 @@ export function RouteMap({
   const [surfaceFilter, setSurfaceFilter] = useState<"all" | "road" | "offroad">("all");
   const [allLoaded, setAllLoaded] = useState(false);
   const [showAll, setShowAll] = useState(true);
+  const [minDistance, setMinDistance] = useState<number>(0);
+  const [maxDistance, setMaxDistance] = useState<number | null>(null);
 
   const selectedIdRef = useRef<string | null>(null);
   const promotedIds = useRef(new Set(initialRoutes.map((r) => r.id)));
@@ -168,8 +178,10 @@ export function RouteMap({
         };
         setSelectedRoute(selected);
 
-        getRouteVoteStatus(routeId).then(({ userVoted }) => {
-          setSelectedRoute((prev) => (prev?.id === routeId ? { ...prev, userVoted } : prev));
+        getRouteVoteStatus(routeId).then(({ userVoted, numVotes }) => {
+          setSelectedRoute((prev) =>
+            prev?.id === routeId ? { ...prev, userVoted, numVotes } : prev,
+          );
         });
       });
 
@@ -206,6 +218,12 @@ export function RouteMap({
       if (!showAll) {
         conditions.push(["==", ["get", "isPromoted"], true]);
       }
+      if (minDistance > 0) {
+        conditions.push([">=", ["get", "distance"], minDistance]);
+      }
+      if (maxDistance !== null) {
+        conditions.push(["<=", ["get", "distance"], maxDistance]);
+      }
       if (conditions.length === 0) return null;
       if (conditions.length === 1) return conditions[0]!;
       return ["all", ...conditions];
@@ -215,7 +233,7 @@ export function RouteMap({
     m.setFilter("routes", filter);
     m.setFilter("routes-casing", filter);
     m.setFilter("routes-selected", filter);
-  }, [surfaceFilter, showAll]);
+  }, [surfaceFilter, showAll, minDistance, maxDistance]);
 
   // Auto-load remaining routes after map init
   useEffect(() => {
@@ -273,6 +291,35 @@ export function RouteMap({
           </Button>
         </div>
 
+        {/* Distance filter */}
+        <div className="flex w-fit gap-0 rounded-lg bg-white/90 py-1 shadow-md">
+          <Select value={String(minDistance)} onValueChange={(v) => setMinDistance(Number(v))}>
+            <SelectTrigger size="sm" className="border-none shadow-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">Min: 0km</SelectItem>
+              <SelectItem value="40">Min: 40km</SelectItem>
+              <SelectItem value="80">Min: 80km</SelectItem>
+              <SelectItem value="120">Min: 120km</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={maxDistance === null ? "none" : String(maxDistance)}
+            onValueChange={(v) => setMaxDistance(v === "none" ? null : Number(v))}
+          >
+            <SelectTrigger size="sm" className="border-none shadow-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="50">Max: 50km</SelectItem>
+              <SelectItem value="90">Max: 90km</SelectItem>
+              <SelectItem value="130">Max: 130km</SelectItem>
+              <SelectItem value="none">No max</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Promoted / All toggle */}
         <div className="flex w-fit gap-1 rounded-lg bg-white/90 p-1 shadow-md">
           <Button
@@ -281,7 +328,7 @@ export function RouteMap({
             disabled={!allLoaded}
             onClick={() => setShowAll(true)}
           >
-            All
+            {!allLoaded ? <LoaderCircleIcon className="size-4 animate-spin" /> : "All"}
           </Button>
           <Button
             size="sm"

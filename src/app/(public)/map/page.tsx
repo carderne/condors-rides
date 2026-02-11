@@ -1,5 +1,5 @@
 import { emitPageView } from "@/clients/posthog";
-import { getMembership } from "@/dal/membership";
+import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
 import { eq, sql } from "drizzle-orm";
@@ -8,8 +8,10 @@ import { RouteMap } from "./map";
 const { osKey } = getConfig();
 
 export default async function MapPage() {
-  const user = await getMembership();
-  emitPageView({ user, page: "map" });
+  const user = await maybeGetMembership();
+  if (user) {
+    emitPageView({ user, page: "map" });
+  }
 
   const routes = await db
     .select({

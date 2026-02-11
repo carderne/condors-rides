@@ -15,11 +15,11 @@ export function RouteInfoPanel({
   onUpdate,
 }: {
   route: RouteHydrated;
-  user: User;
+  user: User | null;
   onClose: () => void;
   onUpdate: (route: RouteHydrated) => void;
 }) {
-  const isSuper = checkIsSuper(user);
+  const isSuper = user ? checkIsSuper(user) : false;
 
   return (
     <div className="absolute bottom-4 left-4 z-10 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white/95 p-4 shadow-lg">
@@ -59,7 +59,12 @@ export function RouteInfoPanel({
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-1">
+      <div className="mt-3 flex items-center gap-2">
+        {user && (
+          <Button size="sm" asChild>
+            <Link href={`/manage/from-route/${route.id}`}>New ride</Link>
+          </Button>
+        )}
         <Link
           href={route.url}
           target="_blank"
@@ -69,7 +74,7 @@ export function RouteInfoPanel({
           View route <ExternalLinkIcon className="size-3" />
         </Link>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-3">
           {isSuper ? (
             <Button
               variant="ghost"
@@ -92,7 +97,7 @@ export function RouteInfoPanel({
             variant="ghost"
             size="icon"
             className="size-8"
-            disabled={route.userVoted === undefined}
+            disabled={user === null || route.userVoted === undefined}
             onClick={async () => {
               await toggleUpvoteRouteAction(route.id);
               onUpdate({
@@ -103,6 +108,7 @@ export function RouteInfoPanel({
             }}
           >
             <ThumbsUpIcon className={cn("size-4", route.userVoted && "text-primary")} />
+            <span className="text-xs">{route.numVotes > 0 ? route.numVotes : ""}</span>
           </Button>
         </div>
       </div>

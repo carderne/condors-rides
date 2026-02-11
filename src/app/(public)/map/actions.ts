@@ -1,13 +1,12 @@
 "use server";
 
-import { getMembership, getSuperUser } from "@/dal/membership";
+import { getMembership, getSuperUser, maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
-import { and, eq, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getRemainingRoutes() {
-  console.log("BACKEND");
   return db
     .select({
       id: schema.route.id,
@@ -29,11 +28,26 @@ export async function getRemainingRoutes() {
 }
 
 export async function getRouteVoteStatus(routeId: string) {
-  const user = await getMembership();
-  const vote = await db.query.routeVote.findFirst({
-    where: and(eq(schema.routeVote.routeId, routeId), eq(schema.routeVote.userId, user.id)),
-  });
-  return { userVoted: !!vote };
+  const user = await maybeGetMembership();
+
+  const [[voteCount], vote] = await Promise.all([
+    db
+      .select({ count: count() })
+      .from(schema.routeVote)
+      .where(eq(schema.routeVote.routeId, routeId)),
+    user
+      ? db.query.routeVote.findFirst({
+          columns: { userId: true },
+          where: and(eq(schema.routeVote.routeId, routeId), eq(schema.routeVote.userId, user.id)),
+        })
+      : undefined,
+  ]);
+  invariant(voteCount);
+
+  const numVotes = voteCount.count;
+  const userVoted = vote !== undefined;
+
+  return { numVotes, userVoted };
 }
 
 export async function togglePromoteRouteAction(routeId: string) {
