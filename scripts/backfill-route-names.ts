@@ -1,10 +1,11 @@
 import { db, schema } from "@/db";
 import { getRouteInfo } from "@/lib/geojson";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 async function backfillRouteNames() {
   const routes = await db.query.route.findMany({
     with: { rides: { columns: { name: true } } },
+    orderBy: desc(schema.route.updatedAt),
   });
 
   for (const route of routes) {
@@ -13,6 +14,10 @@ async function backfillRouteNames() {
     // Skip if route name doesn't match any ride name (already has a real name)
     if (!rideNames.includes(route.name)) {
       console.log(`SKIP ${route.url} — name "${route.name}" doesn't match any ride name`);
+      continue;
+    }
+
+    if (!route.url.includes("strava") && !route.url.includes("ridewithgps")) {
       continue;
     }
 

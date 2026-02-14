@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import type { User } from "@/db/zod";
 import { checkIsSuper } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { ExternalLinkIcon, StarIcon, ThumbsUpIcon, XIcon } from "lucide-react";
+import { StarIcon, ThumbsUpIcon, XIcon } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { togglePromoteRouteAction, toggleUpvoteRouteAction } from "./actions";
@@ -24,7 +24,14 @@ export function RouteInfoPanel({
   return (
     <div className="absolute bottom-4 left-4 z-10 w-80 max-w-[calc(100vw-2rem)] rounded-lg bg-white/95 p-4 shadow-lg">
       <div className="mb-2 flex items-start justify-between gap-2">
-        <h3 className="leading-tight font-semibold">{route.name}</h3>
+        <Link
+          href={route.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          <h3 className="leading-tight font-semibold">{route.name}</h3>
+        </Link>
         <button
           type="button"
           onClick={onClose}
@@ -59,27 +66,25 @@ export function RouteInfoPanel({
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        {user && (
-          <Button size="sm" asChild>
-            <Link href={`/manage/from-route/${route.id}`}>New ride</Link>
-          </Button>
-        )}
-        <Link
-          href={route.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary inline-flex items-center gap-1 text-sm hover:underline"
-        >
-          View route <ExternalLinkIcon className="size-3" />
-        </Link>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <div className="flex gap-2">
+          {user && (
+            <Button size="sm" asChild>
+              <Link href={`/manage/from-route/${route.id}`}>Ride it</Link>
+            </Button>
+          )}
+          {isSuper && (
+            <Button size="sm" asChild>
+              <Link href={`/map/${route.id}`}>Edit</Link>
+            </Button>
+          )}
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isSuper ? (
             <Button
               variant="ghost"
               size="icon"
-              className="size-8"
               onClick={async () => {
                 await togglePromoteRouteAction(route.id);
                 onUpdate({ ...route, promoted: !route.promoted });

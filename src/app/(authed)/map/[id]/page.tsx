@@ -5,12 +5,12 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { UpsertForm } from "./form";
 
-export default async function UpsertRoutePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function UpsertRoutePage({ params }: { params: Promise<{ id: string }> }) {
   await getSuperUser();
-  const { slug } = await params;
+  const { id } = await params;
 
   const route = await db.query.route.findFirst({
-    where: eq(schema.route.id, slug),
+    where: eq(schema.route.id, id),
   });
 
   if (!route) {
