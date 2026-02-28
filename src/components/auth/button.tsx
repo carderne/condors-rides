@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { FacebookLogo } from "../svg/oauth";
 import { signUpSocialAction } from "./actions";
 
-const localStorageKeyOld = "techleap-last-auth-method";
 const localStorageKey = "condors-last-auth-method";
 
 const integrations = ["google", "facebook", "apple"] as const;
@@ -22,17 +21,6 @@ const titles: Record<Integration, string> = {
   facebook: "Facebook",
   apple: "Apple",
 };
-
-function getAndMigrateStorageKey() {
-  const oldVal = localStorage.getItem(localStorageKeyOld);
-
-  if (oldVal !== null) {
-    localStorage.setItem(localStorageKey, oldVal);
-    localStorage.removeItem(localStorageKeyOld);
-    return oldVal;
-  }
-  return localStorage.getItem(localStorageKey);
-}
 
 function SignInButton({
   redirectUrl,
@@ -79,7 +67,7 @@ export function AllSignInButtons({
   const [lastAuth, setLastAuth] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = getAndMigrateStorageKey();
+    const stored = localStorage.getItem(localStorageKey);
     setLastAuth(stored);
   }, []);
 
