@@ -86,7 +86,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   }
   const verified = isVerified(user);
 
-  if (isBefore(ride.date, new Date()) && !verified) {
+  if (isBefore(ride.date, new Date(new Date().toDateString())) && !verified) {
     return (
       <div className="mx-auto mt-20">
         <AccessMessage />
