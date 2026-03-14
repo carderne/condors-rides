@@ -81,7 +81,7 @@ export class Firebase {
     slug: string;
   }) {
     if (this.accessToken === undefined) {
-      this.auth();
+      await this.auth();
     }
 
     const url = new URL(`/rides/${slug}`, baseUrl).toString();
