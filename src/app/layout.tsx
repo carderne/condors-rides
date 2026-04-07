@@ -1,3 +1,5 @@
+import { UsePullToRefresh } from "@/components/pull-refresh";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -47,7 +49,11 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <div className="min-h-screen font-sans antialiased">Doing maintenance, hold tight</div>
+        <div className="min-h-screen font-sans antialiased">
+          <Toaster position="bottom-right" />
+          <UsePullToRefresh />
+          {children}
+        </div>
       </body>
     </html>
   );
