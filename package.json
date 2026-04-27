@@ -27,6 +27,7 @@
     "all": "pnpm run fmt && pnpm run lint && pnpm run check && pnpm run ci:test",
     "backfill": "dotenvx run -- tsx scripts/backfill-route-names.ts",
     "notify": "dotenvx run -- tsx scripts/notify-chris.ts",
+    "script": "dotenvx run -- tsx",
     "knip": "knip"
   },
   "dependencies": {

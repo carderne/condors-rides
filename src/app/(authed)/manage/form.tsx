@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { addDays, format, getDate } from "date-fns";
 import Form from "next/form";
 import { useActionState, useState } from "react";
+import { toast } from "sonner";
 import { action } from "./actions";
 import { names, type State, validator } from "./validate";
 
@@ -28,6 +29,9 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
         return validated;
       }
       const res = await action(ride?.id, prev, formData);
+      if (res.notify) {
+        toast[res.notify.type](res.notify.message);
+      }
       return res;
     },
     { errors: {} },

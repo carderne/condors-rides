@@ -50,7 +50,20 @@ export async function action(
 
   const slug = existingRideId ? undefined : await createSlug(data.date, data.name);
 
-  const routeInfo = await getRouteInfo(data.routeUrl);
+  let routeInfo = null;
+  try {
+    routeInfo = await getRouteInfo(data.routeUrl);
+  } catch {
+    return {
+      formData,
+      errors: {},
+      notify: {
+        type: "error",
+        message:
+          "Bad route URL, make sure it's a URL and nothing else. Or just remove it and try add it back after.",
+      },
+    };
+  }
   const insertable = {
     ...data,
     // convert undefined to null
