@@ -6,31 +6,31 @@
 
 This will insert a Test organization and member so you can work locally.
 ```bash
-npm install
-npm run db:dev
-npm run dev
+pnpm install
+pnpm run db:dev
+pnpm run dev
 ```
 
 ### DB setup
 ```bash
-npm run db:up
-npm run db:push
-npm run db:seed:org
+pnpm run db:up
+pnpm run db:push
+pnpm run db:seed:org
 ```
 
 Or just do:
 ```bash
-npm run db:dev
+pnpm run db:dev
 ```
 
 Down and delete:
 ```bash
-npm run db:down
+pnpm run db:down
 ```
 
 ### Dev server
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:5210](http://localhost:5210)
@@ -38,17 +38,17 @@ with your browser to see the result.
 
 ### Format, lint, typecheck
 ```bash
-npm run fmt
-npm run lint
-npm run check
+pnpm run fmt
+pnpm run lint
+pnpm run check
 
 # or:
-npm run all
+pnpm run all
 ```
 
 ### Test
 ```bash
-npm run test
+pnpm run test
 ```
 
 ### End-to-end tests
@@ -58,9 +58,9 @@ These are _not_ being run on CI.
 You can run these as follows:
 ```bash
 # get a dev server started
-npm run db:up
-npm run db:push
-npm run test:dev
+pnpm run db:up
+pnpm run db:push
+pnpm run test:dev
 
-npm run test:e2e
+pnpm run test:e2e
 ```
