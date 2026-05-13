@@ -27,8 +27,8 @@ export function RideInstructionsDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Welcome — it looks like you&apos;re new here</AlertDialogTitle>
           <AlertDialogDescription>
-            A few quick things to help you get the most from your ride.
-            You will see this message until you've joined three rides.
+            A few quick things to help you get the most from your ride. You will see this message
+            until you've joined three rides.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
