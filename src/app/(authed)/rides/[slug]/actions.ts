@@ -21,6 +21,10 @@ export async function joinRideAction(rideId: string) {
   invariant(ride, "no ride found");
 
   await db.insert(schema.rideMember).values({ rideId, userId });
+  await db
+    .update(schema.user)
+    .set({ seenRideInstructions: new Date() })
+    .where(eq(schema.user.id, userId));
 
   await sendNotifications({
     targets: ride.leader.subs,

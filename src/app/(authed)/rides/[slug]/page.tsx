@@ -1,5 +1,6 @@
 import { emitRideView } from "@/clients/posthog";
 import { AccessMessage } from "@/components/access-message";
+import { RideInstructionsDialog } from "@/components/agreement/ride-instructions";
 import { Confirmation, Modal } from "@/components/confirmation";
 import { Container } from "@/components/container";
 import { Map } from "@/components/map";
@@ -18,7 +19,7 @@ import { checkIsAdmin, isVerified, rideIsFull } from "@/lib/permissions";
 import { surfaceStyle } from "@/lib/surface";
 import { cn } from "@/lib/utils";
 import { addDays, format, isBefore } from "date-fns";
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull } from "drizzle-orm";
 import {
   BikeIcon,
   CalendarIcon,
@@ -97,6 +98,16 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
   await viewedRide(ride.id);
   emitRideView({ user, ride });
 
+  const ridesJoinedCountResult = await db
+    .select({ count: count() })
+    .from(schema.rideMember)
+    .innerJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
+    .where(
+      and(eq(schema.rideMember.userId, user.id), inArray(schema.ride.surface, ["road", "offroad"])),
+    );
+  const ridesJoinedCount = ridesJoinedCountResult[0]?.count ?? 0;
+  const showRideInstructions = user.seenRideInstructions === null || ridesJoinedCount < 3;
+
   const hasChanged = ride.views.length >= 1 && ride.views[0]!.updatedAt < ride.updatedAt;
 
   const { unclaimed } = ride;
@@ -151,6 +162,17 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                   Full
                 </Button>
               </Modal>
+            ) : showRideInstructions ? (
+              <RideInstructionsDialog action={joinRideAction.bind(null, ride.id)}>
+                <Button
+                  variant="outline"
+                  extra="action"
+                  className="text-foreground aspect-square h-16 text-lg"
+                  disabled={isLeader || isCanceled || isPast}
+                >
+                  Join
+                </Button>
+              </RideInstructionsDialog>
             ) : (
               <Button
                 variant="outline"

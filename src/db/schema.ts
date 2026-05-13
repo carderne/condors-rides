@@ -43,6 +43,7 @@ export const user = pgTable(
     image: text("image"),
 
     agreedAt: timestamp("agreed_at"),
+    seenRideInstructions: timestamp("seen_ride_instructions"),
     verifiedAt: timestamp("verified_at"),
     deletedAt: timestamp("deleted_at"),
     bannedAt: timestamp("banned_at"),
