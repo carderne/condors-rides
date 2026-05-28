@@ -33,6 +33,7 @@ import {
   MapPinIcon,
   MountainIcon,
   RecycleIcon,
+  RefreshCwIcon,
   RouteIcon,
   Trash2Icon,
   UsersIcon,
@@ -47,6 +48,7 @@ import {
   deleteRideAction,
   joinRideAction,
   leaveRideAction,
+  resyncRouteAction,
   unCancelRideAction,
   unclaimRideAction,
 } from "./actions";
@@ -458,6 +460,16 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     Duplicate
                   </Button>
                 </Link>
+                {(isLeader || isAdmin) && ride.routeUrl && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 hover:text-pink-600"
+                    onClick={resyncRouteAction.bind(null, ride.id)}
+                  >
+                    <RefreshCwIcon className="h-4 w-4" />
+                    Re-sync route
+                  </Button>
+                )}
                 {!isLeader && isAdmin && !unclaimed && (
                   <Button
                     variant="outline"

@@ -3,11 +3,12 @@
 import { sendNotifications } from "@/clients/notify";
 import { getAdminUser, getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import { getRouteInfo } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { checkIsAdmin } from "@/lib/permissions";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function joinRideAction(rideId: string) {
   const user = await getMembership();
@@ -165,6 +166,40 @@ export async function unCancelRideAction(rideId: string) {
   });
 
   revalidatePath("/rides");
+}
+
+export async function resyncRouteAction(rideId: string) {
+  const user = await getMembership();
+
+  const ride = await db.query.ride.findFirst({
+    columns: { id: true, slug: true, userId: true, routeUrl: true },
+    where: eq(schema.ride.id, rideId),
+  });
+  invariant(ride, "no ride found");
+
+  if (ride.userId !== user.id && !checkIsAdmin(user)) {
+    return notFound();
+  }
+  if (!ride.routeUrl) {
+    return;
+  }
+
+  let routeInfo = null;
+  try {
+    routeInfo = await getRouteInfo(ride.routeUrl);
+  } catch {
+    return;
+  }
+  if (!routeInfo) {
+    return;
+  }
+
+  await db
+    .update(schema.route)
+    .set({ name: routeInfo.name, geojson: routeInfo.geojson })
+    .where(eq(schema.route.url, ride.routeUrl));
+
+  revalidatePath(`/rides/${ride.slug}`);
 }
 
 export async function deleteRideAction(rideId: string) {
