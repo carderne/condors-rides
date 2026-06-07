@@ -4,7 +4,15 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useEffect, useRef } from "react";
 
-export function Map({ geojson, osKey }: { geojson: GeoJSON.LineString; osKey: string }) {
+export function Map({
+  geojson,
+  osKey,
+  cafeStopLoc,
+}: {
+  geojson: GeoJSON.LineString;
+  osKey: string;
+  cafeStopLoc?: GeoJSON.Position | null;
+}) {
   const mapContainer: RefObject<HTMLDivElement | null> = useRef(null);
   const map: RefObject<maplibregl.Map | null> = useRef(null);
 
@@ -50,6 +58,13 @@ export function Map({ geojson, osKey }: { geojson: GeoJSON.LineString; osKey: st
         },
       });
 
+      if (cafeStopLoc && cafeStopLoc.length >= 2) {
+        new maplibregl.Marker({ color: "#ec4899" })
+          .setLngLat([cafeStopLoc[0]!, cafeStopLoc[1]!])
+          .setPopup(new maplibregl.Popup({ offset: 25 }).setText("Cafe stop"))
+          .addTo(map.current);
+      }
+
       if (geojson.coordinates && geojson.coordinates.length > 0) {
         const bounds = new maplibregl.LngLatBounds();
 
@@ -63,7 +78,7 @@ export function Map({ geojson, osKey }: { geojson: GeoJSON.LineString; osKey: st
         });
       }
     });
-  }, [geojson]);
+  }, [geojson, cafeStopLoc]);
 
   return (
     <div className="h-full w-full">

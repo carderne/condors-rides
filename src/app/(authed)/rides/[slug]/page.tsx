@@ -375,7 +375,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               )}
               <div className="h-full w-full">
                 {ride.route?.geojson ? (
-                  <Map geojson={ride.route.geojson} osKey={osKey} />
+                  <Map geojson={ride.route.geojson} osKey={osKey} cafeStopLoc={ride.cafeStopLoc} />
                 ) : (
                   <div className="m-auto flex h-full w-1/2 flex-col justify-center">
                     <p>Use Strava or MapMyRide if you want your route to show up here :)</p>

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import type { RouteDirection, Surface } from "@/db/schema";
 import type { User } from "@/db/zod";
+import type { CafeStop } from "@/lib/geojson";
 import { LoaderCircleIcon } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -25,14 +26,17 @@ const SELECTED_COLOR = "#000000";
 export function RouteMap({
   osKey,
   initialRoutes,
+  cafeStops,
   user,
 }: {
   osKey: string;
   initialRoutes: RouteHydrated[];
+  cafeStops: CafeStop[];
   user: User | null;
 }) {
   const mapContainer: RefObject<HTMLDivElement | null> = useRef(null);
   const map: RefObject<maplibregl.Map | null> = useRef(null);
+  const cafeMarkers: RefObject<maplibregl.Marker[]> = useRef([]);
 
   const [selectedRoute, setSelectedRoute] = useState<RouteHydrated | null>(null);
   const [surfaceFilter, setSurfaceFilter] = useState<"all" | "road" | "offroad">("all");
@@ -40,6 +44,7 @@ export function RouteMap({
   const [showAll, setShowAll] = useState(true);
   const [minDistance, setMinDistance] = useState<number>(0);
   const [maxDistance, setMaxDistance] = useState<number | null>(null);
+  const [showCafeStops, setShowCafeStops] = useState(false);
 
   const selectedIdRef = useRef<string | null>(null);
   const promotedIds = useRef(new Set(initialRoutes.map((r) => r.id)));
@@ -203,8 +208,47 @@ export function RouteMap({
       m.on("mouseleave", "routes", () => {
         m.getCanvas().style.cursor = "";
       });
+
+      // Cafe stops: a DOM marker per stop with an always-visible label that
+      // links to a Google Maps search. Added to the map only when toggled on.
+      cafeMarkers.current = cafeStops.map((stop) => {
+        const name = stop.name ?? "Cafe stop";
+
+        const el = document.createElement("div");
+        el.className = "flex flex-col items-center";
+
+        const dot = document.createElement("div");
+        dot.className = "size-2.5 rounded-full border border-white bg-violet-600 shadow";
+        el.appendChild(dot);
+
+        const link = document.createElement("a");
+        link.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = name;
+        link.className =
+          "mt-0.5 max-w-40 truncate rounded bg-white/90 px-1 py-0.5 text-[10px] font-medium text-violet-700 shadow hover:underline";
+        el.appendChild(link);
+
+        return new maplibregl.Marker({ element: el, anchor: "top" }).setLngLat(
+          stop.loc as [number, number],
+        );
+      });
     });
-  }, [osKey, initialRoutes]);
+  }, [osKey, initialRoutes, cafeStops]);
+
+  // Toggle cafe stop markers on/off.
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    for (const marker of cafeMarkers.current) {
+      if (showCafeStops) {
+        marker.addTo(m);
+      } else {
+        marker.remove();
+      }
+    }
+  }, [showCafeStops]);
 
   useEffect(() => {
     const m = map.current;
@@ -336,6 +380,17 @@ export function RouteMap({
             onClick={() => setShowAll(false)}
           >
             Promoted
+          </Button>
+        </div>
+
+        {/* Cafe stops toggle (default off) */}
+        <div className="flex w-fit gap-1 rounded-lg bg-white/90 p-1 shadow-md">
+          <Button
+            size="sm"
+            variant={showCafeStops ? "default" : "ghost"}
+            onClick={() => setShowCafeStops((v) => !v)}
+          >
+            Cafe stops
           </Button>
         </div>
       </div>

@@ -2,7 +2,8 @@ import { emitPageView } from "@/clients/posthog";
 import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { getConfig } from "@/lib/config";
-import { eq, sql } from "drizzle-orm";
+import { dedupeCafeStops } from "@/lib/geojson";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { RouteMap } from "./map";
 
 const { osKey } = getConfig();
@@ -31,5 +32,16 @@ export default async function MapPage() {
     .from(schema.route)
     .where(eq(schema.route.promoted, true));
 
-  return <RouteMap osKey={osKey} initialRoutes={routes} user={user} />;
+  // All geocoded cafe stops (deduped to one pin per ~1km cluster).
+  const cafeStopRows = await db
+    .select({
+      name: schema.ride.cafeStop,
+      loc: schema.ride.cafeStopLoc,
+    })
+    .from(schema.ride)
+    .where(and(isNotNull(schema.ride.cafeStopLoc), isNull(schema.ride.deletedAt)));
+
+  const cafeStops = dedupeCafeStops(cafeStopRows);
+
+  return <RouteMap osKey={osKey} initialRoutes={routes} cafeStops={cafeStops} user={user} />;
 }

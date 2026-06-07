@@ -153,6 +153,7 @@ export const ride = pgTable(
 
     maxGroupSize: integer("max_group_size"),
     cafeStop: text("cafe_stop"),
+    cafeStopLoc: jsonb("cafe_stop_loc").$type<GeoJSON.Position>(),
     startPoint: text("start_point").notNull(),
 
     unclaimed: boolean("unclaimed").notNull().default(false),

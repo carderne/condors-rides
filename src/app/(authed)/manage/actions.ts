@@ -5,7 +5,7 @@ import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import type { InsertRide, Ride } from "@/db/zod";
 import { camelToSentence, formatISODate } from "@/lib/fmt";
-import { getRouteInfo } from "@/lib/geojson";
+import { geocode, getRouteInfo } from "@/lib/geojson";
 import { invariant } from "@/lib/invariant";
 import { createSlug } from "@/lib/slug";
 import { and, eq } from "drizzle-orm";
@@ -64,6 +64,28 @@ export async function action(
       },
     };
   }
+  const cafeStop = data.cafeStop ?? null;
+
+  // geocode the cafe stop so we can show it on a map. if there's no cafe stop
+  // we null the location too. never block ride creation on this: if it fails,
+  // log and proceed with a null location.
+  let cafeStopLoc: GeoJSON.Position | null = null;
+  if (cafeStop) {
+    const unchanged = existingRide?.cafeStop === cafeStop && existingRide.cafeStopLoc;
+    if (unchanged) {
+      // cafe stop hasn't changed, keep the existing location
+      cafeStopLoc = existingRide.cafeStopLoc;
+    } else {
+      try {
+        // pass the route so we can reject cafe stops that aren't near it
+        // (e.g. a same-named venue elsewhere).
+        cafeStopLoc = await geocode(cafeStop, { route: routeInfo?.geojson ?? null });
+      } catch (error) {
+        console.error("failed to geocode cafe stop", cafeStop, error);
+      }
+    }
+  }
+
   const insertable = {
     ...data,
     // convert undefined to null
@@ -72,7 +94,8 @@ export async function action(
     elevation: data.elevation ?? null,
     routeUrl: routeInfo?.url ?? data.routeUrl ?? null,
     maxGroupSize: data.maxGroupSize ?? null,
-    cafeStop: data.cafeStop ?? null,
+    cafeStop,
+    cafeStopLoc,
     geojson: routeInfo?.geojson ?? null,
   };
 

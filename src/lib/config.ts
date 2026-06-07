@@ -62,6 +62,10 @@ type Config = {
   pirateWeather: {
     apiKey: string;
   };
+
+  googleMaps: {
+    apiKey: string;
+  };
 };
 
 function getDefaultConfig() {
@@ -104,6 +108,10 @@ function getDefaultConfig() {
 
     pirateWeather: {
       apiKey: get("PIRATEWEATHER_API_KEY"),
+    },
+
+    googleMaps: {
+      apiKey: get("GOOGLE_MAPS_API_KEY"),
     },
   };
 }
