@@ -115,7 +115,7 @@ function RideStats({ ride }: { ride: RideHydrated }) {
           <WindIcon className="h-5 w-5 text-pink-500" />
         </div>
         <div>
-          <div className="text-xs tracking-wide text-gray-500 uppercase">Speed</div>
+          <div className="text-xs tracking-wide text-gray-500 uppercase">Speed on flat</div>
           <div className="font-semibold">{ride.speed} kph</div>
         </div>
       </div>
