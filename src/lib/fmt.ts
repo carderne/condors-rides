@@ -1,19 +1,26 @@
-import { format, formatISO } from "date-fns";
+import { formatISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+
+// All human-readable timestamps are rendered in UK local time so that they are
+// consistent regardless of whether formatting happens on the server (UTC) or in
+// the user's browser. Date-only values (slugs, ISO date keys) are intentionally
+// left in `formatISO*` below, since they represent calendar days, not instants.
+const TIME_ZONE = "Europe/London";
 
 export function formatShortDate(date: Date) {
-  return format(date, "EEE, d MMM");
+  return formatInTimeZone(date, TIME_ZONE, "EEE, d MMM");
 }
 
 export function formatShortDateYear(date: Date) {
-  return format(date, "d MMM yyyy");
+  return formatInTimeZone(date, TIME_ZONE, "d MMM yyyy");
 }
 
 export function formatShortDateTime(date: Date) {
-  return format(date, "EEE, d MMM, h:mm a");
+  return formatInTimeZone(date, TIME_ZONE, "EEE, d MMM, h:mm a");
 }
 
 export function formatFullDate(date: Date) {
-  return format(date, "EEE, d MMM yyyy");
+  return formatInTimeZone(date, TIME_ZONE, "EEE, d MMM yyyy");
 }
 
 export function formatISODate(date: Date) {
@@ -25,7 +32,7 @@ export function formatISODateTime(date: Date) {
 }
 
 export function formatFullDateTime(date: Date) {
-  return format(date, "EEE, d MMM yyyy 'at' h:mm a");
+  return formatInTimeZone(date, TIME_ZONE, "EEE, d MMM yyyy 'at' h:mm a");
 }
 
 export function formatTime(time: string | null): string {
