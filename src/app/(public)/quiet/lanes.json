@@ -1,0 +1,168 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Blackthorn (Lower Rd / Station Rd)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.0985649, 51.86871989999998],
+          [-1.093814, 51.87688900000003]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Wendlebury Road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.1880571, 51.87030649999998],
+          [-1.1835884, 51.87595470000003]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Kennington (Bagley Wood Road)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.2645779, 51.7082665],
+          [-1.2452206, 51.7170405]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Radley (Sugworth Lane)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.2665872, 51.69926210000001],
+          [-1.2418368, 51.70440319999999]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Curbridge (Witney Road)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.5460792, 51.77498449999996],
+          [-1.5259783, 51.77850440000002]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Hanwell Lane"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.3602758, 52.09153879999996],
+          [-1.3600955, 52.09186070000002]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Bainton (Stoke Lyne)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.157858, 51.938478]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Towersey"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-0.9433313, 51.7357015],
+          [-0.9288447999999999, 51.74525329999999]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Ewelme (Cat Lane / Firebrass Hill)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.068743, 51.6189884],
+          [-1.0650843, 51.6226412]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "West Lockinge"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.397024, 51.5879959]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Combe (Park Road)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.4024444, 51.838815],
+          [-1.3863, 51.84268489999999]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Marston (Elms Drive)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.2347025, 51.7692451],
+          [-1.2305467, 51.7705877]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "Longcot (Mailings Lane)"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-1.6179812, 51.60992],
+          [-1.5996458, 51.622122]
+        ]
+      }
+    }
+  ]
+}
