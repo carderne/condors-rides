@@ -28,7 +28,8 @@ function routeSvg(
 
   const pad = 24;
   const project = (lng: number, lat: number) => {
-    const x = lng;
+    // Web-Mercator, both axes in radians so x and y share the same units.
+    const x = (lng * Math.PI) / 180;
     const y = Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 180 / 2));
     return [x, y] as const;
   };
@@ -90,7 +91,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          flexGrow: 1,
+          width: size.width - mapWidth,
+          height: "100%",
           padding: 56,
           background: accent,
           color: "white",
@@ -125,12 +127,19 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
       {/* Right: map */}
       {mapUri ? (
-        <img src={mapUri} width={mapWidth} height={size.height} alt="Route map" />
+        <img
+          src={mapUri}
+          width={mapWidth}
+          height={size.height}
+          alt="Route map"
+          style={{ flexShrink: 0 }}
+        />
       ) : (
         <div
           style={{
             display: "flex",
             width: mapWidth,
+            flexShrink: 0,
             height: "100%",
             alignItems: "center",
             justifyContent: "center",
