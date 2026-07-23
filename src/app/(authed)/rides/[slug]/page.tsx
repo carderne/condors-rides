@@ -405,7 +405,9 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                     <div key={rider.id} className="flex min-w-0 items-center gap-3 p-3">
                       <UserAvatar user={rider} className="shrink-0" />
                       <div className="flex min-w-0 flex-col">
-                        <span className="font-medium break-words text-gray-800">{rider.name}</span>
+                        <span className="text-sm font-medium break-words text-gray-800 sm:text-base">
+                          {rider.name}
+                        </span>
                         {isNormalGroupRide && rider.id === ride.leader.id && (
                           <span className="flex items-center text-xs text-pink-500">
                             <BikeIcon className="mr-1 h-3 w-3" />
