@@ -37,7 +37,7 @@ export function RideList({
       {datedRideArray.map((dateGroup) => (
         <div key={formatISODate(dateGroup.date)} className="relative flex flex-col gap-4">
           {/* Creative Date Header */}
-          <div className="relative">
+          <div className="sticky top-2 z-20 py-2">
             {/* Decorative line */}
             <div className="absolute top-1/2 left-0 h-0.5 w-full bg-gradient-to-r from-transparent via-pink-200 to-transparent"></div>
 
