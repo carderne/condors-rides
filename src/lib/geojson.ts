@@ -1,9 +1,15 @@
 import { convertRouteToLineString, getRideWithGpsRoute } from "@/clients/ridewithgps";
 import { followStravaShortLink, getStravaRoute } from "@/clients/strava";
 import { getConfig } from "@/lib/config";
+import { lineStringToGpx } from "@/lib/gpx";
 import polyline from "@mapbox/polyline";
 
-export type RouteInfo = { url: string; name: string; geojson: GeoJSON.LineString };
+export type RouteInfo = {
+  url: string;
+  name: string;
+  geojson: GeoJSON.LineString;
+  gpx: string;
+};
 
 export async function getRouteInfo(url: string | undefined): Promise<RouteInfo | null> {
   if (!url) {
@@ -22,10 +28,12 @@ export async function getRouteInfo(url: string | undefined): Promise<RouteInfo |
     if (!stravaResponse.ok) {
       return null;
     }
+    const geojson = polyline.toGeoJSON(stravaResponse.data.map.polyline);
     return {
       url: cleanUrl,
       name: stravaResponse.data.name,
-      geojson: polyline.toGeoJSON(stravaResponse.data.map.polyline),
+      geojson,
+      gpx: lineStringToGpx(geojson, stravaResponse.data.name),
     };
   }
 
@@ -39,10 +47,12 @@ export async function getRouteInfo(url: string | undefined): Promise<RouteInfo |
     if (!response.ok) {
       return null;
     }
+    const geojson = convertRouteToLineString(response.data);
     return {
       url: cleanUrl,
       name: response.data.route.name,
-      geojson: convertRouteToLineString(response.data),
+      geojson,
+      gpx: lineStringToGpx(geojson, response.data.route.name),
     };
   }
 

@@ -165,8 +165,9 @@ export function UpsertForm({ ride }: { ride: Partial<Ride> | undefined }) {
           <FormInput
             required={false}
             name={names.routeUrl}
-            placeholder="https://www.strava.com/routes/..."
+            placeholder="https://ridewithgps.com/routes/..."
             label="Route"
+            labelSuffix="RWGPS strongly preferred"
             errors={state.errors?.routeUrl}
             defaultValue={(state.formData?.get(names.routeUrl) as string) ?? ride?.routeUrl ?? ""}
           />

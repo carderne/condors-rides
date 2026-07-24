@@ -143,6 +143,7 @@ export async function action(
         cafeStop: data.cafeStop,
         notes: data.notes,
         geojson: routeInfo.geojson,
+        gpx: routeInfo.gpx,
       });
     }
 

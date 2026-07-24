@@ -26,6 +26,7 @@ import {
   ClockIcon,
   CoffeeIcon,
   CopyIcon,
+  DownloadIcon,
   EditIcon,
   ExternalLinkIcon,
   HandHelpingIcon,
@@ -377,7 +378,22 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               )}
               <div className="h-full w-full">
                 {ride.route?.geojson ? (
-                  <Map geojson={ride.route.geojson} osKey={osKey} cafeStopLoc={ride.cafeStopLoc} />
+                  <>
+                    <Map
+                      geojson={ride.route.geojson}
+                      osKey={osKey}
+                      cafeStopLoc={ride.cafeStopLoc}
+                    />
+                    {ride.route.gpx && (
+                      <a
+                        href={`/rides/${ride.slug}/gpx`}
+                        className="absolute right-4 bottom-4 z-10 flex items-center justify-center gap-2 rounded-lg border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
+                      >
+                        GPX
+                        <DownloadIcon className="h-4 w-4" />
+                      </a>
+                    )}
+                  </>
                 ) : (
                   <div className="m-auto flex h-full w-1/2 flex-col justify-center">
                     <p>Use Strava or MapMyRide if you want your route to show up here :)</p>

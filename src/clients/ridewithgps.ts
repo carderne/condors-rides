@@ -10,7 +10,7 @@ interface RideWithGpsRoute {
     // https://ridewithgps.com/api/v1/doc/endpoints/routes
     name: string;
     course_points: { x: number; y: number }[];
-    track_points: { x: number; y: number }[];
+    track_points: { x: number; y: number; e?: number }[];
   };
 }
 
@@ -37,7 +37,9 @@ export async function getRideWithGpsRoute(
 }
 
 export function convertRouteToLineString(route: RideWithGpsRoute): GeoJSON.LineString {
-  const coordinates = route.route.track_points.map(({ x, y }) => [x, y]);
+  const coordinates = route.route.track_points.map(({ x, y, e }) =>
+    typeof e === "number" ? [x, y, e] : [x, y],
+  );
   const linestring = {
     type: "LineString" as const,
     coordinates,

@@ -2,7 +2,7 @@ import type { Route } from "@/db/zod";
 import type maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export type RouteHydrated = Omit<Route, "createdAt" | "updatedAt"> & {
+export type RouteHydrated = Omit<Route, "createdAt" | "updatedAt" | "gpx"> & {
   userVoted?: boolean;
   numVotes: number;
 };

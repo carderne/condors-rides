@@ -196,7 +196,7 @@ export async function resyncRouteAction(rideId: string) {
 
   await db
     .update(schema.route)
-    .set({ name: routeInfo.name, geojson: routeInfo.geojson })
+    .set({ name: routeInfo.name, geojson: routeInfo.geojson, gpx: routeInfo.gpx })
     .where(eq(schema.route.url, ride.routeUrl));
 
   revalidatePath(`/rides/${ride.slug}`);
