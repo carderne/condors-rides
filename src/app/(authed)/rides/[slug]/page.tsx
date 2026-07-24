@@ -26,7 +26,6 @@ import {
   ClockIcon,
   CoffeeIcon,
   CopyIcon,
-  DownloadIcon,
   EditIcon,
   ExternalLinkIcon,
   HandHelpingIcon,
@@ -57,6 +56,7 @@ import { BackButton } from "./back";
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
+import { GpxButton } from "./gpx-button";
 import { ShareButton } from "./share";
 
 const { osKey } = getConfig();
@@ -385,13 +385,11 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
                       cafeStopLoc={ride.cafeStopLoc}
                     />
                     {ride.route.gpx && (
-                      <a
-                        href={`/rides/${ride.slug}/gpx`}
-                        className="absolute right-4 bottom-4 z-10 flex items-center justify-center gap-2 rounded-lg border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50"
-                      >
-                        GPX
-                        <DownloadIcon className="h-4 w-4" />
-                      </a>
+                      <GpxButton
+                        slug={ride.slug}
+                        name={ride.name}
+                        className="absolute right-4 bottom-4 z-10 flex items-center justify-center gap-2 rounded-lg border-2 border-pink-200 bg-white px-4 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50 disabled:opacity-60"
+                      />
                     )}
                   </>
                 ) : (
