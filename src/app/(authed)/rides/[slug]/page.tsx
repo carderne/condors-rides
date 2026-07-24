@@ -56,6 +56,7 @@ import { BackButton } from "./back";
 import { NewCommentForm } from "./comment/form";
 import { OptimisticProvider } from "./comment/optimistic";
 import { CommentsList } from "./comment/table";
+import { ShareButton } from "./share";
 
 const { osKey } = getConfig();
 
@@ -137,6 +138,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
           {hasChanged && (
             <div className="animate-bounce px-4 py-2 text-sm">Details have changed!</div>
           )}
+          <ShareButton className="absolute right-1" />
         </div>
         <div className="flex items-center justify-between gap-4 px-8 pb-4">
           <div className="flex">
