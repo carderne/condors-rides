@@ -57,7 +57,10 @@ export function GpxButton({
 
       if (canShareFile) {
         try {
-          await navigator.share({ files: [file], title: name });
+          // Share ONLY the file: adding title/text makes iOS treat it as a
+          // text share (messaging apps etc.) instead of matching apps that
+          // register for .gpx files (Strava, Wahoo, Garmin, Organic Maps...).
+          await navigator.share({ files: [file] });
           return;
         } catch (err) {
           // User cancelled the share sheet: do nothing.
@@ -81,7 +84,12 @@ export function GpxButton({
     typeof navigator !== "undefined" && typeof (navigator as Navigator).share === "function";
 
   return (
-    <button type="button" onClick={onClick} disabled={busy} className={cn("cursor-pointer", className)}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={busy}
+      className={cn("cursor-pointer", className)}
+    >
       GPX
       {canShare ? <Share2Icon className="h-4 w-4" /> : <DownloadIcon className="h-4 w-4" />}
     </button>
