@@ -2,23 +2,47 @@ import { Container } from "@/components/container";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
-import { and, count, countDistinct, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, countDistinct, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { PeriodSelect, periodLabels, type StatsPeriod } from "./period-select";
 import { RidesPerWeekChart } from "./rides-per-week-chart";
 
-async function getDashboardStats() {
-  // Total rides and by surface
-  const totalRides = await db
-    .select({ count: count() })
-    .from(schema.ride)
-    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
+// Road/offroad only — most stats exclude virtual/event/external rides.
+const roadOffroad = inArray(schema.ride.surface, ["road", "offroad"]);
+// Chart & "rides by surface" include virtual too.
+const chartSurfaces = inArray(schema.ride.surface, ["road", "offroad", "virtual"]);
 
+function periodCondition(period: StatsPeriod): SQL | undefined {
+  if (period === "12m") {
+    return sql`${schema.ride.date} >= CURRENT_DATE - INTERVAL '12 months'`;
+  }
+  if (period === "agm") {
+    return sql`${schema.ride.date} >= '2025-10-19'`;
+  }
+  return undefined;
+}
+
+async function getDashboardStats(period: StatsPeriod) {
+  const inPeriod = periodCondition(period);
+
+  // Base filter for "real" (road/offroad) rides within the selected period.
+  const rideFilter = and(
+    isNull(schema.ride.canceledAt),
+    isNull(schema.ride.deletedAt),
+    roadOffroad,
+    inPeriod,
+  );
+
+  // Total rides
+  const totalRides = await db.select({ count: count() }).from(schema.ride).where(rideFilter);
+
+  // Rides by surface (includes virtual etc.)
   const ridesBySurface = await db
     .select({
       surface: schema.ride.surface,
       count: count(),
     })
     .from(schema.ride)
-    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
+    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt), inPeriod))
     .groupBy(schema.ride.surface);
 
   // Most popular days for rides
@@ -29,15 +53,15 @@ async function getDashboardStats() {
       count: count(),
     })
     .from(schema.ride)
-    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
+    .where(rideFilter)
     .groupBy(sql`EXTRACT(DOW FROM ${schema.ride.date})`, sql`TO_CHAR(${schema.ride.date}, 'Day')`)
     .orderBy(sql`count(*) DESC`)
     .limit(3);
 
-  // Average riders per ride
-  const avgRidersPerRide = await db
+  // Median riders per ride
+  const medianRidersPerRide = await db
     .select({
-      avgRiders: sql<number>`ROUND(AVG(member_count), 1)`,
+      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY member_count))`,
     })
     .from(
       db
@@ -47,46 +71,66 @@ async function getDashboardStats() {
         })
         .from(schema.rideMember)
         .leftJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
-        .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)))
+        .where(rideFilter)
         .groupBy(schema.rideMember.rideId)
         .as("ride_counts"),
+    );
+
+  // Median rides per week
+  const medianRidesPerWeek = await db
+    .select({
+      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY week_count), 1)`,
+    })
+    .from(
+      db
+        .select({
+          week: sql<string>`DATE_TRUNC('week', ${schema.ride.date})`.as("week"),
+          weekCount: sql<number>`COUNT(*)`.as("week_count"),
+        })
+        .from(schema.ride)
+        .where(rideFilter)
+        .groupBy(sql`DATE_TRUNC('week', ${schema.ride.date})`)
+        .as("week_counts"),
     );
 
   // Unique ride leaders
   const uniqueLeaders = await db
     .select({ count: countDistinct(schema.ride.userId) })
     .from(schema.ride)
-    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
+    .where(rideFilter);
 
   // Unique ride members
   const uniqueMembers = await db
     .select({ count: countDistinct(schema.rideMember.userId) })
     .from(schema.rideMember)
     .leftJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
-    .where(and(isNull(schema.ride.canceledAt), isNull(schema.ride.deletedAt)));
+    .where(rideFilter);
 
-  // Rides per week for the last 12 months, grouped by surface
-  const ridesPerWeekBySurface = await db
+  // Weekly chart data, grouped by surface (includes virtual).
+  const weekly = await db
     .select({
       week: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'YYYY-MM-DD')`,
       weekLabel: sql<string>`TO_CHAR(DATE_TRUNC('week', ${schema.ride.date}), 'Mon DD')`,
       surface: sql<"road" | "offroad" | "virtual">`${schema.ride.surface}`,
-      count: count(),
+      rides: sql<number>`COUNT(DISTINCT ${schema.ride.id})`,
+      riders: sql<number>`COUNT(${schema.rideMember.userId})`,
+      riderKms: sql<number>`COALESCE(SUM(CASE WHEN ${schema.rideMember.userId} IS NOT NULL THEN ${schema.ride.distance} ELSE 0 END), 0)`,
     })
     .from(schema.ride)
+    .leftJoin(schema.rideMember, eq(schema.rideMember.rideId, schema.ride.id))
     .where(
       and(
         isNull(schema.ride.canceledAt),
         isNull(schema.ride.deletedAt),
-        sql`${schema.ride.date} >= CURRENT_DATE - INTERVAL '12 months'`,
         sql`${schema.ride.date} <= CURRENT_DATE`,
-        inArray(schema.ride.surface, ["road", "offroad", "virtual"]),
+        chartSurfaces,
+        inPeriod,
       ),
     )
     .groupBy(sql`DATE_TRUNC('week', ${schema.ride.date})`, schema.ride.surface)
     .orderBy(sql`DATE_TRUNC('week', ${schema.ride.date})`);
 
-  // Total routes and by surface
+  // Total routes and by surface (not affected by period).
   const totalRoutes = await db.select({ count: count() }).from(schema.route);
   const routesBySurface = await db
     .select({
@@ -100,24 +144,36 @@ async function getDashboardStats() {
     totalRides: totalRides[0]?.count || 0,
     ridesBySurface,
     popularDays,
-    avgRidersPerRide: avgRidersPerRide[0]?.avgRiders || 0,
+    medianRidersPerRide: medianRidersPerRide[0]?.median || 0,
+    medianRidesPerWeek: medianRidesPerWeek[0]?.median || 0,
     uniqueLeaders: uniqueLeaders[0]?.count || 0,
     uniqueMembers: uniqueMembers[0]?.count || 0,
     totalRoutes: totalRoutes[0]?.count || 0,
     routesBySurface,
-    ridesPerWeekBySurface,
+    weekly,
   };
 }
 
-export default async function StatsPage() {
-  const stats = await getDashboardStats();
+export default async function StatsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
+  const { period: periodParam } = await searchParams;
+  const period: StatsPeriod =
+    periodParam && periodParam in periodLabels ? (periodParam as StatsPeriod) : "all";
+
+  const stats = await getDashboardStats(period);
 
   return (
     <Container className="mt-4">
-      <H1>Stats</H1>
+      <div className="flex items-center justify-between">
+        <H1>Stats</H1>
+        <PeriodSelect value={period} />
+      </div>
 
       {/* Key Metrics */}
-      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100">
           <CardHeader className="pb-2">
             <CardTitle className="text-primary text-sm font-medium">Total Rides</CardTitle>
@@ -147,22 +203,28 @@ export default async function StatsPage() {
 
         <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100">
           <CardHeader className="pb-2">
-            <CardTitle className="text-primary text-sm font-medium">Avg Riders/Ride</CardTitle>
+            <CardTitle className="text-primary text-sm font-medium">Median Riders/Ride</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-primary text-3xl font-bold">{stats.avgRidersPerRide}</div>
+            <div className="text-primary text-3xl font-bold">{stats.medianRidersPerRide}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-primary text-sm font-medium">Median Rides/Week</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-primary text-3xl font-bold">{stats.medianRidesPerWeek}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Rides per Week Chart */}
+      {/* Weekly Chart */}
       <div className="mb-8">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">Rides per Week</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RidesPerWeekChart data={stats.ridesPerWeekBySurface} />
+          <CardContent className="pt-6">
+            <RidesPerWeekChart data={stats.weekly} />
           </CardContent>
         </Card>
       </div>
