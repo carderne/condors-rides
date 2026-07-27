@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { and, count, countDistinct, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
-import { PeriodSelect, periodLabels, type StatsPeriod } from "./period-select";
+import type { SearchParams } from "nuqs/server";
+import { loadStatsParams, type StatsPeriod } from "./period-params";
+import { PeriodSelect } from "./period-select";
 import { RidesPerWeekChart } from "./rides-per-week-chart";
 
 // Road/offroad only — most stats exclude virtual/event/external rides.
@@ -154,14 +156,8 @@ async function getDashboardStats(period: StatsPeriod) {
   };
 }
 
-export default async function StatsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ period?: string }>;
-}) {
-  const { period: periodParam } = await searchParams;
-  const period: StatsPeriod =
-    periodParam && periodParam in periodLabels ? (periodParam as StatsPeriod) : "all";
+export default async function StatsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const { period } = await loadStatsParams(searchParams);
 
   const stats = await getDashboardStats(period);
 
@@ -169,7 +165,7 @@ export default async function StatsPage({
     <Container className="mt-4">
       <div className="flex items-center justify-between">
         <H1>Stats</H1>
-        <PeriodSelect value={period} />
+        <PeriodSelect />
       </div>
 
       {/* Key Metrics */}

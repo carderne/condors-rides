@@ -2,6 +2,7 @@ import { UsePullToRefresh } from "@/components/pull-refresh";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 const fontInter = localFont({
@@ -52,7 +53,7 @@ export default async function RootLayout({
         <div className="min-h-screen font-sans antialiased">
           <Toaster position="bottom-right" />
           <UsePullToRefresh />
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </div>
       </body>
     </html>

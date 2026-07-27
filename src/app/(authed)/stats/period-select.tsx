@@ -7,34 +7,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
+import { periodLabels, periodParser, type StatsPeriod } from "./period-params";
 
-export type StatsPeriod = "all" | "12m" | "agm";
-
-export const periodLabels: Record<StatsPeriod, string> = {
-  all: "All time",
-  "12m": "Last 12 months",
-  agm: "Since last AGM",
-};
-
-export function PeriodSelect({ value }: { value: StatsPeriod }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const onChange = (next: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (next === "all") {
-      params.delete("period");
-    } else {
-      params.set("period", next);
-    }
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
-  };
+export function PeriodSelect() {
+  const [period, setPeriod] = useQueryState("period", periodParser);
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={period} onValueChange={(v) => setPeriod(v as StatsPeriod)}>
       <SelectTrigger className="w-[180px]">
         <SelectValue />
       </SelectTrigger>
