@@ -22,6 +22,7 @@ interface WeeklyData {
   surface: "road" | "offroad" | "virtual";
   rides: number;
   riders: number;
+  uniqueRiders: number;
   riderKms: number;
 }
 
@@ -32,6 +33,7 @@ interface RidesPerWeekChartProps {
 const metrics = {
   rides: { label: "Rides per week", key: "rides" as const },
   riders: { label: "Riders per week", key: "riders" as const },
+  uniqueRiders: { label: "Unique riders per week", key: "uniqueRiders" as const },
   riderKms: { label: "Rider-kms per week", key: "riderKms" as const },
 };
 

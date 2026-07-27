@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1 } from "@/components/ui/typography";
 import { db, schema } from "@/db";
 import { and, count, countDistinct, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { union } from "drizzle-orm/pg-core";
 import type { SearchParams } from "nuqs/server";
 import { loadStatsParams, type StatsPeriod } from "./period-params";
 import { PeriodSelect } from "./period-select";
@@ -132,6 +133,56 @@ async function getDashboardStats(period: StatsPeriod) {
     .groupBy(sql`DATE_TRUNC('week', ${schema.ride.date})`, schema.ride.surface)
     .orderBy(sql`DATE_TRUNC('week', ${schema.ride.date})`);
 
+  // Unique riders per week: distinct users who either led OR joined a ride
+  // that week (deduped across leaders + members), grouped by surface.
+  const chartRideConds = and(
+    isNull(schema.ride.canceledAt),
+    isNull(schema.ride.deletedAt),
+    sql`${schema.ride.date} <= CURRENT_DATE`,
+    chartSurfaces,
+    inPeriod,
+  );
+
+  const leaderRiders = db
+    .select({
+      week: sql<string>`DATE_TRUNC('week', ${schema.ride.date})`.as("week"),
+      surface: sql<"road" | "offroad" | "virtual">`${schema.ride.surface}`.as("surface"),
+      userId: sql<string>`${schema.ride.userId}`.as("user_id"),
+    })
+    .from(schema.ride)
+    .where(chartRideConds);
+
+  const memberRiders = db
+    .select({
+      week: sql<string>`DATE_TRUNC('week', ${schema.ride.date})`.as("week"),
+      surface: sql<"road" | "offroad" | "virtual">`${schema.ride.surface}`.as("surface"),
+      userId: sql<string>`${schema.rideMember.userId}`.as("user_id"),
+    })
+    .from(schema.rideMember)
+    .innerJoin(schema.ride, eq(schema.ride.id, schema.rideMember.rideId))
+    .where(chartRideConds);
+
+  const ridersUnion = union(leaderRiders, memberRiders).as("riders");
+
+  const uniqueRidersWeekly = await db
+    .select({
+      week: sql<string>`TO_CHAR(${ridersUnion.week}, 'YYYY-MM-DD')`,
+      surface: sql<"road" | "offroad" | "virtual">`${ridersUnion.surface}`,
+      uniqueRiders: sql<number>`COUNT(DISTINCT ${ridersUnion.userId})`,
+    })
+    .from(ridersUnion)
+    .groupBy(ridersUnion.week, ridersUnion.surface);
+
+  const uniqueRidersMap = new Map<string, number>();
+  for (const row of uniqueRidersWeekly) {
+    uniqueRidersMap.set(`${row.week}|${row.surface}`, Number(row.uniqueRiders));
+  }
+
+  const weeklyWithUnique = weekly.map((w) => ({
+    ...w,
+    uniqueRiders: uniqueRidersMap.get(`${w.week}|${w.surface}`) ?? 0,
+  }));
+
   // Total routes and by surface (not affected by period).
   const totalRoutes = await db.select({ count: count() }).from(schema.route);
   const routesBySurface = await db
@@ -152,7 +203,7 @@ async function getDashboardStats(period: StatsPeriod) {
     uniqueMembers: uniqueMembers[0]?.count || 0,
     totalRoutes: totalRoutes[0]?.count || 0,
     routesBySurface,
-    weekly,
+    weekly: weeklyWithUnique,
   };
 }
 
