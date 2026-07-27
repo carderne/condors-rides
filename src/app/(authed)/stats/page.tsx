@@ -61,7 +61,7 @@ async function getDashboardStats(period: StatsPeriod) {
   // Median riders per ride
   const medianRidersPerRide = await db
     .select({
-      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY member_count))`,
+      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY member_count)::numeric)`,
     })
     .from(
       db
@@ -79,7 +79,7 @@ async function getDashboardStats(period: StatsPeriod) {
   // Median rides per week
   const medianRidesPerWeek = await db
     .select({
-      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY week_count), 1)`,
+      median: sql<number>`ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY week_count)::numeric, 1)`,
     })
     .from(
       db
