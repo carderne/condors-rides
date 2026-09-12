@@ -221,7 +221,7 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               asChild
               variant="outline"
               extra="action"
-              className="text-foreground h-16 w-24 text-sm leading-tight whitespace-normal"
+              className="text-foreground h-12 w-20 text-xs leading-tight whitespace-normal md:h-16 md:w-24 md:text-sm"
             >
               <a
                 href="https://cowleyroadcondors.cc/crash-procedure/"
