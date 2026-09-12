@@ -1,6 +1,7 @@
 import { db, schema } from "@/db";
 import type { User } from "@/db/zod";
 import { auth } from "@/lib/auth";
+import { getConfig } from "@/lib/config";
 import { invariant } from "@/lib/invariant";
 import { getPathOnServer } from "@/lib/path";
 import { eq } from "drizzle-orm";
@@ -10,6 +11,19 @@ import { notFound, redirect } from "next/navigation";
 export async function getAdminUser(): Promise<User> {
   const user = await getMembership();
   if (user.type !== "admin") {
+    return notFound();
+  }
+  return user;
+}
+
+export function isSuperAdmin(user: User): boolean {
+  const email = getConfig().superAdminEmail;
+  return email.length > 0 && user.email.toLowerCase() === email.toLowerCase();
+}
+
+export async function getSuperAdminUser(): Promise<User> {
+  const user = await getMembership();
+  if (!isSuperAdmin(user)) {
     return notFound();
   }
   return user;

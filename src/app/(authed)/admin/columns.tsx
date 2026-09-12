@@ -14,92 +14,96 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { userTypeArray } from "@/db/schema";
 import type { Ride, User } from "@/db/zod";
 import { formatShortDateYear } from "@/lib/fmt";
 import { cn } from "@/lib/utils";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { differenceInMonths } from "date-fns";
 import { MoreHorizontalIcon } from "lucide-react";
-import { banUserAction, verifyUserAction } from "./actions";
+import { banUserAction, setUserTypeAction, verifyUserAction } from "./actions";
 
 export type UserHydrated = User & { rides: Array<Ride>; ridesJoined: Array<unknown> };
 
-export const columns: ColumnDef<UserHydrated>[] = [
-  {
-    id: "actions",
-    cell: ({ row }) => <Actions row={row} />,
-    size: 20,
-  },
-  {
-    id: "name",
-    accessorFn: (row) => row.name,
-    header: ({ column }) => <SortableColumn column={column}>Name</SortableColumn>,
-    size: 200,
-  },
-  {
-    id: "email",
-    accessorFn: (row) => row.email,
-    header: ({ column }) => <SortableColumn column={column}>Email</SortableColumn>,
-    size: 200,
-  },
-  {
-    id: "type",
-    accessorFn: (row) => row.type,
-    header: ({ column }) => <SortableColumn column={column}>Type</SortableColumn>,
-    size: 100,
-  },
-  {
-    id: "numRidesLed",
-    accessorFn: (row) => row.rides.length,
-    header: ({ column }) => <SortableColumn column={column}>Rides led</SortableColumn>,
-    size: 100,
-  },
-  {
-    id: "numRidesJoined",
-    accessorFn: (row) => row.ridesJoined.length,
-    header: ({ column }) => <SortableColumn column={column}>Rides joined</SortableColumn>,
-    size: 140,
-  },
-  {
-    id: "verifiedAt",
-    accessorFn: (row) => row.verifiedAt,
-    cell: ({ row }) => {
-      const verifiedAt = row.original.verifiedAt;
-      if (!verifiedAt) {
-        return <span className="bg-red-300">never</span>;
-      }
-      const months = differenceInMonths(new Date(), verifiedAt);
-      return (
-        <span className={cn(months > 12 ? "bg-red-300" : "bg-green-300")}>
-          {formatShortDateYear(verifiedAt)}
-        </span>
-      );
+export function getColumns(canEditType: boolean): ColumnDef<UserHydrated>[] {
+  return [
+    {
+      id: "actions",
+      cell: ({ row }) => <Actions row={row} canEditType={canEditType} />,
+      size: 20,
     },
-    header: ({ column }) => <SortableColumn column={column}>Verified</SortableColumn>,
-    size: 200,
-  },
-  {
-    id: "createdAt",
-    accessorFn: (row) => row.createdAt,
-    cell: ({ row }) => (
-      <span className="text-xs">{formatShortDateYear(row.original.createdAt)}</span>
-    ),
-    header: ({ column }) => <SortableColumn column={column}>Joined</SortableColumn>,
-    size: 200,
-  },
-  {
-    id: "status",
-    accessorFn: (row) => (row.deletedAt === null ? "Active" : "Deleted"),
-    header: ({ column }) => <SortableColumn column={column}>Status</SortableColumn>,
-    size: 200,
-  },
-];
+    {
+      id: "name",
+      accessorFn: (row) => row.name,
+      header: ({ column }) => <SortableColumn column={column}>Name</SortableColumn>,
+      size: 200,
+    },
+    {
+      id: "email",
+      accessorFn: (row) => row.email,
+      header: ({ column }) => <SortableColumn column={column}>Email</SortableColumn>,
+      size: 200,
+    },
+    {
+      id: "type",
+      accessorFn: (row) => row.type,
+      header: ({ column }) => <SortableColumn column={column}>Type</SortableColumn>,
+      size: 100,
+    },
+    {
+      id: "numRidesLed",
+      accessorFn: (row) => row.rides.length,
+      header: ({ column }) => <SortableColumn column={column}>Rides led</SortableColumn>,
+      size: 100,
+    },
+    {
+      id: "numRidesJoined",
+      accessorFn: (row) => row.ridesJoined.length,
+      header: ({ column }) => <SortableColumn column={column}>Rides joined</SortableColumn>,
+      size: 140,
+    },
+    {
+      id: "verifiedAt",
+      accessorFn: (row) => row.verifiedAt,
+      cell: ({ row }) => {
+        const verifiedAt = row.original.verifiedAt;
+        if (!verifiedAt) {
+          return <span className="bg-red-300">never</span>;
+        }
+        const months = differenceInMonths(new Date(), verifiedAt);
+        return (
+          <span className={cn(months > 12 ? "bg-red-300" : "bg-green-300")}>
+            {formatShortDateYear(verifiedAt)}
+          </span>
+        );
+      },
+      header: ({ column }) => <SortableColumn column={column}>Verified</SortableColumn>,
+      size: 200,
+    },
+    {
+      id: "createdAt",
+      accessorFn: (row) => row.createdAt,
+      cell: ({ row }) => (
+        <span className="text-xs">{formatShortDateYear(row.original.createdAt)}</span>
+      ),
+      header: ({ column }) => <SortableColumn column={column}>Joined</SortableColumn>,
+      size: 200,
+    },
+    {
+      id: "status",
+      accessorFn: (row) => (row.deletedAt === null ? "Active" : "Deleted"),
+      header: ({ column }) => <SortableColumn column={column}>Status</SortableColumn>,
+      size: 200,
+    },
+  ];
+}
 
-function Actions({ row }: { row: Row<UserHydrated> }) {
+function Actions({ row, canEditType }: { row: Row<UserHydrated>; canEditType: boolean }) {
   const user = row.original;
   const { id: userId } = user;
 
@@ -118,6 +122,22 @@ function Actions({ row }: { row: Row<UserHydrated> }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {canEditType && (
+            <>
+              <DropdownMenuLabel>Set type</DropdownMenuLabel>
+              {userTypeArray.map((type) => (
+                <DropdownMenuItem
+                  key={type}
+                  disabled={user.type === type}
+                  onClick={setUserTypeAction.bind(null, userId, type)}
+                >
+                  {type}
+                  {user.type === type && " \u2713"}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+            </>
+          )}
           {user.type !== "admin" && !user.deletedAt && (
             <AlertDialog>
               <AlertDialogTrigger className="hover:bg-muted flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none">

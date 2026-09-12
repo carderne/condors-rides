@@ -216,7 +216,22 @@ export default async function RidePage({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           </div>
-          <div>{/* This is just here to force the previous div into the center */}</div>
+          <div className="flex justify-end">
+            <Button
+              asChild
+              variant="outline"
+              extra="action"
+              className="text-foreground h-16 w-24 text-sm leading-tight whitespace-normal"
+            >
+              <a
+                href="https://cowleyroadcondors.cc/crash-procedure/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Crash Procedure
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
 

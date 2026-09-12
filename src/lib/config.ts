@@ -24,6 +24,7 @@ function getEncryptionKeys(name: string): [string, ...string[]] {
 type Config = {
   baseUrl: string;
   dbUrl: string;
+  superAdminEmail: string;
   encryptionKeys: [string, ...string[]];
   emailAndPasswordEnabled: boolean;
 
@@ -72,6 +73,7 @@ function getDefaultConfig() {
   return {
     baseUrl: get("BASE_URL"),
     dbUrl: get("DATABASE_URL"),
+    superAdminEmail: get("SUPER_ADMIN_EMAIL"),
     encryptionKeys: getEncryptionKeys("ENCRYPTION_KEYS"),
 
     osKey: get("OS_KEY"),

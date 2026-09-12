@@ -262,7 +262,9 @@ export default async function StatsPage({ searchParams }: { searchParams: Promis
             <CardTitle className="text-primary text-sm font-medium">Median Rides/Week</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-primary text-3xl font-bold">{stats.medianRidesPerWeek}</div>
+            <div className="text-primary text-3xl font-bold">
+              {Math.round(stats.medianRidesPerWeek)}
+            </div>
           </CardContent>
         </Card>
       </div>

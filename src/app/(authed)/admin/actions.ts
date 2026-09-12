@@ -1,7 +1,8 @@
 "use server";
 
-import { getAdminUser } from "@/dal/membership";
+import { getAdminUser, getSuperAdminUser } from "@/dal/membership";
 import { db, schema } from "@/db";
+import { userTypeArray } from "@/db/schema";
 import { invariant } from "@/lib/invariant";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -19,6 +20,13 @@ export async function banUserAction(userId: string) {
     await tx.delete(schema.session).where(eq(schema.session.userId, userId));
   });
 
+  revalidatePath("/admin");
+}
+
+export async function setUserTypeAction(userId: string, type: (typeof userTypeArray)[number]) {
+  await getSuperAdminUser();
+  invariant(userTypeArray.includes(type));
+  await db.update(schema.user).set({ type }).where(eq(schema.user.id, userId));
   revalidatePath("/admin");
 }
 
