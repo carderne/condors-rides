@@ -20,6 +20,10 @@ export function rideIsFull(ride: RideHydrated): boolean {
   return isFull;
 }
 
+export function mustUpdateUserName(user: User): boolean {
+  return user.name.toLowerCase().includes("privaterelay");
+}
+
 export function isVerified(user: User): boolean {
   const { verifiedAt } = user;
   if (verifiedAt === null) {

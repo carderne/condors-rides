@@ -3,13 +3,18 @@ import { groupRidesByDate } from "@/components/rides/list";
 import { GenericRidesPage } from "@/components/rides/rides-page";
 import { maybeGetMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
+import { mustUpdateUserName } from "@/lib/permissions";
 import { addDays } from "date-fns";
 import { and, gte, isNull, lt } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 export default async function UpcomingRidesPage() {
   const user = await maybeGetMembership();
   if (user) {
     posthogIdentify(user);
+    if (mustUpdateUserName(user)) {
+      redirect("/settings");
+    }
   }
 
   const showPrivacy = user !== null && user.agreedAt === null;

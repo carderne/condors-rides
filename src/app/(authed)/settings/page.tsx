@@ -8,6 +8,7 @@ import { H2 } from "@/components/ui/typography";
 import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
+import { mustUpdateUserName } from "@/lib/permissions";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { SunsetIcon } from "lucide-react";
 import Link from "next/link";
@@ -58,6 +59,8 @@ export default async function SettingsPage() {
       and(eq(schema.ride.userId, user.id), eq(schema.ride.unclaimed, false), validRideConditions),
     );
 
+  const needsRealName = mustUpdateUserName(user);
+
   const stats = [
     { label: "Rides led", value: ridesLedData.length },
     { label: "Rides joined", value: ridesJoinedData.length },
@@ -74,11 +77,17 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={needsRealName ? "border-red-500 md:order-first" : undefined}>
         <CardHeader>
           <H2>User settings</H2>
         </CardHeader>
         <CardContent>
+          {needsRealName && (
+            <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+              Your name is currently set to an automatically generated email address. Please enter
+              your real name below so other members can recognise you.
+            </p>
+          )}
           <UserSettingsForm user={user} />
         </CardContent>
       </Card>
