@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import type { Column } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronsUpDownIcon, ChevronUpIcon } from "lucide-react";
+import type { Features } from "./features";
 
-export function SortableColumn<T>({
+export function SortableColumn<T extends object>({
   column,
   children,
 }: {
-  column: Column<T>;
+  column: Column<Features, T, unknown>;
   children: React.ReactNode;
 }) {
   const sorted = column.getIsSorted();

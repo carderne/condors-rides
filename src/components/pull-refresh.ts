@@ -5,7 +5,7 @@ import PullToRefresh from "pulltorefreshjs";
 import { useEffect } from "react";
 
 function isApp(): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const platform = (window as any).__appPlatform;
   return platform === "ios-app" || platform === "android-app";
 }

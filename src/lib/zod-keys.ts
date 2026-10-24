@@ -109,7 +109,6 @@ type ParsedFormKeys<Type, PrevKey extends string = ""> = Required<{
         }
       : ParsedFormKeys<
           Type[K],
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
           CreateKeyWithPrevKey<PrevKey, K>
         >

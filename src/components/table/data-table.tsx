@@ -16,20 +16,20 @@ import {
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  type RowData,
   type SortingState,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
+  useTable,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { type Features, features } from "./features";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData extends RowData> {
+  // oxlint-disable-next-line typescript/no-explicit-any -- column value types vary per column
+  columns: ColumnDef<Features, TData, any>[];
   data: TData[];
 }
 
@@ -41,13 +41,13 @@ function DefaultToggle({ isExpanded, toggle }: { isExpanded: boolean; toggle: ()
   );
 }
 
-export function DataTable<TData extends object, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   searchCol,
   filterCols,
   expandableRows,
-}: DataTableProps<TData, TValue> & {
+}: DataTableProps<TData> & {
   searchCol?: keyof TData & string;
   filterCols?: Array<keyof TData>;
   expandableRows?: (row: TData) => React.ReactNode;
@@ -56,14 +56,12 @@ export function DataTable<TData extends object, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
       columnFilters,
@@ -185,13 +183,13 @@ export function DataTable<TData extends object, TValue>({
                 const isExpanded = expandedRows.has(row.id);
                 return (
                   <Fragment key={row.id}>
-                    <TableRow data-state={row.getIsSelected() && "selected"}>
+                    <TableRow>
                       {expandableRows && (
                         <TableCell className="px-1">
                           <DefaultToggle isExpanded={isExpanded} toggle={() => toggleRow(row.id)} />
                         </TableCell>
                       )}
-                      {row.getVisibleCells().map((cell) => (
+                      {row.getAllCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>

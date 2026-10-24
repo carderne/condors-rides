@@ -1,5 +1,5 @@
 import type { Route } from "@/db/zod";
-import type maplibregl from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export type RouteHydrated = Omit<Route, "createdAt" | "updatedAt" | "gpx"> & {

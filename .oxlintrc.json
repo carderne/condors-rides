@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "nextjs"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "nextjs/no-img-element": "off",
+    "react/purity": "off",
+    "react/set-state-in-effect": "off",
+    "react/incompatible-library": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "typescript/consistent-type-imports": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-explicit-any": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": { "typescript/no-explicit-any": "off" }
+    }
+  ],
+  "ignorePatterns": [".next/**", "next-env.d.ts"]
+}

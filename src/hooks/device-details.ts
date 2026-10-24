@@ -22,7 +22,7 @@ function getDeviceType(): DeviceType {
     return "other"; // SSR-safe
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const appPlatformValue = (window as any).__appPlatform;
 
   if (appPlatformValue === "android-app") {
@@ -34,7 +34,7 @@ function getDeviceType(): DeviceType {
   }
 
   const ua = navigator.userAgent.toLowerCase();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const isIOS = /ipad|iphone|ipod/.test(ua) && !(window as any).MSStream;
 
   if (isIOS) {

@@ -31,7 +31,7 @@ export function GpxButton({
     // forward `intent://` URLs to an external app though, so we bounce the GPX
     // endpoint out to Chrome, which downloads it properly (we send it with a
     // Content-Disposition attachment) and offers "open with Wahoo/Garmin/etc".
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     const platform = typeof window !== "undefined" ? (window as any).__appPlatform : undefined;
     if (platform === "android-app") {
       const { host } = window.location;

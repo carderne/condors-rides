@@ -44,10 +44,10 @@ export function PushNotificationManager() {
     }
 
     // Make the setPushToken "publicly" available so the iOS/Android app can use it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     (window as any).setPushToken = setPushToken;
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       delete (window as any).setPushToken;
     };
   }, []);
@@ -152,10 +152,10 @@ export function NotificationPrompt() {
     }
 
     // Make the setPushToken "publicly" available so the iOS/Android app can use it
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     (window as any).setPushToken = setPushToken;
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // oxlint-disable-next-line typescript/no-explicit-any
       delete (window as any).setPushToken;
     };
   }, []);

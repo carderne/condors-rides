@@ -1,3 +1,4 @@
+import type { Features } from "@/components/table/features";
 import { SortableColumn } from "@/components/table/sortable-column";
 import {
   AlertDialog,
@@ -30,7 +31,8 @@ import { banUserAction, setUserTypeAction, verifyUserAction } from "./actions";
 
 export type UserHydrated = User & { rides: Array<Ride>; ridesJoined: Array<unknown> };
 
-export function getColumns(canEditType: boolean): ColumnDef<UserHydrated>[] {
+// oxlint-disable-next-line typescript/no-explicit-any -- column value types vary per column
+export function getColumns(canEditType: boolean): ColumnDef<Features, UserHydrated, any>[] {
   return [
     {
       id: "actions",
@@ -103,7 +105,7 @@ export function getColumns(canEditType: boolean): ColumnDef<UserHydrated>[] {
   ];
 }
 
-function Actions({ row, canEditType }: { row: Row<UserHydrated>; canEditType: boolean }) {
+function Actions({ row, canEditType }: { row: Row<Features, UserHydrated>; canEditType: boolean }) {
   const user = row.original;
   const { id: userId } = user;
 

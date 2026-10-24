@@ -12,7 +12,7 @@ import type { RouteDirection, Surface } from "@/db/schema";
 import type { User } from "@/db/zod";
 import type { CafeStop } from "@/lib/geojson";
 import { LoaderCircleIcon } from "lucide-react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { getRemainingRoutes, getRouteVoteStatus } from "./actions";

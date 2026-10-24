@@ -1,8 +1,3 @@
-ignoreDepScripts: true
+ignoreScripts: true
 
-minimumReleaseAge: 4320
-
-overrides:
-  esbuild: ">=0.25.0"
-  vite: ">=7.1.11"
-  "mdast-util-to-hast": ">=13.2.1"
+minimumReleaseAge: 1440

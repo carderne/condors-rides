@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "singleQuote": false,
+  "quoteProps": "as-needed",
+  "sortImports": {
+    "newlinesBetween": false,
+    "groups": [
+      ["builtin", "external", "internal", "unknown"],
+      ["parent", "sibling", "index"]
+    ]
+  },
+  "sortTailwindcss": {
+    "functions": ["cva", "clsx", "cn"]
+  },
+  "ignorePatterns": [".next", "*.md", "pnpm-lock.yaml", "next-env.d.ts"]
+}
