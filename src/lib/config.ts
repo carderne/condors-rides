@@ -57,7 +57,9 @@ type Config = {
   };
   apple: {
     clientId: string;
-    clientSecret: string;
+    teamId: string;
+    keyId: string;
+    privateKey: string;
   };
 
   pirateWeather: {
@@ -105,7 +107,9 @@ function getDefaultConfig() {
     },
     apple: {
       clientId: get("APPLE_CLIENT_ID"),
-      clientSecret: get("APPLE_CLIENT_SECRET"),
+      teamId: "W77BHZR96V",
+      keyId: get("APPLE_KEY_ID"),
+      privateKey: get("APPLE_PRIVATE_KEY"),
     },
 
     pirateWeather: {
