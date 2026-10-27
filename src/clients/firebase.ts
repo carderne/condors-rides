@@ -62,6 +62,38 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
+// FCM error codes meaning the token will never work again.
+// https://firebase.google.com/docs/reference/fcm/rest/v1/ErrorCode
+// INVALID_ARGUMENT is also returned for bad payloads, so it only counts when it blames the token.
+const DEAD_TOKEN_CODES = new Set(["UNREGISTERED", "SENDER_ID_MISMATCH"]);
+
+export class FcmError extends Error {
+  constructor(
+    readonly status: number,
+    readonly errorCode: string | undefined,
+    readonly body: string,
+  ) {
+    super(`Failed to send notification (${status} ${errorCode ?? "unknown"}): ${body}`);
+  }
+
+  get isDeadToken() {
+    if (this.errorCode === "INVALID_ARGUMENT") {
+      return /registration token/i.test(this.body);
+    }
+    return this.errorCode !== undefined && DEAD_TOKEN_CODES.has(this.errorCode);
+  }
+}
+
+function parseErrorCode(body: string): string | undefined {
+  try {
+    const { error } = JSON.parse(body);
+    const detail = error?.details?.find((d: { errorCode?: string }) => d.errorCode);
+    return detail?.errorCode ?? error?.status;
+  } catch {
+    return undefined;
+  }
+}
+
 export class Firebase {
   accessToken: string | undefined;
 
@@ -118,7 +150,8 @@ export class Firebase {
     );
 
     if (!response.ok) {
-      throw new Error(`Failed to send notification: ${await response.text()}`);
+      const text = await response.text();
+      throw new FcmError(response.status, parseErrorCode(text), text);
     }
 
     return response.json();
