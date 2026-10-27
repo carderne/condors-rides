@@ -3,10 +3,17 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { eq } from "drizzle-orm";
+import { createAppleClientSecret } from "./apple";
 import { getConfig } from "./config";
 import { invariant } from "./invariant";
 
 const config = getConfig();
+
+// Signed once per process when this module loads. Skipped when the key is empty,
+// i.e. in tests with NO_CHECK_ENV_VARS=1.
+const appleClientSecret = config.apple.privateKey
+  ? createAppleClientSecret(config.apple).secret
+  : "";
 
 export const auth = betterAuth({
   trustedOrigins: [config.baseUrl, "https://appleid.apple.com"],
@@ -22,7 +29,10 @@ export const auth = betterAuth({
   socialProviders: {
     google: config.google,
     facebook: config.facebook,
-    apple: config.apple,
+    apple: {
+      clientId: config.apple.clientId,
+      clientSecret: appleClientSecret,
+    },
   },
   account: {
     accountLinking: {
