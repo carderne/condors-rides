@@ -1,4 +1,6 @@
-import { Firebase } from "./firebase";
+import { db, schema } from "@/db";
+import { eq } from "drizzle-orm";
+import { FcmError, Firebase } from "./firebase";
 import { emitEvent } from "./posthog";
 
 type SubTarget = { userId: string; deviceId: string; token: string };
@@ -31,8 +33,14 @@ export async function sendNotifications({
       emitEvent({ user: { id: userId }, event, properties });
       try {
         await firebase.sendNotification({ token, title, body, slug });
-      } catch (_) {
-        console.warn("FCM notify failed", { userId, deviceId });
+      } catch (err) {
+        if (err instanceof FcmError && err.isDeadToken) {
+          await db.delete(schema.sub).where(eq(schema.sub.token, token));
+          console.info("FCM token dead, deleted sub", { userId, deviceId, code: err.errorCode });
+          return;
+        }
+        const { status, errorCode } = err instanceof FcmError ? err : {};
+        console.warn("FCM notify failed", { userId, deviceId, status, errorCode, err });
       }
     }),
   );
