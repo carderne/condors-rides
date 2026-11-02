@@ -1,7 +1,6 @@
 "use client";
 
-import * as maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { maplibregl } from "@/lib/maplibre";
 import { type RefObject, useEffect, useRef } from "react";
 import lanes from "./lanes.json";
 
