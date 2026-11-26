@@ -3,12 +3,16 @@ import { encrypt } from "@/lib/encryption";
 
 async function insertTokens() {
   const refreshToken = process.env.STRAVA_REFRESH_TOKEN!;
-  await db.insert(schema.token).values({
-    site: "strava",
+  const values = {
+    site: "strava" as const,
     accessToken: encrypt("foobar"),
     expiresAt: new Date(),
     refreshToken: encrypt(refreshToken),
-  });
+  };
+  await db
+    .insert(schema.token)
+    .values(values)
+    .onConflictDoUpdate({ target: schema.token.site, set: values });
 
   console.log("Tokens inserted successfully!");
   process.exit(0);

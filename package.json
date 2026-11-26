@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "env-dev": "dotenv-dev DATABASE_URL -i localhost",
-    "db:dev": "pnpm run db:up && sleep 1 && pnpm run db:push && pnpm run db:seed:all",
-    "db:up": "docker compose up -d",
+    "db:dev": "pnpm run db:up && pnpm run db:push && pnpm run db:seed:all",
+    "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
-    "db:push": "pnpm run env-dev -- pnpm exec drizzle-kit push --config drizzle.config.ts",
+    "db:push": "pnpm run env-dev -- drizzle-kit push --config drizzle.config.ts",
     "db:push:prd": "dotenvx run -- pnpm exec drizzle-kit push --config drizzle.config.ts",
     "db:seed:all": "pnpm run db:seed:tokens && pnpm run db:seed:rides",
-    "db:seed:rides": "dotenvx run -- tsx scripts/db-seed-rides.ts",
-    "db:seed:tokens": "dotenvx run -- tsx scripts/db-seed-tokens.ts",
+    "db:seed:rides": "pnpm run env-dev -- tsx scripts/db-seed-rides.ts",
+    "db:seed:tokens": "pnpm run env-dev -- tsx scripts/db-seed-tokens.ts",
     "dev": "next dev --turbo --port 5210",
     "build": "NODE_ENV=production next build",
     "start": "next start",
@@ -97,5 +97,5 @@
     "node": ">=26.13.1 <27.0.0",
     "pnpm": ">=12.16.1 <13.0.0"
   },
-  "packageManager": "pnpm@12.16.1"
+  "packageManager": "pnpm@12.23.0"
 }
