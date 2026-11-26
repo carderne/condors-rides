@@ -18,7 +18,7 @@
     "start": "next start",
     "fmt": "oxfmt .",
     "lint": "oxlint --fix .",
-    "check": "tsc --noEmit",
+    "check": "next typegen && tsc --noEmit",
     "test": "NO_CHECK_ENV_VARS=1 vitest",
     "test:dev": "IN_TEST=1 next dev --turbo --port 2999",
     "test:e2e": "dotenvx run -- vitest run --config vitest-e2e.config.js --no-file-parallelism",
