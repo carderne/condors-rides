@@ -156,6 +156,8 @@ export function archetype(args: {
   const { rides, ridesLed, offroadShare, races, avgDistance, climbPerKm } = args;
   const { topCafeVisits, medianStartMins, weekendShare } = args;
   if (rides === 0) return { title: "The Ones Who Got Away", emoji: "👻" };
+  // Too few rides for any trait to mean much.
+  if (rides < 4) return { title: "The Cameo", emoji: "🎬" };
   if (ridesLed >= 5 && ridesLed / rides >= 0.3) return { title: "The Shepherd", emoji: "🐑" };
   if (offroadShare >= 0.5) return { title: "The Mud Magnet", emoji: "🌲" };
   if (races >= 2 && races / rides >= 0.2) return { title: "The Racer", emoji: "🏁" };

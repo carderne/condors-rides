@@ -73,6 +73,7 @@ describe("wrapped stats", () => {
       weekendShare: 0.5,
     };
     expect(archetype({ ...base, rides: 0 }).title).toBe("The Ones Who Got Away");
+    expect(archetype({ ...base, rides: 3, offroadShare: 1 }).title).toBe("The Cameo");
     expect(archetype({ ...base, ridesLed: 8 }).title).toBe("The Shepherd");
     expect(archetype({ ...base, offroadShare: 0.6 }).title).toBe("The Mud Magnet");
     expect(archetype({ ...base, races: 4 }).title).toBe("The Racer");
