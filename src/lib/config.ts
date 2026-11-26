@@ -69,6 +69,14 @@ type Config = {
   googleMaps: {
     apiKey: string;
   };
+
+  s3: {
+    endpoint: string;
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    bucket: string;
+  };
 };
 
 function getDefaultConfig() {
@@ -118,6 +126,14 @@ function getDefaultConfig() {
 
     googleMaps: {
       apiKey: get("GOOGLE_MAPS_API_KEY"),
+    },
+
+    s3: {
+      endpoint: get("S3_ENDPOINT"),
+      region: process.env.S3_REGION || "garage",
+      accessKeyId: get("S3_ACCESS_KEY_ID"),
+      secretAccessKey: get("S3_SECRET_ACCESS_KEY"),
+      bucket: get("S3_BUCKET"),
     },
   };
 }

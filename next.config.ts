@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  experimental: {
+    serverActions: {
+      // Profile photo uploads (validated to 8MB in the action, plus multipart overhead)
+      bodySizeLimit: "9mb",
+    },
+  },
   async headers() {
     return [
       {

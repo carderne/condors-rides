@@ -5,7 +5,7 @@ import { PushNotificationManager } from "@/components/notifications/notification
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
-import { getMembership } from "@/dal/membership";
+import { getMembership, isSuperAdmin } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
 import { mustUpdateUserName } from "@/lib/permissions";
@@ -13,6 +13,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { SunsetIcon } from "lucide-react";
 import Link from "next/link";
 import { deleteAccountAction } from "./actions";
+import { AvatarForm } from "./avatar-form";
 import { UserSettingsForm } from "./form";
 
 export default async function SettingsPage() {
@@ -88,7 +89,10 @@ export default async function SettingsPage() {
               your real name below so other members can recognise you.
             </p>
           )}
-          <UserSettingsForm user={user} />
+          <div className="flex flex-col gap-6">
+            {isSuperAdmin(user) && <AvatarForm user={user} />}
+            <UserSettingsForm user={user} />
+          </div>
         </CardContent>
       </Card>
 
