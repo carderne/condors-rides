@@ -5,7 +5,7 @@ import { PushNotificationManager } from "@/components/notifications/notification
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { H2 } from "@/components/ui/typography";
-import { getMembership } from "@/dal/membership";
+import { getMembership, isSuperAdmin } from "@/dal/membership";
 import { db, schema } from "@/db";
 import { invariant } from "@/lib/invariant";
 import { mustUpdateUserName } from "@/lib/permissions";
@@ -90,7 +90,7 @@ export default async function SettingsPage() {
             </p>
           )}
           <div className="flex flex-col gap-6">
-            <AvatarForm user={user} />
+            {isSuperAdmin(user) && <AvatarForm user={user} />}
             <UserSettingsForm user={user} />
           </div>
         </CardContent>
