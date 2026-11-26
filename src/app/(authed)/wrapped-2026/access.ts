@@ -1,8 +1,7 @@
 import type { User } from "@/db/zod";
 
-// Wrapped is in preview: only visible to these users until launch.
-const PREVIEW_EMAILS = ["chris@rdrn.me"];
-
-export function canSeeWrapped(user: User | null): boolean {
-  return !!user && PREVIEW_EMAILS.includes(user.email.toLowerCase());
+// Wrapped is open to all members. Keep this as the single gate so it's easy
+// to restrict again (e.g. an email allowlist) if needed.
+export function canSeeWrapped(user: User | null): user is User {
+  return !!user;
 }
