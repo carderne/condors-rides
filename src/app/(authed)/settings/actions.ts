@@ -1,7 +1,7 @@
 "use server";
 
 import { deleteObject, putObject } from "@/clients/s3";
-import { getMembership, getSuperAdminUser } from "@/dal/membership";
+import { getMembership } from "@/dal/membership";
 import { db, schema } from "@/db";
 import {
   AvatarError,
@@ -28,9 +28,8 @@ export async function action(_: State, formData: FormData): Promise<State> {
   redirect("/settings");
 }
 
-// TODO: avatar upload is restricted to the super admin while it's being trialled
 export async function uploadAvatarAction(formData: FormData): Promise<{ error?: string }> {
-  const user = await getSuperAdminUser();
+  const user = await getMembership();
 
   const file = formData.get("image");
   if (!(file instanceof File)) return { error: "No image selected" };
@@ -56,7 +55,7 @@ export async function uploadAvatarAction(formData: FormData): Promise<{ error?: 
 }
 
 export async function removeAvatarAction() {
-  const user = await getSuperAdminUser();
+  const user = await getMembership();
   await db.update(schema.user).set({ image: null }).where(eq(schema.user.id, user.id));
   await deleteOldAvatar(user.image);
   revalidatePath("/", "layout");
