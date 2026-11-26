@@ -18,6 +18,7 @@ import {
   PlannerSlide,
   RidesSlide,
   SummarySlide,
+  VirtualSlide,
 } from "./slides";
 
 const SLIDE_MS = 7000;
@@ -26,7 +27,11 @@ const TAP_MS = 250;
 type SlideComponent = (props: { data: WrappedData; index: number }) => React.JSX.Element;
 
 function buildSlides(data: WrappedData): SlideComponent[] {
-  if (data.rides === 0) return [IntroSlide, EmptySlide];
+  if (data.rides === 0) {
+    return [IntroSlide, EmptySlide, data.virtual && VirtualSlide].filter(
+      (s): s is SlideComponent => !!s,
+    );
+  }
   const { places } = data;
   return [
     IntroSlide,
@@ -37,6 +42,7 @@ function buildSlides(data: WrappedData): SlideComponent[] {
     data.planner && PlannerSlide,
     data.crew.peopleMet > 0 && CrewSlide,
     (places.cafe || places.start || places.route) && PlacesSlide,
+    data.virtual && VirtualSlide,
     (data.longest || data.biggest) && BigDaysSlide,
     data.ridesLed > 0 && LeaderSlide,
     ClubSlide,

@@ -107,6 +107,30 @@ export function topEntry<T extends string>(items: T[]): { name: T; count: number
   return best;
 }
 
+/**
+ * Like topEntry, but trims and ignores case when counting ("Café X" == "café x ").
+ * Returns the most common original spelling of the winning entry.
+ */
+export function topEntryLoose(items: (string | null | undefined)[]): {
+  name: string;
+  count: number;
+} | null {
+  const spellings = new Map<string, string[]>();
+  for (const raw of items) {
+    const item = raw?.trim();
+    if (!item) continue;
+    const key = item.toLowerCase();
+    spellings.set(key, [...(spellings.get(key) ?? []), item]);
+  }
+  let best: { name: string; count: number } | null = null;
+  for (const variants of spellings.values()) {
+    if (!best || variants.length > best.count) {
+      best = { name: topEntry(variants)!.name, count: variants.length };
+    }
+  }
+  return best;
+}
+
 export type Chronotype = { label: string; emoji: string; blurb: string };
 
 export function chronotype(medianStart: number): Chronotype {

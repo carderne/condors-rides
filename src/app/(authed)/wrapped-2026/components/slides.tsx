@@ -329,6 +329,49 @@ export function PlacesSlide({ data, index }: Props) {
   );
 }
 
+export function VirtualSlide({ data, index }: Props) {
+  const v = data.virtual!;
+  return (
+    <Slide tone="ink" kicker="Indoors" index={index} className="justify-between">
+      <Rise>
+        <p className="text-6xl">🖥️</p>
+        <Label className="mt-4">When it was grim outside</Label>
+        <Big className="mt-2 text-[#e1449b]">
+          <CountUp value={v.rides} />
+        </Big>
+        <p className="text-2xl font-bold">virtual rides</p>
+      </Rise>
+      <Rise delay={300} className="grid grid-cols-2 gap-4 border-t-2 border-current/40 pt-4">
+        <div>
+          <Label>Km</Label>
+          <p className="text-4xl font-bold tracking-tighter text-[#d9f24a] tabular-nums">
+            <CountUp value={v.km} />
+          </p>
+        </div>
+        <div>
+          <Label>Metres climbed</Label>
+          <p className="text-4xl font-bold tracking-tighter tabular-nums">
+            <CountUp value={v.elevation} />
+          </p>
+        </div>
+      </Rise>
+      <Rise delay={500} className="border-t-2 border-current/40 pt-4">
+        {v.riders > 0 && (
+          <p className="text-xl">
+            Going nowhere with <b className="text-[#d9f24a]">{v.riders}</b> other Condor
+            {v.riders === 1 ? "" : "s"}.
+          </p>
+        )}
+        {v.longest && (
+          <p className="mt-2 opacity-70">
+            Longest: <b>{v.longest.distance} km</b>, {v.longest.name} ({v.longest.date})
+          </p>
+        )}
+      </Rise>
+    </Slide>
+  );
+}
+
 export function BigDaysSlide({ data, index }: Props) {
   return (
     <Slide tone="acid" kicker="Big days" index={index} className="justify-center gap-6">
@@ -466,7 +509,7 @@ export function EmptySlide({ data, index }: Props) {
     <Slide tone="ink" kicker="Hmm" index={index} className="justify-center gap-6">
       <p className="text-7xl">👻</p>
       <p className="text-4xl font-bold tracking-tight">
-        No club rides for you in 2026, {data.user.firstName}.
+        No {data.virtual ? "outdoor " : ""}club rides for you in 2026, {data.user.firstName}.
       </p>
       <p className="text-lg opacity-70">
         Still {data.club.rides} rides and {data.club.km.toLocaleString("en-GB")} km from the club,

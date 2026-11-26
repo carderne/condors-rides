@@ -1,6 +1,6 @@
 import { db, schema } from "@/db";
 import type { User } from "@/db/zod";
-import { and, count, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
+import { and, count, eq, gte, inArray, isNotNull, isNull, lt, ne, or, sql } from "drizzle-orm";
 import {
   archetype,
   chronotype,
@@ -17,11 +17,14 @@ import {
   rideStart,
   timeToMinutes,
   topEntry,
+  topEntryLoose,
   weekOfYear,
 } from "./stats";
 
 // Only include these ride surfaces in wrapped stats ("external" = races and such)
 const VALID_SURFACES = ["road", "offroad", "external"] as const;
+// Virtual rides get their own slide instead, if the rider did at least this many.
+const MIN_VIRTUAL_RIDES = 4;
 
 const validRide = and(
   isNull(schema.ride.canceledAt),
@@ -192,14 +195,9 @@ export async function getWrappedData(user: User) {
   const favouriteLeader = [...leaderMap.values()].sort((a, b) => b.count - a.count)[0] ?? null;
 
   // Places
-  const favouriteCafe = topEntry(
-    rides.map((r) => r.cafeStop?.trim()).filter((c) => !!c) as string[],
-  );
-  // Case-insensitive so "Café X" and "café x" count as the same stop.
-  const topCafeVisits = topEntry(
-    rides.map((r) => r.cafeStop?.trim().toLowerCase()).filter((c) => !!c) as string[],
-  );
-  const favouriteStart = topEntry(rides.map((r) => r.startPoint.trim()).filter(Boolean));
+  // Free text, so ignore case/whitespace when counting ("Café X" == "café x").
+  const favouriteCafe = topEntryLoose(rides.map((r) => r.cafeStop));
+  const favouriteStart = topEntryLoose(rides.map((r) => r.startPoint));
   const routeUrls = [...new Set(rides.map((r) => r.routeUrl).filter((u): u is string => !!u))];
   const knownRoutes = routeUrls.length
     ? await db
@@ -252,6 +250,62 @@ export async function getWrappedData(user: User) {
     myCount,
   );
   const totalRiders = ranked.length;
+
+  // Virtual rides (joined or led), kept separate from the main stats.
+  const virtualRides = await db
+    .select({
+      id: schema.ride.id,
+      name: schema.ride.name,
+      date: schema.ride.date,
+      distance: schema.ride.distance,
+      elevation: schema.ride.elevation,
+    })
+    .from(schema.ride)
+    .leftJoin(
+      schema.rideMember,
+      and(eq(schema.rideMember.rideId, schema.ride.id), eq(schema.rideMember.userId, userId)),
+    )
+    .where(
+      and(
+        isNull(schema.ride.canceledAt),
+        isNull(schema.ride.deletedAt),
+        eq(schema.ride.surface, "virtual"),
+        inYear,
+        or(
+          isNotNull(schema.rideMember.id),
+          and(eq(schema.ride.userId, userId), eq(schema.ride.unclaimed, false)),
+        ),
+      ),
+    );
+  let virtual = null;
+  if (virtualRides.length >= MIN_VIRTUAL_RIDES) {
+    const ids = virtualRides.map((r) => r.id);
+    const others = await db.execute<{ n: number }>(sql`
+      select count(distinct user_id)::int as n from (
+        select ${schema.rideMember.userId} as user_id from ${schema.rideMember}
+          where ${inArray(schema.rideMember.rideId, ids)}
+        union
+        select ${schema.ride.userId} from ${schema.ride}
+          where ${inArray(schema.ride.id, ids)} and ${schema.ride.unclaimed} = false
+      ) t where user_id <> ${userId}
+    `);
+    const longestVirtual = virtualRides.reduce((best, r) =>
+      (r.distance ?? 0) > (best.distance ?? 0) ? r : best,
+    );
+    virtual = {
+      rides: virtualRides.length,
+      km: virtualRides.reduce((s, r) => s + (r.distance ?? 0), 0),
+      elevation: virtualRides.reduce((s, r) => s + (r.elevation ?? 0), 0),
+      riders: others.rows[0]?.n ?? 0,
+      longest: longestVirtual.distance
+        ? {
+            name: longestVirtual.name,
+            distance: longestVirtual.distance,
+            date: formatDate(longestVirtual.date),
+          }
+        : null,
+    };
+  }
 
   const surface = {
     road: rides.filter((r) => r.surface === "road").length,
@@ -324,6 +378,7 @@ export async function getWrappedData(user: User) {
           : null,
     },
     surface,
+    virtual,
     club: {
       rides: clubRow?.rides ?? 0,
       km: clubRow?.km ?? 0,
@@ -342,7 +397,7 @@ export async function getWrappedData(user: User) {
       races: surface.external,
       avgDistance: withDistance.length ? totalKm / withDistance.length : 0,
       climbPerKm,
-      topCafeVisits: topCafeVisits?.count ?? 0,
+      topCafeVisits: favouriteCafe?.count ?? 0,
       medianStartMins: medianStart,
       weekendShare,
     }),

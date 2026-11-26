@@ -9,6 +9,7 @@ import {
   rideStart,
   timeToMinutes,
   topEntry,
+  topEntryLoose,
   weekOfYear,
 } from "./stats";
 
@@ -58,6 +59,14 @@ describe("wrapped stats", () => {
     expect(rankPosition(scores, 30)).toBe(2);
     expect(rankPosition(scores, 10)).toBe(4);
     expect(rankPosition(scores, 0)).toBe(5);
+  });
+
+  it("topEntryLoose ignores case and whitespace, keeps common spelling", () => {
+    expect(topEntryLoose(["Café X", "café x ", "Café X", "Other", null, " "])).toEqual({
+      name: "Café X",
+      count: 3,
+    });
+    expect(topEntryLoose([null, ""])).toBeNull();
   });
 
   it("archetype", () => {
