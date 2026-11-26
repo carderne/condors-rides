@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { archetype, longestWeekStreak, median, timeToMinutes, topEntry, weekOfYear } from "./stats";
+import {
+  archetype,
+  longestWeekStreak,
+  median,
+  PERIOD_END,
+  periodEnd,
+  rankPosition,
+  rideStart,
+  timeToMinutes,
+  topEntry,
+  weekOfYear,
+} from "./stats";
 
 const d = (s: string) => new Date(`${s}T00:00:00Z`);
 
@@ -25,10 +36,53 @@ describe("wrapped stats", () => {
     expect(topEntry(["a", "b", "a"])).toEqual({ name: "a", count: 2 });
   });
 
+  it("weekOfYear covers the partial last week", () => {
+    expect(weekOfYear(d("2026-12-31"))).toBe(52);
+  });
+
+  it("periodEnd includes today (UK) and caps at year end", () => {
+    expect(periodEnd(new Date("2026-11-26T15:00:00Z"))).toEqual(d("2026-11-27"));
+    // 23:30 UTC on 30 Jun is already 1 Jul in London (BST)
+    expect(periodEnd(new Date("2026-06-30T23:30:00Z"))).toEqual(d("2026-07-02"));
+    expect(periodEnd(new Date("2027-03-01T12:00:00Z"))).toEqual(PERIOD_END);
+  });
+
+  it("rideStart interprets time as UK local", () => {
+    expect(rideStart(d("2026-01-10"), "08:00:00").toISOString()).toBe("2026-01-10T08:00:00.000Z");
+    expect(rideStart(d("2026-07-10"), "08:00:00").toISOString()).toBe("2026-07-10T07:00:00.000Z");
+  });
+
+  it("rankPosition shares ties", () => {
+    const scores = [40, 30, 30, 10];
+    expect(rankPosition(scores, 40)).toBe(1);
+    expect(rankPosition(scores, 30)).toBe(2);
+    expect(rankPosition(scores, 10)).toBe(4);
+    expect(rankPosition(scores, 0)).toBe(5);
+  });
+
   it("archetype", () => {
-    const base = { rides: 20, ridesLed: 0, offroadShare: 0, avgDistance: 60, climbPerKm: 8 };
+    const base = {
+      rides: 20,
+      ridesLed: 0,
+      offroadShare: 0,
+      races: 0,
+      avgDistance: 60,
+      climbPerKm: 7,
+      topCafeVisits: 1,
+      medianStartMins: 9 * 60,
+      weekendShare: 0.5,
+    };
+    expect(archetype({ ...base, rides: 0 }).title).toBe("The Ones Who Got Away");
     expect(archetype({ ...base, ridesLed: 8 }).title).toBe("The Shepherd");
     expect(archetype({ ...base, offroadShare: 0.6 }).title).toBe("The Mud Magnet");
-    expect(archetype({ ...base, rides: 0 }).title).toBe("The Ones Who Got Away");
+    expect(archetype({ ...base, races: 4 }).title).toBe("The Racer");
+    expect(archetype({ ...base, rides: 5, races: 1 }).title).toBe("The Club Regular");
+    expect(archetype({ ...base, climbPerKm: 9.5 }).title).toBe("The Mountain Goat");
+    expect(archetype({ ...base, avgDistance: 85 }).title).toBe("The Long Hauler");
+    expect(archetype({ ...base, rides: 45 }).title).toBe("The Ever-Present");
+    expect(archetype({ ...base, topCafeVisits: 5 }).title).toBe("The Café Connoisseur");
+    expect(archetype({ ...base, medianStartMins: 18 * 60 }).title).toBe("The Night Shift");
+    expect(archetype({ ...base, weekendShare: 0.8 }).title).toBe("The Weekend Warrior");
+    expect(archetype(base).title).toBe("The Club Regular");
   });
 });

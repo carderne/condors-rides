@@ -1,5 +1,10 @@
 // Pure helpers for Wrapped 2026 — no DB access so they're easy to test.
 
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
+
+// Ride dates/times are entered in UK local time.
+const TIME_ZONE = "Europe/London";
+
 export const YEAR = 2026;
 // Calendar year, same as Wrapped 2025, so year-on-year comparisons line up.
 export const PERIOD_START = new Date(Date.UTC(YEAR, 0, 1));
@@ -7,6 +12,26 @@ export const PERIOD_END = new Date(Date.UTC(YEAR + 1, 0, 1));
 export const PREV_PERIOD_START = new Date(Date.UTC(YEAR - 1, 0, 1));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Exclusive upper bound on ride dates: rides up to and including today (UK),
+ * capped at the end of the period. Ride dates are UTC-midnight `Date`s.
+ */
+export function periodEnd(now: Date): Date {
+  const today = new Date(`${formatInTimeZone(now, TIME_ZONE, "yyyy-MM-dd")}T00:00:00Z`);
+  const tomorrow = new Date(today.getTime() + DAY_MS);
+  return tomorrow < PERIOD_END ? tomorrow : PERIOD_END;
+}
+
+/** Ride start as a real instant: date (UTC midnight) + "HH:MM:SS" in UK local time. */
+export function rideStart(date: Date, time: string): Date {
+  return fromZonedTime(`${date.toISOString().slice(0, 10)}T${time}`, TIME_ZONE);
+}
+
+/** 1-based rank where ties share a position (1 + number of strictly better scores). */
+export function rankPosition(scores: number[], mine: number): number {
+  return 1 + scores.filter((n) => n > mine).length;
+}
 export const DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -111,21 +136,38 @@ export function plannerType(medianLeadHours: number): Planner {
 
 export type Archetype = { title: string; emoji: string };
 
+/**
+ * First match wins. Thresholds tuned on 2026 prod data (riders with 6+ rides):
+ * the rarer / more distinctive traits come first, then the broad "when do you
+ * ride" splits (the club divides fairly cleanly into weekday-evening and
+ * weekend-morning riders), then a fallback.
+ */
 export function archetype(args: {
   rides: number;
   ridesLed: number;
   offroadShare: number;
+  races: number;
   avgDistance: number;
   climbPerKm: number;
+  topCafeVisits: number;
+  medianStartMins: number | null;
+  weekendShare: number;
 }): Archetype {
-  const { rides, ridesLed, offroadShare, avgDistance, climbPerKm } = args;
+  const { rides, ridesLed, offroadShare, races, avgDistance, climbPerKm } = args;
+  const { topCafeVisits, medianStartMins, weekendShare } = args;
   if (rides === 0) return { title: "The Ones Who Got Away", emoji: "👻" };
   if (ridesLed >= 5 && ridesLed / rides >= 0.3) return { title: "The Shepherd", emoji: "🐑" };
   if (offroadShare >= 0.5) return { title: "The Mud Magnet", emoji: "🌲" };
-  if (climbPerKm >= 12) return { title: "The Mountain Goat", emoji: "🐐" };
-  if (avgDistance >= 90) return { title: "The Long Hauler", emoji: "🛣️" };
+  if (races >= 2 && races / rides >= 0.2) return { title: "The Racer", emoji: "🏁" };
+  if (climbPerKm >= 9) return { title: "The Mountain Goat", emoji: "🐐" };
+  if (avgDistance >= 80) return { title: "The Long Hauler", emoji: "🛣️" };
   if (rides >= 40) return { title: "The Ever-Present", emoji: "📍" };
-  return { title: "The Café Connoisseur", emoji: "🥐" };
+  if (topCafeVisits >= 4) return { title: "The Café Connoisseur", emoji: "🥐" };
+  if (medianStartMins !== null && medianStartMins >= 17 * 60) {
+    return { title: "The Night Shift", emoji: "🌆" };
+  }
+  if (weekendShare >= 0.7) return { title: "The Weekend Warrior", emoji: "⚔️" };
+  return { title: "The Club Regular", emoji: "🚲" };
 }
 
 export function pctChange(curr: number, prev: number): number | null {

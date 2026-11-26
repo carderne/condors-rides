@@ -8,25 +8,26 @@ import {
   longestWeekStreak,
   median,
   MONTH_NAMES,
-  PERIOD_END,
   PERIOD_START,
   pctChange,
+  periodEnd,
   plannerType,
   PREV_PERIOD_START,
+  rankPosition,
+  rideStart,
   timeToMinutes,
   topEntry,
   weekOfYear,
 } from "./stats";
 
-// Only include these ride surfaces in wrapped stats
-const VALID_SURFACES = ["road", "offroad", "virtual"] as const;
+// Only include these ride surfaces in wrapped stats ("external" = races and such)
+const VALID_SURFACES = ["road", "offroad", "external"] as const;
 
 const validRide = and(
   isNull(schema.ride.canceledAt),
   isNull(schema.ride.deletedAt),
   inArray(schema.ride.surface, [...VALID_SURFACES]),
 );
-const inYear = and(gte(schema.ride.date, PERIOD_START), lt(schema.ride.date, PERIOD_END));
 
 type Person = { name: string; image: string | null; count: number };
 
@@ -36,6 +37,9 @@ function formatDate(date: Date) {
 
 export async function getWrappedData(user: User) {
   const userId = user.id;
+  // Only rides that have already happened (up to and including today).
+  const end = periodEnd(new Date());
+  const inYear = and(gte(schema.ride.date, PERIOD_START), lt(schema.ride.date, end));
 
   // All the user's rides (joined or led) across this year and last year.
   const [joinedRows, ledRows] = await Promise.all([
@@ -48,7 +52,7 @@ export async function getWrappedData(user: User) {
           eq(schema.rideMember.userId, userId),
           validRide,
           gte(schema.ride.date, PREV_PERIOD_START),
-          lt(schema.ride.date, PERIOD_END),
+          lt(schema.ride.date, end),
         ),
       ),
     db
@@ -60,7 +64,7 @@ export async function getWrappedData(user: User) {
           eq(schema.ride.unclaimed, false),
           validRide,
           gte(schema.ride.date, PREV_PERIOD_START),
-          lt(schema.ride.date, PERIOD_END),
+          lt(schema.ride.date, end),
         ),
       ),
   ]);
@@ -77,6 +81,12 @@ export async function getWrappedData(user: User) {
   const km = (rs: typeof rides) => rs.reduce((s, r) => s + (r.distance ?? 0), 0);
   const totalKm = km(rides);
   const totalElevation = rides.reduce((s, r) => s + (r.elevation ?? 0), 0);
+  // Averages only over rides that actually have the value filled in.
+  const withDistance = rides.filter((r) => r.distance);
+  const withBoth = withDistance.filter((r) => r.elevation !== null);
+  const avgKm = withDistance.length ? Math.round(totalKm / withDistance.length) : 0;
+  const bothKm = km(withBoth);
+  const climbPerKm = bothKm ? withBoth.reduce((s, r) => s + r.elevation!, 0) / bothKm : 0;
 
   // Calendar: rides per week + per weekday
   const weeks = Array.from({ length: 53 }, () => 0);
@@ -102,13 +112,13 @@ export async function getWrappedData(user: User) {
   const leadHours = joinedRows
     .filter((j) => isThisYear(j.ride.date) && j.ride.userId !== userId)
     .map((j) => {
-      const start = j.ride.date.getTime() + timeToMinutes(j.ride.time) * 60_000;
+      const start = rideStart(j.ride.date, j.ride.time).getTime();
       return (start - j.joinedAt.getTime()) / 3_600_000;
     })
     .filter((h) => h >= 0);
   const medianLead = median(leadHours);
 
-  // Group sizes (members + leader)
+  // Group sizes (members + leader; unclaimed rides have no real leader)
   const memberCounts = rideIds.length
     ? await db
         .select({ rideId: schema.rideMember.rideId, n: count() })
@@ -116,16 +126,20 @@ export async function getWrappedData(user: User) {
         .where(inArray(schema.rideMember.rideId, rideIds))
         .groupBy(schema.rideMember.rideId)
     : [];
-  const groupSize = new Map(memberCounts.map((m) => [m.rideId, m.n + 1]));
+  const memberCount = new Map(memberCounts.map((m) => [m.rideId, m.n]));
+  const groupSize = new Map(
+    rides.map((r) => [r.id, (memberCount.get(r.id) ?? 0) + (r.unclaimed ? 0 : 1)]),
+  );
+  const sizeOf = (r: (typeof rides)[number]) => groupSize.get(r.id) ?? 0;
   const biggest = rides.reduce<(typeof rides)[number] | null>(
-    (best, r) => (!best || (groupSize.get(r.id) ?? 1) > (groupSize.get(best.id) ?? 1) ? r : best),
+    (best, r) => (!best || sizeOf(r) > sizeOf(best) ? r : best),
     null,
   );
   const longest = rides.reduce<(typeof rides)[number] | null>(
     (best, r) => (!best || (r.distance ?? 0) > (best.distance ?? 0) ? r : best),
     null,
   );
-  const ridersLed = led.reduce((s, r) => s + (groupSize.get(r.id) ?? 1) - 1, 0);
+  const ridersLed = led.reduce((s, r) => s + (memberCount.get(r.id) ?? 0), 0);
 
   // Crew: everyone who was on the same rides (members + leaders)
   const [memberBuddies, leaderBuddies] = rideIds.length
@@ -181,6 +195,10 @@ export async function getWrappedData(user: User) {
   const favouriteCafe = topEntry(
     rides.map((r) => r.cafeStop?.trim()).filter((c) => !!c) as string[],
   );
+  // Case-insensitive so "Café X" and "café x" count as the same stop.
+  const topCafeVisits = topEntry(
+    rides.map((r) => r.cafeStop?.trim().toLowerCase()).filter((c) => !!c) as string[],
+  );
   const favouriteStart = topEntry(rides.map((r) => r.startPoint.trim()).filter(Boolean));
   const routeUrls = [...new Set(rides.map((r) => r.routeUrl).filter((u): u is string => !!u))];
   const knownRoutes = routeUrls.length
@@ -201,8 +219,9 @@ export async function getWrappedData(user: User) {
     .where(
       and(
         eq(schema.comment.userId, userId),
+        isNull(schema.comment.deletedAt),
         gte(schema.comment.createdAt, PERIOD_START),
-        lt(schema.comment.createdAt, PERIOD_END),
+        lt(schema.comment.createdAt, end),
       ),
     );
 
@@ -227,13 +246,17 @@ export async function getWrappedData(user: User) {
     ) t group by user_id order by n desc
   `);
   const ranked = perUser.rows;
-  const position = ranked.findIndex((r) => r.user_id === userId) + 1 || ranked.length + 1;
+  const myCount = ranked.find((r) => r.user_id === userId)?.n ?? 0;
+  const position = rankPosition(
+    ranked.map((r) => r.n),
+    myCount,
+  );
   const totalRiders = ranked.length;
 
   const surface = {
     road: rides.filter((r) => r.surface === "road").length,
     offroad: rides.filter((r) => r.surface === "offroad").length,
-    virtual: rides.filter((r) => r.surface === "virtual").length,
+    external: rides.filter((r) => r.surface === "external").length,
   };
 
   return {
@@ -243,7 +266,7 @@ export async function getWrappedData(user: User) {
     ridersLed,
     totalKm,
     totalElevation,
-    avgKm: rides.length ? Math.round(totalKm / rides.length) : 0,
+    avgKm,
     prev: {
       rides: prevRides.length,
       km: km(prevRides),
@@ -282,8 +305,8 @@ export async function getWrappedData(user: User) {
       ? { name: longest.name, distance: longest.distance, date: formatDate(longest.date) }
       : null,
     biggest:
-      biggest && (groupSize.get(biggest.id) ?? 1) > 2
-        ? { name: biggest.name, size: groupSize.get(biggest.id)!, date: formatDate(biggest.date) }
+      biggest && sizeOf(biggest) > 2
+        ? { name: biggest.name, size: sizeOf(biggest), date: formatDate(biggest.date) }
         : null,
     crew: {
       peopleMet: buddies.length,
@@ -316,8 +339,12 @@ export async function getWrappedData(user: User) {
       rides: rides.length,
       ridesLed: led.length,
       offroadShare: rides.length ? surface.offroad / rides.length : 0,
-      avgDistance: rides.length ? totalKm / rides.length : 0,
-      climbPerKm: totalKm ? totalElevation / totalKm : 0,
+      races: surface.external,
+      avgDistance: withDistance.length ? totalKm / withDistance.length : 0,
+      climbPerKm,
+      topCafeVisits: topCafeVisits?.count ?? 0,
+      medianStartMins: medianStart,
+      weekendShare,
     }),
   };
 }

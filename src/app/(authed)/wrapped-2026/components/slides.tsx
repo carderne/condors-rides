@@ -140,8 +140,8 @@ export function CalendarSlide({ data, index }: Props) {
         <p className="text-2xl font-bold tracking-tight">week{streak === 1 ? "" : "s"} in a row</p>
       </Rise>
       <Rise delay={250}>
-        <div className="grid grid-cols-[repeat(13,minmax(0,1fr))] gap-1">
-          {weeks.slice(0, 52).map((n, i) => (
+        <div className="grid grid-cols-[repeat(18,minmax(0,1fr))] gap-1">
+          {weeks.map((n, i) => (
             <div
               key={i}
               title={`Week ${i + 1}: ${n} ride${n === 1 ? "" : "s"}`}
@@ -154,7 +154,7 @@ export function CalendarSlide({ data, index }: Props) {
           ))}
         </div>
         <p className="mt-2 font-mono text-xs uppercase opacity-70">
-          {activeWeeks} of 52 weeks on the bike
+          {activeWeeks} of {weeks.length} weeks on the bike
         </p>
       </Rise>
       <Rise delay={600} className="grid grid-cols-2 gap-4 border-t-2 border-current pt-4">
