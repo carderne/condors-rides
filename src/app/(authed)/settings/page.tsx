@@ -13,6 +13,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { SunsetIcon } from "lucide-react";
 import Link from "next/link";
 import { deleteAccountAction } from "./actions";
+import { AvatarForm } from "./avatar-form";
 import { UserSettingsForm } from "./form";
 
 export default async function SettingsPage() {
@@ -88,7 +89,10 @@ export default async function SettingsPage() {
               your real name below so other members can recognise you.
             </p>
           )}
-          <UserSettingsForm user={user} />
+          <div className="flex flex-col gap-6">
+            <AvatarForm user={user} />
+            <UserSettingsForm user={user} />
+          </div>
         </CardContent>
       </Card>
 
