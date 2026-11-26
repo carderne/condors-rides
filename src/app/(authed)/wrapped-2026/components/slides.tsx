@@ -457,8 +457,9 @@ export function ClubSlide({ data, index }: Props) {
       </Rise>
       <Rise delay={600} className="border-t-2 border-current pt-4">
         <p className="text-xl">
-          Ride count rank: <b>#{data.rank.position}</b> of {data.rank.total}
-          {data.rank.topPercent <= 25 && <> — top {data.rank.topPercent}%</>}
+          You&apos;re <b>#{data.rank.position}</b> of {data.rank.total} Condors for most rides this
+          year
+          {data.rank.topPercent <= 25 && <> — top {data.rank.topPercent}%</>}.
         </p>
       </Rise>
     </Slide>
@@ -466,13 +467,17 @@ export function ClubSlide({ data, index }: Props) {
 }
 
 export function SummarySlide({ data, index }: Props) {
-  const stats = [
+  const stats: { label: string; value: string | number; sub?: string }[] = [
     { label: "Rides", value: data.rides },
     { label: "Km", value: data.totalKm.toLocaleString("en-GB") },
     { label: "Climbed", value: `${(data.totalElevation / 1000).toFixed(1)}k m` },
     { label: "Riders met", value: data.crew.peopleMet },
     { label: "Week streak", value: data.calendar.streak },
-    { label: "Rank", value: `#${data.rank.position}` },
+    {
+      label: "Club rank",
+      value: `#${data.rank.position}`,
+      sub: `of ${data.rank.total} riders, by rides`,
+    },
   ];
   return (
     <Slide tone="paper" kicker="Summary" index={index} className="justify-between gap-4">
@@ -494,6 +499,7 @@ export function SummarySlide({ data, index }: Props) {
           <div key={s.label} className="border-r-2 border-b-2 border-current p-3">
             <Label>{s.label}</Label>
             <p className="text-3xl font-bold tracking-tighter tabular-nums">{s.value}</p>
+            {s.sub && <p className="font-mono text-[10px] uppercase opacity-60">{s.sub}</p>}
           </div>
         ))}
       </Rise>
